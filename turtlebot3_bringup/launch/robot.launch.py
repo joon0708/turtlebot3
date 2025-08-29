@@ -32,8 +32,7 @@ from launch_ros.actions import PushRosNamespace
 def generate_launch_description():
     TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
     ROS_DISTRO = os.environ.get('ROS_DISTRO')
-    LDS_MODEL = os.environ['LDS_MODEL']
-    LDS_LAUNCH_FILE = '/hlds_laser.launch.py'
+    # LDS_MODEL is no longer needed as we directly use LD08 driver
 
     namespace = LaunchConfiguration('namespace', default='')
 
@@ -55,24 +54,8 @@ def generate_launch_description():
                 'param',
                 TURTLEBOT3_MODEL + '.yaml'))
 
-    if LDS_MODEL == 'LDS-01':
-        lidar_pkg_dir = LaunchConfiguration(
-            'lidar_pkg_dir',
-            default=os.path.join(get_package_share_directory('hls_lfcd_lds_driver'), 'launch'))
-    elif LDS_MODEL == 'LDS-02':
-        lidar_pkg_dir = LaunchConfiguration(
-            'lidar_pkg_dir',
-            default=os.path.join(get_package_share_directory('ld08_driver'), 'launch'))
-        LDS_LAUNCH_FILE = '/ld08.launch.py'
-    elif LDS_MODEL == 'LDS-03':
-        lidar_pkg_dir = LaunchConfiguration(
-            'lidar_pkg_dir',
-            default=os.path.join(get_package_share_directory('coin_d4_driver'), 'launch'))
-        LDS_LAUNCH_FILE = '/single_lidar_node.launch.py'
-    else:
-        lidar_pkg_dir = LaunchConfiguration(
-            'lidar_pkg_dir',
-            default=os.path.join(get_package_share_directory('hls_lfcd_lds_driver'), 'launch'))
+    # LD08 LIDAR configuration (LDS-02)
+    # No longer using external launch files, directly using Node
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
 
@@ -151,12 +134,16 @@ def generate_launch_description():
                               'namespace': namespace}.items(),
         ),
 
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([lidar_pkg_dir, LDS_LAUNCH_FILE]),
-            launch_arguments={'port': '/dev/ttyUSB0',
-                              'frame_id': 'base_scan',
-                              'namespace': namespace}.items(),
-        ),
+        # LD08 LIDAR Node (LDS-02)
+        Node(
+            package='ld08_driver',
+            executable='ld08_driver',
+            name='ld08_driver',
+            parameters=[{
+                'port': '/dev/ttyUSB0',
+                'frame_id': 'base_scan',
+            }],
+            output='screen'),
 
         Node(
             package='turtlebot3_node',

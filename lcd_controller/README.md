@@ -83,7 +83,7 @@ sudo raspi-config
 ### 패키지 빌드
 ```bash
 colcon build --packages-select lcd_controller
-source install/setup.bash
+
 ```
 
 ## 사용법
