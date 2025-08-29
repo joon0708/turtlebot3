@@ -71,6 +71,7 @@ def generate_launch_description():
                 'frame_id': 'base_scan',
             }],
             output='screen',
+            emulate_tty=True,
             env={'ROS_DOMAIN_ID': '10'}),
 
         Node(
