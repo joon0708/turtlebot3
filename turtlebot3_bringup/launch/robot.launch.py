@@ -151,7 +151,7 @@ def generate_launch_description():
             }],
             output='screen',
             emulate_tty=True,
-            env=[('ROS_DOMAIN_ID', '10')]),
+            env={'ROS_DOMAIN_ID': '10'}),
 
         Node(
             package='turtlebot3_node',
@@ -161,7 +161,7 @@ def generate_launch_description():
                 {'namespace': namespace}],
             arguments=['-i', usb_port],
             output='screen',
-            env=[('ROS_DOMAIN_ID', '10')]),
+            env={'ROS_DOMAIN_ID': '10'}),
 
         # RFID Tag Publisher Node
         Node(
@@ -178,5 +178,5 @@ def generate_launch_description():
                 'rst_bcm': rfid_rst_bcm,
             }],
             output='screen',
-            env=[('ROS_DOMAIN_ID', '10')]),
+            env={'ROS_DOMAIN_ID': '10'}),
     ])

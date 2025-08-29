@@ -72,12 +72,12 @@ def generate_launch_description():
             executable='turtlebot3_ros',
             name='turtlebot3_node',
             output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'tb3_param_dir': os.path.join(
+            parameters=[
+                {'use_sim_time': use_sim_time},
+                os.path.join(
                     get_package_share_directory('turtlebot3_bringup'),
                     'param', 'humble', 'waffle_pi.yaml')
-            }],
+            ],
             arguments=['-i', usb_port],
             env={
                 'ROS_DOMAIN_ID': '10',
