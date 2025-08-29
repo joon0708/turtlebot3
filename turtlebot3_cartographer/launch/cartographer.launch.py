@@ -77,9 +77,15 @@ def generate_launch_description():
             name='cartographer_node',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time}],
-            arguments=['-configuration_directory', cartographer_config_dir,
-                       '-configuration_basename', configuration_basename],
-            env={'ROS_DOMAIN_ID': '10', 'ROS_LOG_DIR': '/root/.ros/log'}),
+            arguments=[
+                '-configuration_directory', cartographer_config_dir,
+                '-configuration_basename', configuration_basename
+            ],
+            env={
+                'ROS_DOMAIN_ID': '10', 
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
+            }),
 
         DeclareLaunchArgument(
             'resolution',
