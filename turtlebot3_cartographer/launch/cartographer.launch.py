@@ -31,6 +31,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_rviz = LaunchConfiguration('use_rviz', default='true')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     turtlebot3_cartographer_prefix = get_package_share_directory('turtlebot3_cartographer')
     cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
                                                   turtlebot3_cartographer_prefix, 'config'))
@@ -60,13 +61,19 @@ def generate_launch_description():
             'lidar_port',
             default_value=lidar_port,
             description='Connected USB port with LIDAR sensor'),
+        
+        DeclareLaunchArgument(
+            'usb_port',
+            default_value=usb_port,
+            description='Connected USB port with OpenCR'),
 
-        # TurtleBot3 Hardware Bringup (LIDAR + TF)
+        # TurtleBot3 Hardware Bringup (LIDAR + TF + Motor Control)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_hardware_bringup'), 'launch', 'hardware.launch.py')]),
             launch_arguments={
                 'lidar_port': lidar_port,
+                'usb_port': usb_port,
                 'use_sim_time': use_sim_time
             }.items(),
         ),
@@ -86,6 +93,8 @@ def generate_launch_description():
                 'ROS_LOG_DIR': '/root/.ros/log',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
             }),
+
+
 
         DeclareLaunchArgument(
             'resolution',

@@ -17,6 +17,7 @@ def generate_launch_description():
     # Launch 파라미터
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     namespace = LaunchConfiguration('namespace', default='')
     
     return LaunchDescription([
@@ -30,6 +31,11 @@ def generate_launch_description():
             'lidar_port',
             default_value='/dev/ttyUSB0',
             description='Connected USB port with LIDAR sensor'),
+        
+        DeclareLaunchArgument(
+            'usb_port',
+            default_value='/dev/ttyACM0',
+            description='Connected USB port with OpenCR'),
         
         DeclareLaunchArgument(
             'namespace',
@@ -58,5 +64,24 @@ def generate_launch_description():
                 'ROS_DOMAIN_ID': '10',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
                 'ROS_LOG_DIR': '/root/.ros/log'
+            }),
+        
+        # TurtleBot3 Node (Motor Control)
+        Node(
+            package='turtlebot3_node',
+            executable='turtlebot3_ros',
+            name='turtlebot3_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'tb3_param_dir': os.path.join(
+                    get_package_share_directory('turtlebot3_bringup'),
+                    'param', 'humble', 'waffle_pi.yaml')
+            }],
+            arguments=['-i', usb_port],
+            env={
+                'ROS_DOMAIN_ID': '10',
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
             }),
     ])
