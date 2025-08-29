@@ -71,7 +71,7 @@ def generate_launch_description():
                 'frame_id': 'base_scan',
             }],
             output='screen',
-            env=[('ROS_DOMAIN_ID', '10')]),
+            env={'ROS_DOMAIN_ID': '10'}),
 
         Node(
             package='cartographer_ros',
