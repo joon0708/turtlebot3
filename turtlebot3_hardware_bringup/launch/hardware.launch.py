@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    # 환경 변수 설정
+    TURTLEBOT3_MODEL = os.environ.get('TURTLEBOT3_MODEL', 'waffle_pi')
+    
+    # Launch 파라미터
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
+    namespace = LaunchConfiguration('namespace', default='')
+    
+    return LaunchDescription([
+        # Launch 파라미터 선언
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='false',
+            description='Use simulation (Gazebo) clock if true'),
+        
+        DeclareLaunchArgument(
+            'lidar_port',
+            default_value='/dev/ttyUSB0',
+            description='Connected USB port with LIDAR sensor'),
+        
+        DeclareLaunchArgument(
+            'namespace',
+            default_value='',
+            description='Namespace for nodes'),
+        
+        # TurtleBot3 State Publisher (TF)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_bringup'), 'launch', 'turtlebot3_state_publisher.launch.py')]),
+            launch_arguments={'use_sim_time': use_sim_time}.items(),
+        ),
+        
+        # LD08 LIDAR Node (LDS-02)
+        Node(
+            package='ld08_driver',
+            executable='ld08_driver',
+            name='ld08_driver',
+            parameters=[{
+                'port': lidar_port,
+                'frame_id': 'base_scan',
+            }],
+            output='screen',
+            emulate_tty=True,
+            env={
+                'ROS_DOMAIN_ID': '10',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
+                'ROS_LOG_DIR': '/root/.ros/log'
+            }),
+    ])

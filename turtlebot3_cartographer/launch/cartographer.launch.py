@@ -61,22 +61,15 @@ def generate_launch_description():
             default_value=lidar_port,
             description='Connected USB port with LIDAR sensor'),
 
-        # LD08 LIDAR Node (LDS-02)
-        Node(
-            package='ld08_driver',
-            executable='ld08_driver',
-            name='ld08_driver',
-            parameters=[{
-                'port': lidar_port,
-                'frame_id': 'base_scan',
-            }],
-            output='screen',
-            emulate_tty=True,
-            env={
-                'ROS_DOMAIN_ID': '10', 
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
-                'ROS_LOG_DIR': '/root/.ros/log'
-            }),
+        # TurtleBot3 Hardware Bringup (LIDAR + TF)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_hardware_bringup'), 'launch', 'hardware.launch.py')]),
+            launch_arguments={
+                'lidar_port': lidar_port,
+                'use_sim_time': use_sim_time
+            }.items(),
+        ),
 
         Node(
             package='cartographer_ros',

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>turtlebot3_hardware_bringup</name>
+  <version>0.0.1</version>
+  <description>TurtleBot3 Hardware Bringup Package - LIDAR and TF setup</description>
+  <maintainer email="user@example.com">TurtleBot3 User</maintainer>
+  <license>Apache License 2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>turtlebot3_description</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>ld08_driver</depend>
+  <depend>tf2_ros</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
