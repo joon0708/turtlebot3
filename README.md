@@ -1,5 +1,20 @@
-# TurtleBot3
+# TurtleBot3 - 4-Wheel Extended Version
 <img src="https://raw.githubusercontent.com/ROBOTIS-GIT/emanual/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
+
+## Overview
+This is an extended version of TurtleBot3 that supports **4-wheel drive system** instead of the standard 2-wheel differential drive. The system has been modified to handle four motors (Front Left, Front Right, Rear Left, Rear Right) for enhanced stability and maneuverability.
+
+### Motor Configuration
+- **Front Left Motor**: ID 1, Address 136 (Position), 128 (Velocity), 120 (Current)
+- **Front Right Motor**: ID 2, Address 140 (Position), 132 (Velocity), 124 (Current)  
+- **Rear Left Motor**: ID 3, Address 141 (Position), 133 (Velocity), 125 (Current)
+- **Rear Right Motor**: ID 4, Address 142 (Position), 134 (Velocity), 126 (Current)
+
+### Software Modifications
+- Extended control table for 4 motors
+- Modified joint state handling (4 joints instead of 2)
+- Updated odometry calculation for 4-wheel system
+- Enhanced sensor state messages
 
 - Active Branches: noetic, humble, jazzy, main(rolling)
 - Legacy Branches: *-devel

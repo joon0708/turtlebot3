@@ -94,10 +94,18 @@ typedef struct
 
   ControlItem present_current_left = {120, RAM, 4, READ};
   ControlItem present_current_right = {124, RAM, 4, READ};
+  ControlItem present_current_rear_left = {125, RAM, 4, READ};
+  ControlItem present_current_rear_right = {126, RAM, 4, READ};
+  
   ControlItem present_velocity_left = {128, RAM, 4, READ};
   ControlItem present_velocity_right = {132, RAM, 4, READ};
+  ControlItem present_velocity_rear_left = {133, RAM, 4, READ};
+  ControlItem present_velocity_rear_right = {134, RAM, 4, READ};
+  
   ControlItem present_position_left = {136, RAM, 4, READ};
   ControlItem present_position_right = {140, RAM, 4, READ};
+  ControlItem present_position_rear_left = {141, RAM, 4, READ};
+  ControlItem present_position_rear_right = {142, RAM, 4, READ};
 
   ControlItem motor_torque_enable = {149, RAM, 1, READ_WRITE};
 
@@ -110,6 +118,8 @@ typedef struct
 
   ControlItem profile_acceleration_left = {174, RAM, 4, READ_WRITE};
   ControlItem profile_acceleration_right = {178, RAM, 4, READ_WRITE};
+  ControlItem profile_acceleration_rear_left = {179, RAM, 4, READ_WRITE};
+  ControlItem profile_acceleration_rear_right = {180, RAM, 4, READ_WRITE};
 } ControlTable;
 
 const ControlTable extern_control_table;

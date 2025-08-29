@@ -23,6 +23,8 @@ uint8 BUTTON1 = 2
 # Motor errors
 uint8 ERROR_LEFT_MOTOR  = 1
 uint8 ERROR_RIGHT_MOTOR = 2
+uint8 ERROR_REAR_LEFT_MOTOR = 3
+uint8 ERROR_REAR_RIGHT_MOTOR = 4
 
 # Motor torque
 uint8 TORQUE_ON  = 1
@@ -40,6 +42,8 @@ uint8  button
 bool   torque
 int32  left_encoder    # (-2,147,483,648 ~ 2,147,483,647)
 int32  right_encoder   # (-2,147,483,648 ~ 2,147,483,647)
+int32  rear_left_encoder    # (-2,147,483,648 ~ 2,147,483,647)
+int32  rear_right_encoder   # (-2,147,483,648 ~ 2,147,483,647)
 float32  battery
 
 # Additional ultrasonic sensors (3 sensors)

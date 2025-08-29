@@ -90,7 +90,7 @@ private:
   bool publish_tf_;
   bool last_theta_initialized_;
 
-  std::array<double, 2> diff_joint_positions_;
+  std::array<double, 4> diff_joint_positions_;
   double imu_angle_;
 
   std::array<double, 3> robot_pose_;

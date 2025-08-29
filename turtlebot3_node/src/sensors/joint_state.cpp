@@ -41,7 +41,13 @@ JointState::JointState(
       extern_control_table.present_position_left.length),
     dxl_sdk_wrapper->get_data_from_device<int32_t>(
       extern_control_table.present_position_right.addr,
-      extern_control_table.present_position_right.length)};
+      extern_control_table.present_position_right.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_position_rear_left.addr,
+      extern_control_table.present_position_rear_left.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_position_rear_right.addr,
+      extern_control_table.present_position_rear_right.length)};
 
   nh_->get_parameter_or<std::string>(
     "namespace",
@@ -52,6 +58,8 @@ JointState::JointState(
     frame_id_ = name_space_ + "/" + frame_id_;
     wheel_right_joint_ = name_space_ + "/" + wheel_right_joint_;
     wheel_left_joint_ = name_space_ + "/" + wheel_left_joint_;
+    wheel_rear_left_joint_ = name_space_ + "/" + wheel_rear_left_joint_;
+    wheel_rear_right_joint_ = name_space_ + "/" + wheel_rear_right_joint_;
   }
   RCLCPP_INFO(nh_->get_logger(), "Succeeded to create joint state publisher");
 }
@@ -68,7 +76,13 @@ void JointState::publish(
       extern_control_table.present_position_left.length),
     dxl_sdk_wrapper->get_data_from_device<int32_t>(
       extern_control_table.present_position_right.addr,
-      extern_control_table.present_position_right.length)};
+      extern_control_table.present_position_right.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_position_rear_left.addr,
+      extern_control_table.present_position_rear_left.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_position_rear_right.addr,
+      extern_control_table.present_position_rear_right.length)};
 
   std::array<int32_t, JOINT_NUM> velocity =
   {dxl_sdk_wrapper->get_data_from_device<int32_t>(
@@ -76,33 +90,55 @@ void JointState::publish(
       extern_control_table.present_velocity_left.length),
     dxl_sdk_wrapper->get_data_from_device<int32_t>(
       extern_control_table.present_velocity_right.addr,
-      extern_control_table.present_velocity_right.length)};
+      extern_control_table.present_velocity_right.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_velocity_rear_left.addr,
+      extern_control_table.present_velocity_rear_left.length),
+    dxl_sdk_wrapper->get_data_from_device<int32_t>(
+      extern_control_table.present_velocity_rear_right.addr,
+      extern_control_table.present_velocity_rear_right.length)};
 
   // std::array<int32_t, JOINT_NUM> current =
   //   {dxl_sdk_wrapper->get_data_from_device<int32_t>(
-  //     extern_control_table.resent_current_left.addr,
-  //     extern_control_table.resent_current_left.length),
+  //     extern_control_table.present_current_left.addr,
+  //     extern_control_table.present_current_left.length),
   //   dxl_sdk_wrapper->get_data_from_device<int32_t>(
-  //     extern_control_table.resent_current_right.addr,
-  //     extern_control_table.resent_current_right.length)};
+  //     extern_control_table.present_current_right.addr,
+  //     extern_control_table.present_current_right.length),
+  //   dxl_sdk_wrapper->get_data_from_device<int32_t>(
+  //     extern_control_table.present_current_rear_left.addr,
+  //     extern_control_table.present_current_rear_left.length),
+  //   dxl_sdk_wrapper->get_data_from_device<int32_t>(
+  //     extern_control_table.present_current_rear_right.addr,
+  //     extern_control_table.present_current_rear_right.length)};
 
   msg->header.frame_id = this->frame_id_;
   msg->header.stamp = now;
 
   msg->name.push_back(wheel_left_joint_);
   msg->name.push_back(wheel_right_joint_);
+  msg->name.push_back(wheel_rear_left_joint_);
+  msg->name.push_back(wheel_rear_right_joint_);
 
   msg->position.push_back(TICK_TO_RAD * last_diff_position[0]);
   msg->position.push_back(TICK_TO_RAD * last_diff_position[1]);
+  msg->position.push_back(TICK_TO_RAD * last_diff_position[2]);
+  msg->position.push_back(TICK_TO_RAD * last_diff_position[3]);
 
   msg->velocity.push_back(RPM_TO_MS * velocity[0]);
   msg->velocity.push_back(RPM_TO_MS * velocity[1]);
+  msg->velocity.push_back(RPM_TO_MS * velocity[2]);
+  msg->velocity.push_back(RPM_TO_MS * velocity[3]);
 
   // msg->effort.push_back(current[0]);
   // msg->effort.push_back(current[1]);
+  // msg->effort.push_back(current[2]);
+  // msg->effort.push_back(current[3]);
 
   last_diff_position[0] += (position[0] - last_position[0]);
   last_diff_position[1] += (position[1] - last_position[1]);
+  last_diff_position[2] += (position[2] - last_position[2]);
+  last_diff_position[3] += (position[3] - last_position[3]);
 
   last_position = position;
 

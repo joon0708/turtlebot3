@@ -214,13 +214,17 @@ void Odometry::publish(const rclcpp::Time & now)
 void Odometry::update_joint_state(
   const std::shared_ptr<sensor_msgs::msg::JointState const> & joint_state)
 {
-  static std::array<double, 2> last_joint_positions = {0.0f, 0.0f};
+  static std::array<double, 4> last_joint_positions = {0.0f, 0.0f, 0.0f, 0.0f};
 
   diff_joint_positions_[0] = joint_state->position[0] - last_joint_positions[0];
   diff_joint_positions_[1] = joint_state->position[1] - last_joint_positions[1];
+  diff_joint_positions_[2] = joint_state->position[2] - last_joint_positions[2];
+  diff_joint_positions_[3] = joint_state->position[3] - last_joint_positions[3];
 
   last_joint_positions[0] = joint_state->position[0];
   last_joint_positions[1] = joint_state->position[1];
+  last_joint_positions[2] = joint_state->position[2];
+  last_joint_positions[3] = joint_state->position[3];
 }
 
 void Odometry::update_imu(const std::shared_ptr<sensor_msgs::msg::Imu const> & imu)
@@ -233,8 +237,10 @@ void Odometry::update_imu(const std::shared_ptr<sensor_msgs::msg::Imu const> & i
 bool Odometry::calculate_odometry(const rclcpp::Duration & duration)
 {
   // rotation value of wheel [rad]
-  double wheel_l = diff_joint_positions_[0];
-  double wheel_r = diff_joint_positions_[1];
+  double wheel_fl = diff_joint_positions_[0];  // Front Left
+  double wheel_fr = diff_joint_positions_[1];  // Front Right
+  double wheel_rl = diff_joint_positions_[2];  // Rear Left
+  double wheel_rr = diff_joint_positions_[3];  // Rear Right
 
   double delta_s = 0.0;
   double delta_theta = 0.0;
@@ -253,15 +259,25 @@ bool Odometry::calculate_odometry(const rclcpp::Duration & duration)
     return false;
   }
 
-  if (std::isnan(wheel_l)) {
-    wheel_l = 0.0;
+  if (std::isnan(wheel_fl)) {
+    wheel_fl = 0.0;
   }
 
-  if (std::isnan(wheel_r)) {
-    wheel_r = 0.0;
+  if (std::isnan(wheel_fr)) {
+    wheel_fr = 0.0;
   }
 
-  delta_s = wheels_radius_ * (wheel_r + wheel_l) / 2.0;
+  if (std::isnan(wheel_rl)) {
+    wheel_rl = 0.0;
+  }
+
+  if (std::isnan(wheel_rr)) {
+    wheel_rr = 0.0;
+  }
+
+  // 4-wheel odometry calculation
+  // Average of all 4 wheels for translational motion
+  delta_s = wheels_radius_ * (wheel_fl + wheel_fr + wheel_rl + wheel_rr) / 4.0;
 
   if (use_imu_) {
     if (last_theta_initialized_) {
@@ -274,7 +290,9 @@ bool Odometry::calculate_odometry(const rclcpp::Duration & duration)
       last_theta_initialized_ = true;
     }
   } else {
-    theta = wheels_radius_ * (wheel_r - wheel_l) / wheels_separation_;
+    // 4-wheel differential drive calculation
+    // Use front wheels for rotation calculation (assuming they're the primary steering wheels)
+    theta = wheels_radius_ * (wheel_fr - wheel_fl) / wheels_separation_;
     delta_theta = theta;
   }
 

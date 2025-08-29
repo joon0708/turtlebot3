@@ -126,6 +126,14 @@ void SensorState::publish(
     extern_control_table.present_position_right.addr,
     extern_control_table.present_position_right.length);
 
+  msg->rear_left_encoder = dxl_sdk_wrapper->get_data_from_device<int32_t>(
+    extern_control_table.present_position_rear_left.addr,
+    extern_control_table.present_position_rear_left.length);
+
+  msg->rear_right_encoder = dxl_sdk_wrapper->get_data_from_device<int32_t>(
+    extern_control_table.present_position_rear_right.addr,
+    extern_control_table.present_position_rear_right.length);
+
   msg->battery = 0.01f * dxl_sdk_wrapper->get_data_from_device<int32_t>(
     extern_control_table.battery_voltage.addr,
     extern_control_table.battery_voltage.length);
