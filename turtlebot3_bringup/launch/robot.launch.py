@@ -149,7 +149,9 @@ def generate_launch_description():
                 'port': lidar_port,
                 'frame_id': 'base_scan',
             }],
-            output='screen'),
+            output='screen',
+            emulate_tty=True,
+            env=[('ROS_DOMAIN_ID', '10')]),
 
         Node(
             package='turtlebot3_node',
@@ -158,7 +160,8 @@ def generate_launch_description():
                 tb3_param_dir,
                 {'namespace': namespace}],
             arguments=['-i', usb_port],
-            output='screen'),
+            output='screen',
+            env=[('ROS_DOMAIN_ID', '10')]),
 
         # RFID Tag Publisher Node
         Node(
@@ -174,5 +177,6 @@ def generate_launch_description():
                 'whitelist': rfid_whitelist,
                 'rst_bcm': rfid_rst_bcm,
             }],
-            output='screen'),
+            output='screen',
+            env=[('ROS_DOMAIN_ID', '10')]),
     ])

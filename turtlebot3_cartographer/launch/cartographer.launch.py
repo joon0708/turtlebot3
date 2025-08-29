@@ -30,6 +30,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_rviz = LaunchConfiguration('use_rviz', default='true')
+    lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     turtlebot3_cartographer_prefix = get_package_share_directory('turtlebot3_cartographer')
     cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
                                                   turtlebot3_cartographer_prefix, 'config'))
@@ -55,6 +56,22 @@ def generate_launch_description():
             'use_sim_time',
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
+        DeclareLaunchArgument(
+            'lidar_port',
+            default_value=lidar_port,
+            description='Connected USB port with LIDAR sensor'),
+
+        # LD08 LIDAR Node (LDS-02)
+        Node(
+            package='ld08_driver',
+            executable='ld08_driver',
+            name='ld08_driver',
+            parameters=[{
+                'port': lidar_port,
+                'frame_id': 'base_scan',
+            }],
+            output='screen',
+            env=[('ROS_DOMAIN_ID', '10')]),
 
         Node(
             package='cartographer_ros',
