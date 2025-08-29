@@ -37,6 +37,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace', default='')
 
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
+    lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
 
     if ROS_DISTRO == 'humble':
         tb3_param_dir = LaunchConfiguration(
@@ -78,6 +79,11 @@ def generate_launch_description():
             'usb_port',
             default_value=usb_port,
             description='Connected USB port with OpenCR'),
+
+        DeclareLaunchArgument(
+            'lidar_port',
+            default_value=lidar_port,
+            description='Connected USB port with LIDAR sensor'),
 
         DeclareLaunchArgument(
             'tb3_param_dir',
@@ -140,7 +146,7 @@ def generate_launch_description():
             executable='ld08_driver',
             name='ld08_driver',
             parameters=[{
-                'port': '/dev/ttyUSB0',
+                'port': lidar_port,
                 'frame_id': 'base_scan',
             }],
             output='screen'),
