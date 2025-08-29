@@ -17,7 +17,7 @@
 #ifndef TURTLEBOT3_NODE__SENSORS__SENSOR_STATE_HPP_
 #define TURTLEBOT3_NODE__SENSORS__SENSOR_STATE_HPP_
 
-#include <turtlebot3_msgs/msg/sensor_state.hpp>
+#include <custom_turtlebot3_msgs/msg/sensor_state.hpp>
 
 #include <memory>
 #include <string>
@@ -47,7 +47,7 @@ public:
     std::shared_ptr<DynamixelSDKWrapper> & dxl_sdk_wrapper) override;
 
 private:
-  rclcpp::Publisher<turtlebot3_msgs::msg::SensorState>::SharedPtr pub_;
+  rclcpp::Publisher<custom_turtlebot3_msgs::msg::SensorState>::SharedPtr pub_;
 
   uint8_t bumper_forward_;
   uint8_t bumper_backward_;

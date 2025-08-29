@@ -37,7 +37,7 @@ SensorState::SensorState(
   cliff_(cliff),
   sonar_(sonar)
 {
-  pub_ = nh->create_publisher<turtlebot3_msgs::msg::SensorState>(topic_name, this->qos_);
+  pub_ = nh->create_publisher<custom_turtlebot3_msgs::msg::SensorState>(topic_name, this->qos_);
 
   RCLCPP_INFO(nh_->get_logger(), "Succeeded to create sensor state publisher");
 }
@@ -46,7 +46,7 @@ void SensorState::publish(
   const rclcpp::Time & now,
   std::shared_ptr<DynamixelSDKWrapper> & dxl_sdk_wrapper)
 {
-  auto msg = std::make_unique<turtlebot3_msgs::msg::SensorState>();
+  auto msg = std::make_unique<custom_turtlebot3_msgs::msg::SensorState>();
 
   msg->header.stamp = now;
 
@@ -80,11 +80,11 @@ void SensorState::publish(
   }
 
   if (sonar_) {
-    msg->sonar = dxl_sdk_wrapper->get_data_from_device<float>(
+    msg->ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
       extern_control_table.sonar.addr,
       extern_control_table.sonar.length);
   } else {
-    msg->sonar = 0.0f;
+    msg->ultrasonic_front = 0.0f;
   }
 
   if (illumination_) {
@@ -142,20 +142,19 @@ void SensorState::publish(
   float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
     extern_control_table.ultrasonic_left.addr,
     extern_control_table.ultrasonic_left.length);
-  
+
   float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
     extern_control_table.ultrasonic_front.addr,
     extern_control_table.ultrasonic_front.length);
-  
+
   float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
     extern_control_table.ultrasonic_right.addr,
     extern_control_table.ultrasonic_right.length);
-  
-  // Store front sensor value in sonar field (for compatibility with existing code)
-  msg->sonar = ultrasonic_front;
-  
-  // TODO: Publish 3 ultrasonic sensors to separate topics
-  // This will be implemented in a separate node or future update
+
+  // Set ultrasonic sensor values
+  msg->ultrasonic_left = ultrasonic_left;
+  msg->ultrasonic_front = ultrasonic_front;
+  msg->ultrasonic_right = ultrasonic_right;
 
   pub_->publish(std::move(msg));
 }

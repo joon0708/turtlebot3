@@ -34,7 +34,7 @@
 #include <sensor_msgs/msg/battery_state.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <turtlebot3_msgs/msg/sensor_state.hpp>
+#include <custom_turtlebot3_msgs/msg/sensor_state.hpp>
 
 #include "turtlebot3_node/control_table.hpp"
 #include "turtlebot3_node/devices/devices.hpp"
