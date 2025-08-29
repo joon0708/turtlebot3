@@ -72,7 +72,7 @@ def generate_launch_description():
             }],
             output='screen',
             emulate_tty=True,
-            env={'ROS_DOMAIN_ID': '10'}),
+            env={'ROS_DOMAIN_ID': '10', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib'}),
 
         Node(
             package='cartographer_ros',
