@@ -82,6 +82,6 @@ def generate_launch_description():
             env={
                 'ROS_DOMAIN_ID': '10',
                 'ROS_LOG_DIR': '/root/.ros/log',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib'
             }),
     ])

@@ -161,22 +161,28 @@ def generate_launch_description():
                 {'namespace': namespace}],
             arguments=['-i', usb_port],
             output='screen',
-            env={'ROS_DOMAIN_ID': '10'}),
+            env={
+                'ROS_DOMAIN_ID': '10',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
+            }),
 
-        # RFID Tag Publisher Node
-        Node(
-            package='rfid_tag_publisher',
-            executable='rfid_tag_publisher',
-            name='rfid_tag_publisher',
-            parameters=[{
-                'bus': rfid_bus,
-                'device': rfid_device,
-                'hold_ms': rfid_hold_ms,
-                'cooldown': rfid_cooldown,
-                'grace_ms': rfid_grace_ms,
-                'whitelist': rfid_whitelist,
-                'rst_bcm': rfid_rst_bcm,
-            }],
-            output='screen',
-            env={'ROS_DOMAIN_ID': '10'}),
+        # RFID Tag Publisher Node (Temporarily disabled due to package issues)
+        # Node(
+        #     package='rfid_tag_publisher',
+        #     executable='rfid_tag_publisher',
+        #     name='rfid_tag_publisher',
+        #     parameters=[{
+        #         'bus': rfid_bus,
+        #         'device': rfid_device,
+        #         'hold_ms': rfid_hold_ms,
+        #         'cooldown': rfid_cooldown,
+        #         'grace_ms': rfid_grace_ms,
+        #         'whitelist': rfid_whitelist,
+        #         'rst_bcm': rfid_rst_bcm,
+        #     }],
+        #     output='screen',
+        #     env={
+        #         'ROS_DOMAIN_ID': '10',
+        #         'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
+        #     }),
     ])
