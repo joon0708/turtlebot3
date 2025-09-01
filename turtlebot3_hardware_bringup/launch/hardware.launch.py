@@ -11,8 +11,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    # 환경 변수 설정
-    TURTLEBOT3_MODEL = os.environ.get('TURTLEBOT3_MODEL', 'waffle_pi')
+    # 환경 변수 설정 - 4바퀴 시스템용
+    TURTLEBOT3_MODEL = os.environ.get('TURTLEBOT3_MODEL', 'waffle_pi_4wheel')
     
     # Launch 파라미터
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
@@ -68,7 +68,7 @@ def generate_launch_description():
             emulate_tty=True,
             env={
                 'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': 'waffle_pi',
+                'TURTLEBOT3_MODEL': 'waffle_pi_4wheel',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
                 'ROS_LOG_DIR': '/root/.ros/log'
             }),
@@ -89,7 +89,7 @@ def generate_launch_description():
                     arguments=['-i', usb_port],
             env={
                 'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': 'waffle_pi',
+                'TURTLEBOT3_MODEL': 'waffle_pi_4wheel',
                 'ROS_LOG_DIR': '/root/.ros/log',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib'
             }),
