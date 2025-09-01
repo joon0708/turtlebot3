@@ -73,20 +73,20 @@ def generate_launch_description():
                 'ROS_LOG_DIR': '/root/.ros/log'
             }),
         
-                        # TurtleBot3 Node (Motor Control)
-                Node(
-                    package='turtlebot3_node',
-                    executable='turtlebot3_ros',
-                    name='turtlebot3_node',
-                    output='screen',
-                    parameters=[
-                        {'use_sim_time': use_sim_time},
-                        {'namespace': ''},
-                        os.path.join(
-                            get_package_share_directory('turtlebot3_bringup'),
-                            'param', 'humble', 'waffle_pi_4wheel.yaml' if use_4wheel == 'true' else 'waffle_pi.yaml')
-                    ],
-                    arguments=['-i', usb_port],
+        # TurtleBot3 Node (Motor Control)
+        Node(
+            package='turtlebot3_node',
+            executable='turtlebot3_ros',
+            name='turtlebot3_node',
+            output='screen',
+            parameters=[
+                {'use_sim_time': use_sim_time},
+                {'namespace': ''},
+                os.path.join(
+                    get_package_share_directory('turtlebot3_bringup'),
+                    'param', 'humble', 'waffle_pi_4wheel.yaml')
+            ],
+            arguments=['-i', usb_port],
             env={
                 'ROS_DOMAIN_ID': '10',
                 'TURTLEBOT3_MODEL': 'waffle_pi_4wheel',
