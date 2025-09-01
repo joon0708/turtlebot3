@@ -153,7 +153,8 @@ def generate_launch_description():
             emulate_tty=True,
             env={
                 'ROS_DOMAIN_ID': '10',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib'
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
+                'ROS_LOG_DIR': '/root/.ros/log'
             }),
 
         Node(
@@ -166,7 +167,8 @@ def generate_launch_description():
             output='screen',
             env={
                 'ROS_DOMAIN_ID': '10',
-                'LD_LIBRARY_PATH': '/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib'
+                'LD_LIBRARY_PATH': '/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib',
+                'ROS_LOG_DIR': '/root/.ros/log'
             }),
 
         # RFID Tag Publisher Node (Temporarily disabled due to package issues)
