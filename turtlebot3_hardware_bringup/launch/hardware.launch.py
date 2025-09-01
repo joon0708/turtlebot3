@@ -19,6 +19,7 @@ def generate_launch_description():
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     namespace = LaunchConfiguration('namespace', default='')
+    use_4wheel = LaunchConfiguration('use_4wheel', default='true')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -41,6 +42,11 @@ def generate_launch_description():
             'namespace',
             default_value='',
             description='Namespace for nodes'),
+
+        DeclareLaunchArgument(
+            'use_4wheel',
+            default_value='true',
+            description='Use 4-wheel configuration if true'),
         
         # TurtleBot3 State Publisher (TF)
         IncludeLaunchDescription(
@@ -78,7 +84,7 @@ def generate_launch_description():
                         {'namespace': ''},
                         os.path.join(
                             get_package_share_directory('turtlebot3_bringup'),
-                            'param', 'humble', 'waffle_pi.yaml')
+                            'param', 'humble', 'waffle_pi_4wheel.yaml' if use_4wheel == 'true' else 'waffle_pi.yaml')
                     ],
                     arguments=['-i', usb_port],
             env={

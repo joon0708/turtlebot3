@@ -16,13 +16,19 @@ TurtleBot3의 기본 하드웨어 설정을 위한 패키지입니다. 라이더
 ros2 launch turtlebot3_hardware_bringup hardware.launch.py
 ```
 
-### 2. lidar_only.launch.py
+### 2. hardware_4wheel.launch.py
+4바퀴 시스템 전용 실행
+```bash
+ros2 launch turtlebot3_hardware_bringup hardware_4wheel.launch.py
+```
+
+### 3. lidar_only.launch.py
 라이더 센서만 실행
 ```bash
 ros2 launch turtlebot3_hardware_bringup lidar_only.launch.py
 ```
 
-### 3. tf_only.launch.py
+### 4. tf_only.launch.py
 TF만 실행
 ```bash
 ros2 launch turtlebot3_hardware_bringup tf_only.launch.py
