@@ -32,7 +32,7 @@ ROS_DISTRO = os.environ.get('ROS_DISTRO')
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-    start_rviz = LaunchConfiguration('start_rviz', default='true')
+    start_rviz = LaunchConfiguration('start_rviz', default='false')
     map_dir = LaunchConfiguration(
         'map',
         default=os.path.join(
