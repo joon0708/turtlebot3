@@ -2,7 +2,6 @@
   turtlebot3_node:
     ros__parameters:
 
-      namespace: ""
       enable_stamped_cmd_vel: false
 
       opencr:
