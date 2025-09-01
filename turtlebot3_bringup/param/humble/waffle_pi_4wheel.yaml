@@ -59,6 +59,19 @@
         ultrasonic_right: 0
 
 /**:
+  turtlebot3_node:
+    ros__parameters:
+      # 오도메트리 파라미터 추가
+      odometry:
+        frame_id: "odom"
+        child_frame_id: "base_footprint"
+        publish_tf: true
+        use_imu: true
+        use_4_wheel_odometry: true
+        front_wheels_weight: 0.5
+        rear_wheels_weight: 0.5
+
+/**:
   diff_drive_controller:
     ros__parameters:
 
