@@ -62,25 +62,28 @@ def generate_launch_description():
             emulate_tty=True,
             env={
                 'ROS_DOMAIN_ID': '10',
+                'TURTLEBOT3_MODEL': 'waffle_pi',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
                 'ROS_LOG_DIR': '/root/.ros/log'
             }),
         
-        # TurtleBot3 Node (Motor Control)
-        Node(
-            package='turtlebot3_node',
-            executable='turtlebot3_ros',
-            name='turtlebot3_node',
-            output='screen',
-            parameters=[
-                {'use_sim_time': use_sim_time},
-                os.path.join(
-                    get_package_share_directory('turtlebot3_bringup'),
-                    'param', 'humble', 'waffle_pi.yaml')
-            ],
-            arguments=['-i', usb_port],
+                        # TurtleBot3 Node (Motor Control)
+                Node(
+                    package='turtlebot3_node',
+                    executable='turtlebot3_ros',
+                    name='turtlebot3_node',
+                    output='screen',
+                    parameters=[
+                        {'use_sim_time': use_sim_time},
+                        {'namespace': ''},
+                        os.path.join(
+                            get_package_share_directory('turtlebot3_bringup'),
+                            'param', 'humble', 'waffle_pi.yaml')
+                    ],
+                    arguments=['-i', usb_port],
             env={
                 'ROS_DOMAIN_ID': '10',
+                'TURTLEBOT3_MODEL': 'waffle_pi',
                 'ROS_LOG_DIR': '/root/.ros/log',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib'
             }),
