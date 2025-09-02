@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from custom_turtlebot3_msgs/srv/Sound.srv
+// generated code does not contain a copyright notice
+
+
+module custom_turtlebot3_msgs {
+  module srv {
+    struct Sound_Request {
+      uint8 value;
+    };
+    struct Sound_Response {
+      string message;
+    };
+  };
+};

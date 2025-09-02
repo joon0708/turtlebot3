@@ -1,0 +1,3 @@
+string hardware
+string firmware
+string software

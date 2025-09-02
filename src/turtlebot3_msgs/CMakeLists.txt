@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(custom_turtlebot3_msgs)
+project(turtlebot3_msgs)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -12,7 +12,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(actionlib_msgs REQUIRED)
 
-rosidl_generate_interfaces(custom_turtlebot3_msgs
+rosidl_generate_interfaces(turtlebot3_msgs
   "msg/SensorState.msg"
   "msg/Sound.msg"
   "msg/VersionInfo.msg"

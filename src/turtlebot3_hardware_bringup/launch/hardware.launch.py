@@ -67,7 +67,8 @@ def generate_launch_description():
             output='screen',
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib'
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
+                'ROS_LOG_DIR': '/root/.ros/log'
             }),
         
         # TurtleBot3 Node (Motor Control) - 직접 실행
@@ -85,6 +86,7 @@ def generate_launch_description():
             arguments=['-i', usb_port],
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib'
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
+                'ROS_LOG_DIR': '/root/.ros/log'
             }),
     ])

@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from custom_turtlebot3_msgs/srv/CheckStatus.srv
+// generated code does not contain a copyright notice
+
+
+module custom_turtlebot3_msgs {
+  module srv {
+    struct CheckStatus_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct CheckStatus_Response {
+      boolean status;
+    };
+  };
+};
