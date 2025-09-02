@@ -16,7 +16,7 @@ def generate_launch_description():
     # Launch 파라미터
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
-    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM1')
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')  # ACM1에서 ACM0으로 변경
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -32,7 +32,7 @@ def generate_launch_description():
         
         DeclareLaunchArgument(
             'usb_port',
-            default_value='/dev/ttyACM1',
+            default_value='/dev/ttyACM0',  # ACM1에서 ACM0으로 변경
             description='Connected USB port with OpenCR'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF)
