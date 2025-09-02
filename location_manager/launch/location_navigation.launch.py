@@ -46,7 +46,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. Cartographer (SLAM) - 맵 로딩 모드
+        # 2. Cartographer (SLAM)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer.launch.py')]),
@@ -72,8 +72,5 @@ def generate_launch_description():
             executable='location_manager',
             name='location_manager',
             output='screen',
-            env={
-                'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL
-            }),
+            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}),
     ])

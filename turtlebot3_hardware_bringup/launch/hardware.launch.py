@@ -5,7 +5,6 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
@@ -48,49 +47,30 @@ def generate_launch_description():
             default_value='true',
             description='Use 4-wheel configuration if true'),
         
-        # TurtleBot3 State Publisher (TF)
+        # TurtleBot3 기본 브링업 (URDF, 파라미터, 기본 노드들)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_bringup'), 'launch', 'turtlebot3_state_publisher.launch.py')]),
             launch_arguments={'use_sim_time': use_sim_time}.items(),
         ),
         
-        # LD08 LIDAR Node (LDS-02)
-        Node(
-            package='ld08_driver',
-            executable='ld08_driver',
-            name='ld08_driver',
-            parameters=[{
+        # LD08 LIDAR Node (LDS-02) - 포트만 설정
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_bringup'), 'launch', 'ld08_driver.launch.py')]),
+            launch_arguments={
                 'port': lidar_port,
-                'frame_id': 'base_scan',
-            }],
-            output='screen',
-            emulate_tty=True,
-            env={
-                'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': 'waffle_pi_4wheel',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib',
-                'ROS_LOG_DIR': '/root/.ros/log'
-            }),
+                'frame_id': 'base_scan'
+            }.items(),
+        ),
         
-        # TurtleBot3 Node (Motor Control)
-        Node(
-            package='turtlebot3_node',
-            executable='turtlebot3_ros',
-            name='turtlebot3_node',
-            output='screen',
-            parameters=[
-                {'use_sim_time': use_sim_time},
-                {'namespace': ''},
-                os.path.join(
-                    get_package_share_directory('turtlebot3_bringup'),
-                    'param', 'humble', 'waffle_pi_4wheel.yaml')
-            ],
-            arguments=['-i', usb_port],
-            env={
-                'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': 'waffle_pi_4wheel',
-                'ROS_LOG_DIR': '/root/.ros/log',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib'
-            }),
+        # TurtleBot3 Node (Motor Control) - 포트만 설정
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_bringup'), 'launch', 'turtlebot3_node.launch.py')]),
+            launch_arguments={
+                'usb_port': usb_port,
+                'use_sim_time': use_sim_time
+            }.items(),
+        ),
     ])
