@@ -16,7 +16,7 @@ def generate_launch_description():
     # Launch 파라미터
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
-    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')  # ACM1에서 ACM0으로 변경
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -32,7 +32,7 @@ def generate_launch_description():
         
         DeclareLaunchArgument(
             'usb_port',
-            default_value='/dev/ttyACM0',  # ACM1에서 ACM0으로 변경
+            default_value='/dev/ttyACM0',
             description='Connected USB port with OpenCR'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF)
@@ -66,14 +66,14 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드 (일시적으로 제거됨)
-        # Node(
-        #     package='location_manager',
-        #     executable='location_manager',
-        #     name='location_manager',
-        #     output='screen',
-        #     env={
-        #         'ROS_DOMAIN_ID': '10',
-        #         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL
-        #     })
+        # 4. 위치 관리 노드
+        Node(
+            package='location_manager',
+            executable='location_manager',
+            name='location_manager',
+            output='screen',
+            env={
+                'ROS_DOMAIN_ID': '10',
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL
+            }),
     ])
