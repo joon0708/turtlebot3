@@ -3,7 +3,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
@@ -66,14 +66,19 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드
-        Node(
-            package='location_manager',
-            executable='location_manager',
-            name='location_manager',
-            output='screen',
-            env={
-                'ROS_DOMAIN_ID': '10',
-                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL
-            }),
+        # 4. 위치 관리 노드 (5초 후 시작)
+        TimerAction(
+            period=5.0,
+            actions=[
+                Node(
+                    package='location_manager',
+                    executable='location_manager',
+                    name='location_manager',
+                    output='screen',
+                    env={
+                        'ROS_DOMAIN_ID': '10',
+                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL
+                    })
+            ]
+        ),
     ])
