@@ -14,7 +14,11 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml'))),
-        ('lib/' + package_name, []),  # libexec 디렉토리 생성
+        ('lib/' + package_name, [
+            'map_mode_manager/map_comparator.py',
+            'map_mode_manager/map_similarity_checker.py',
+            'map_mode_manager/mode_switcher.py',
+        ]),  # libexec 디렉토리에 실행 파일 설치
     ],
     install_requires=['setuptools'],
     zip_safe=True,
