@@ -110,7 +110,7 @@ def generate_launch_description():
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
                 'AMENT_PREFIX_PATH': '/opt/ros/humble:/root/turtlebot3/install',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/usr/lib/x86_64-linux-gnu:/usr/lib',
                 'ROS_LOG_DIR': '/root/.ros/log',
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
