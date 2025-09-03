@@ -20,7 +20,9 @@ setup(
     description='Location management system for TurtleBot3 navigation',
     license='Apache 2.0',
     tests_require=['pytest'],
-    scripts=[
-        'location_manager/location_manager.py',
-    ],
+    entry_points={
+        'console_scripts': [
+            'location_manager = location_manager.location_manager:main',
+        ],
+    },
 )
