@@ -66,7 +66,10 @@ def generate_launch_description():
         
         # 4. 위치 관리 노드 - Python 모듈로 직접 실행
         ExecuteProcess(
-            cmd=['python3', '-m', 'location_manager.location_manager'],
+            cmd=['python3', os.path.join(
+                get_package_share_directory('location_manager'),
+                '..', '..', 'src', 'location_manager', 'location_manager', 'location_manager.py'
+            )],
             output='screen',
             env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}),
     ])
