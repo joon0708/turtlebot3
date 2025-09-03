@@ -68,7 +68,10 @@ def generate_launch_description():
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
-                'ROS_LOG_DIR': '/root/.ros/log'
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
             }),
         
         # TurtleBot3 Node (Motor Control) - 직접 실행
@@ -87,6 +90,9 @@ def generate_launch_description():
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
-                'ROS_LOG_DIR': '/root/.ros/log'
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
             }),
     ])
