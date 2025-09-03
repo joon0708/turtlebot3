@@ -29,12 +29,12 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_' + TURTLEBOT3_MODEL + '.lua'
+                'configuration_basename': 'turtlebot3_lds_2d.lua'
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_' + TURTLEBOT3_MODEL + '.lua'
+                '-configuration_basename', 'turtlebot3_lds_2d.lua'
             ]),
         
         # Cartographer Occupancy Grid Node
