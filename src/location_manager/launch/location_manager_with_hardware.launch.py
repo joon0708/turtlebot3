@@ -46,27 +46,44 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. Cartographer (SLAM) - 하드웨어 노드 제외
+        # 2. Cartographer (SLAM) - 직접 노드 실행 (하드웨어 제외)
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_node',
+            name='cartographer_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'configuration_basename': 'turtlebot3_' + TURTLEBOT3_MODEL + '.lua'
+            }],
+            arguments=[
+                '-configuration_directory', os.path.join(
+                    get_package_share_directory('turtlebot3_cartographer'), 'config'),
+                '-configuration_basename', 'turtlebot3_' + TURTLEBOT3_MODEL + '.lua'
+            ]),
+        
+        # 3. Cartographer Occupancy Grid Node
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_occupancy_grid_node',
+            name='cartographer_occupancy_grid_node',
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time}],
+            arguments=['-resolution', '0.05', '-publish_period_sec', '1.0']),
+        
+        # 4. Navigation2 - 직접 노드 실행 (하드웨어 제외)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer.launch.py')]),
+                get_package_share_directory('nav2_bringup'), 'launch', 'bringup_launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'use_rviz': 'false'
+                'params_file': os.path.join(
+                    get_package_share_directory('turtlebot3_navigation2'),
+                    'param', 'humble', TURTLEBOT3_MODEL + '.yaml')
             }.items(),
         ),
         
-        # 3. Navigation2 - 하드웨어 노드 제외
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2.launch.py')]),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-                'start_rviz': 'false'
-            }.items(),
-        ),
-        
-        # 4. 위치 관리 노드
+        # 5. 위치 관리 노드
         Node(
             package='location_manager',
             executable='location_manager',
