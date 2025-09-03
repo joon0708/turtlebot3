@@ -98,7 +98,7 @@ def generate_launch_description():
         Node(
             package='turtlebot3_node',
             executable='turtlebot3_ros',
-            name='turtlebot3_hardware_node',  # 고유한 이름으로 변경
+            name='turtlebot3_ros',  # 기본 이름 사용
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
