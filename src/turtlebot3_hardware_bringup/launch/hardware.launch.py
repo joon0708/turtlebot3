@@ -102,6 +102,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
+                'namespace': '',
                 'opencr': {
                     'id': 200,
                     'baud_rate': 1000000,
