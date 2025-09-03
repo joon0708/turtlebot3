@@ -100,10 +100,8 @@ def generate_launch_description():
             executable='turtlebot3_ros',
             name='turtlebot3_hardware_node',  # 고유한 이름으로 변경
             output='screen',
-            parameters=[
-                '/root/turtlebot3/install/turtlebot3_bringup/share/turtlebot3_bringup/param/humble/waffle_pi_4wheel.yaml',
-                {'use_sim_time': use_sim_time}
-            ],
+            parameters=[{'use_sim_time': use_sim_time}],
+            params_file=['/root/turtlebot3/install/turtlebot3_bringup/share/turtlebot3_bringup/param/humble/waffle_pi_4wheel.yaml'],
             arguments=['-i', usb_port],
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
