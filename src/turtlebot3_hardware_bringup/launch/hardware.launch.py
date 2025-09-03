@@ -52,7 +52,10 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_bringup'), 'launch', 'turtlebot3_state_publisher.launch.py')]),
-            launch_arguments={'use_sim_time': use_sim_time}.items(),
+            launch_arguments={
+                'use_sim_time': use_sim_time
+            }.items(),
+            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}
         ),
         
         # LD08 LIDAR Node (LDS-02) - 직접 실행

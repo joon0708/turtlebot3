@@ -77,6 +77,9 @@ def generate_launch_description():
                 get_package_share_directory('nav2_bringup'), 'launch', 'bringup_launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
+                'map': os.path.join(
+                    get_package_share_directory('turtlebot3_navigation2'),
+                    'map', 'map.yaml'),
                 'params_file': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'),
                     'param', 'humble', TURTLEBOT3_MODEL + '.yaml')
