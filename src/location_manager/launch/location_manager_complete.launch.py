@@ -3,7 +3,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -64,11 +64,9 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드
-        Node(
-            package='location_manager',
-            executable='location_manager',
-            name='location_manager',
+        # 4. 위치 관리 노드 - Python 모듈로 직접 실행
+        ExecuteProcess(
+            cmd=['python3', '-m', 'location_manager.location_manager'],
             output='screen',
             env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}),
     ])
