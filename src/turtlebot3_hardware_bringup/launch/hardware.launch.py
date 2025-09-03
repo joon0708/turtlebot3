@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -48,15 +48,28 @@ def generate_launch_description():
             default_value='true',
             description='Use 4-wheel configuration if true'),
         
-        # TurtleBot3 State Publisher (TF) - turtlebot3_bringup에서
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_bringup'), 'launch', 'turtlebot3_state_publisher.launch.py')]),
-            launch_arguments={
-                'use_sim_time': use_sim_time
-            }.items(),
-            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}
-        ),
+        # TurtleBot3 State Publisher (TF) - 직접 노드 실행으로 변경
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'robot_description': Command([
+                    'xacro ',
+                    os.path.join(
+                        get_package_share_directory('turtlebot3_description'),
+                        'urdf', 'turtlebot3_' + TURTLEBOT3_MODEL + '.urdf'
+                    )
+                ])
+            }],
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
+            }),
         
         # LD08 LIDAR Node (LDS-02) - 직접 실행
         Node(
