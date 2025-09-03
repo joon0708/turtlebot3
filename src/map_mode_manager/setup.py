@@ -1,24 +1,19 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+import glob
 import os
-from glob import glob
 
 package_name = 'map_mode_manager'
 
 setup(
     name=package_name,
     version='0.1.0',
-    packages=['map_mode_manager'],
+    packages=find_packages(),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
-        (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml'))),
-        ('lib/' + package_name, [
-            'map_mode_manager/map_comparator.py',
-            'map_mode_manager/map_similarity_checker.py',
-            'map_mode_manager/mode_switcher.py',
-        ]),  # libexec 디렉토리에 실행 파일 설치
+        ('share/' + package_name + '/launch', glob.glob('launch/*.launch.py')),
+        ('share/' + package_name + '/config', glob.glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -29,10 +24,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'map_comparator = map_mode_manager.map_comparator:main',
             'map_similarity_checker = map_mode_manager.map_similarity_checker:main',
             'mode_switcher = map_mode_manager.mode_switcher:main',
-            'map_comparator = map_mode_manager.map_comparator:main',
         ],
     },
-
 )
