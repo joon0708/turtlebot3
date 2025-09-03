@@ -66,6 +66,8 @@ def generate_launch_description():
             }],
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib',
+                'ROS_LOG_DIR': '/root/.ros/log',
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
                 'ROS_DISTRO': 'humble'
@@ -94,7 +96,7 @@ def generate_launch_description():
         Node(
             package='turtlebot3_node',
             executable='turtlebot3_ros',
-            name='turtlebot3_node',
+            name='turtlebot3_hardware_node',  # 고유한 이름으로 변경
             output='screen',
             parameters=[
                 {'use_sim_time': use_sim_time},
