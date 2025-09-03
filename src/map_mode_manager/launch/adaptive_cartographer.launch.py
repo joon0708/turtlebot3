@@ -192,7 +192,7 @@ def generate_launch_description():
     # RViz 사용 여부 인자
     declare_use_rviz_cmd = DeclareLaunchArgument(
         'use_rviz',
-        default_value='true',
+        default_value='false',
         description='Launch RViz2 if true'
     )
     

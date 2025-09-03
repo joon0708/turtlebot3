@@ -29,9 +29,5 @@ setup(
             'map_comparator = map_mode_manager.map_comparator:main',
         ],
     },
-    scripts=[
-        'map_mode_manager/map_similarity_checker.py',
-        'map_mode_manager/mode_switcher.py',
-        'map_mode_manager/map_comparator.py',
-    ],
+
 )
