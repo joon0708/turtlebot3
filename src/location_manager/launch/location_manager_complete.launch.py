@@ -5,9 +5,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
 
 def generate_launch_description():
     # 환경 변수 설정
@@ -35,7 +35,7 @@ def generate_launch_description():
             default_value='/dev/ttyACM0',
             description='Connected USB port with OpenCR'),
         
-        # 1. 하드웨어 브링업 (모터 + 센서 + TF)
+        # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_hardware_bringup'), 'launch', 'hardware.launch.py')]),
@@ -46,13 +46,29 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. Navigation2 - 하드웨어 노드 제외
+        # 2. Cartographer (SLAM) - 하드웨어 제외
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2.launch.py')]),
+                get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer_only.launch.py')]),
             launch_arguments={
-                'use_sim_time': use_sim_time,
-                'start_rviz': 'false'
+                'use_sim_time': use_sim_time
             }.items(),
         ),
+        
+        # 3. Navigation2 - 하드웨어 제외
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
+            launch_arguments={
+                'use_sim_time': use_sim_time
+            }.items(),
+        ),
+        
+        # 4. 위치 관리 노드
+        Node(
+            package='location_manager',
+            executable='location_manager',
+            name='location_manager',
+            output='screen',
+            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}),
     ])
