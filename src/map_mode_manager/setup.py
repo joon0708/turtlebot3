@@ -7,7 +7,7 @@ package_name = 'map_mode_manager'
 setup(
     name=package_name,
     version='0.1.0',
-    packages=[package_name],
+    packages=['map_mode_manager'],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
