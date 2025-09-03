@@ -27,11 +27,9 @@ setup(
     description='Adaptive SLAM/Localization mode switching system for TurtleBot3',
     license='Apache License 2.0',
     tests_require=['pytest'],
-    entry_points={
-        'console_scripts': [
-            'map_comparator = map_mode_manager.map_comparator:main',
-            'map_similarity_checker = map_mode_manager.map_similarity_checker:main',
-            'mode_switcher = map_mode_manager.mode_switcher:main',
-        ],
-    },
+    scripts=[
+        'map_mode_manager/map_comparator.py'
+        'map_mode_manager/map_similarity_checker.py',
+        'map_mode_manager/mode_switcher.py',
+    ],
 )
