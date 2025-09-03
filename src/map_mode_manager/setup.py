@@ -14,6 +14,11 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob.glob('launch/*.launch.py')),
         ('share/' + package_name + '/config', glob.glob('config/*.yaml')),
+        ('lib/' + package_name, [
+            'map_mode_manager/map_comparator.py',
+            'map_mode_manager/map_similarity_checker.py',
+            'map_mode_manager/mode_switcher.py',
+        ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
