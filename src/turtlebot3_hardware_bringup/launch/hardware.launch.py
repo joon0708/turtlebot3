@@ -102,9 +102,7 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'use_sim_time': use_sim_time},
-                os.path.join(
-                    get_package_share_directory('turtlebot3_bringup'),
-                    'param', 'humble', 'waffle_pi_4wheel.yaml')
+                '/root/turtlebot3/install/turtlebot3_bringup/share/turtlebot3_bringup/param/humble/waffle_pi_4wheel.yaml'
             ],
             arguments=['-i', usb_port],
             env={
