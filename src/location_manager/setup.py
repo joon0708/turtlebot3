@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import glob
+import os
 
 package_name = 'location_manager'
 
