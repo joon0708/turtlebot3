@@ -153,6 +153,21 @@ def generate_launch_description():
         parameters=[{
             'use_sim_time': use_sim_time,
             'publish_period_sec': 1.0,
+        }],
+        remappings=[
+            ('/map', '/cartographer_map'),  # 맵 토픽 분리
+        ]
+    )
+    
+    # 맵 토픽 통합 노드 (Cartographer 맵을 /map으로 리맵핑)
+    map_remap_node = Node(
+        package='topic_tools',
+        executable='relay',
+        name='map_relay',
+        arguments=['/cartographer_map', '/map'],
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
         }]
     )
     
@@ -219,6 +234,11 @@ def generate_launch_description():
         actions=[cartographer_occupancy_grid_node]
     )
     
+    delayed_map_remap = TimerAction(
+        period=6.0,
+        actions=[map_remap_node]
+    )
+    
     # 런치 설명 생성
     ld = LaunchDescription()
     
@@ -237,6 +257,7 @@ def generate_launch_description():
     # 지연된 시작 노드들 추가
     ld.add_action(delayed_cartographer)
     ld.add_action(delayed_occupancy_grid)
+    ld.add_action(delayed_map_remap)
     
     # 선택적 노드들 추가
     ld.add_action(rviz_node)
