@@ -79,7 +79,10 @@ def generate_launch_description():
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
-            'ROS_DISTRO': 'humble'
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
         }
     )
     
@@ -94,7 +97,10 @@ def generate_launch_description():
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
-            'ROS_DISTRO': 'humble'
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
         }
     )
     
@@ -109,7 +115,10 @@ def generate_launch_description():
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
-            'ROS_DISTRO': 'humble'
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
         }
     )
     
