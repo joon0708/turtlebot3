@@ -89,5 +89,6 @@ def generate_launch_description():
                 '..', '..', 'src', 'location_manager', 'location_manager', 'location_manager.py'
             )],
             output='screen',
-            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}),
+            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL},
+            condition=IfCondition(LaunchConfiguration('use_location_manager', default='true'))),
     ])

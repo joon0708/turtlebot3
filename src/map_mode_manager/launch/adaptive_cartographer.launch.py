@@ -170,7 +170,8 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'input_topic': '/cartographer_map',
             'output_topic': '/map',
-        }]
+        }],
+        condition=IfCondition(LaunchConfiguration('use_map_relay', default='true'))
     )
     
     # RViz2 노드 (선택적)

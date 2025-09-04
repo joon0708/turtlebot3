@@ -23,7 +23,7 @@ class MapComparator(Node):
     def __init__(self):
         super().__init__('map_comparator')
         
-        # QoS 설정
+        # QoS 설정 (호환성 향상)
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             durability=DurabilityPolicy.VOLATILE,
