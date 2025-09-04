@@ -53,6 +53,11 @@ def generate_launch_description():
             default_value='true',
             description='Launch location manager node'),
         
+        DeclareLaunchArgument(
+            'use_cartographer',
+            default_value='false',
+            description='Launch Cartographer SLAM system'),
+        
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -64,7 +69,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 적응형 Cartographer (SLAM) - map_mode_manager 사용
+        # 2. 적응형 Cartographer (SLAM) - map_mode_manager 사용 (선택적)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
@@ -76,6 +81,7 @@ def generate_launch_description():
                 'use_external_map': use_external_map,
                 'external_map_path': external_map_path
             }.items(),
+            condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
         
         # 3. Navigation2 - 하드웨어 제외 (복사된 맵 사용)
