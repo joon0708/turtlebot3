@@ -85,7 +85,7 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
         
-        # 3. Navigation2 - 하드웨어 제외 (복사된 맵 사용)
+        # 3. Navigation2 - 항상 실행 (AMCL 포함)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
@@ -93,7 +93,6 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml')
             }.items(),
-            condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
         
         # 4. 위치 관리 노드 - Python 모듈로 직접 실행

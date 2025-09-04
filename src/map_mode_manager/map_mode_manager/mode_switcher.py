@@ -80,6 +80,10 @@ class ModeSwitcher(Node):
         self.set_params_client = self.create_client(SetParameters, f'/{self.cartographer_node_name}/set_parameters')
         self.get_params_client = self.create_client(GetParameters, f'/{self.cartographer_node_name}/get_parameters')
         
+        # AMCL 제어를 위한 서비스 클라이언트
+        self.amcl_set_params_client = self.create_client(SetParameters, '/amcl/set_parameters')
+        self.amcl_get_params_client = self.create_client(GetParameters, '/amcl/get_parameters')
+        
         # 상태 변수
         self.current_mode = 'SLAM'  # 초기 모드
         self.target_mode = None
@@ -301,7 +305,15 @@ class ModeSwitcher(Node):
     def perform_mode_switch(self, target_mode: str):
         """실제 모드 전환을 수행합니다."""
         try:
-            # 1단계: 설정 파일 변경
+            # 1단계: AMCL 제어 (TF 충돌 방지)
+            if target_mode == 'SLAM':
+                # SLAM 모드: AMCL 비활성화 (카토그래퍼가 map->odom 발행)
+                self.control_amcl(False)
+            else:  # Localization 모드
+                # Localization 모드: AMCL 활성화 (AMCL이 map->odom 발행)
+                self.control_amcl(True)
+            
+            # 2단계: 설정 파일 변경
             config_file = self.mode_config_files[target_mode]
             config_path = os.path.join(self.config_directory, config_file)
             
@@ -310,12 +322,12 @@ class ModeSwitcher(Node):
                 self.switch_failed(f'설정 파일 없음: {config_file}')
                 return
             
-            # 2단계: Cartographer 파라미터 변경
+            # 3단계: Cartographer 파라미터 변경
             if not self.update_cartographer_parameters(target_mode):
                 self.switch_failed('Cartographer 파라미터 변경 실패')
                 return
             
-            # 3단계: 모드 전환 완료
+            # 4단계: 모드 전환 완료
             self.switch_successful(target_mode)
             
         except Exception as e:
@@ -365,6 +377,43 @@ class ModeSwitcher(Node):
         except Exception as e:
             self.get_logger().error(f'파라미터 변경 중 오류: {e}')
             return False
+    
+    def control_amcl(self, enable: bool) -> bool:
+        """AMCL을 활성화/비활성화합니다."""
+        try:
+            # AMCL 파라미터 설정
+            param = Parameter()
+            param.name = 'use_map_topic'
+            param.value.type = ParameterType.BOOL
+            param.value.bool_value = enable
+            
+            request = SetParameters.Request()
+            request.parameters = [param]
+            
+            # 서비스 호출
+            if not self.amcl_set_params_client.wait_for_service(timeout_sec=5.0):
+                self.get_logger().warn('AMCL 서비스를 찾을 수 없습니다. (정상일 수 있음)')
+                return True  # AMCL이 없어도 계속 진행
+            
+            future = self.amcl_set_params_client.call_async(request)
+            rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
+            
+            if future.done():
+                response = future.result()
+                if response.results[0].successful:
+                    status = "활성화" if enable else "비활성화"
+                    self.get_logger().info(f'AMCL {status} 성공')
+                    return True
+                else:
+                    self.get_logger().error(f'AMCL 제어 실패: {response.results[0].reason}')
+                    return False
+            else:
+                self.get_logger().warn('AMCL 제어 서비스 타임아웃')
+                return True  # 타임아웃이어도 계속 진행
+                
+        except Exception as e:
+            self.get_logger().warn(f'AMCL 제어 중 오류: {e}')
+            return True  # 오류가 있어도 계속 진행
     
     def switch_successful(self, new_mode: str):
         """모드 전환이 성공했습니다."""
