@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - TF 브로드캐스트 활성화
+        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - 새로운 맵 생성
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
@@ -60,7 +60,7 @@ def generate_launch_description():
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',
+                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # SLAM 모드로 새로운 맵 생성
             ]
         ),
         
