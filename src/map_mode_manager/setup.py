@@ -22,4 +22,9 @@ setup(
     description='Adaptive SLAM/Localization mode switching system for TurtleBot3',
     license='Apache License 2.0',
     tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'map_topic_relay = map_mode_manager.map_topic_relay:main',
+        ],
+    },
 )

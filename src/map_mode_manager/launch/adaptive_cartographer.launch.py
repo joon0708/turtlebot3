@@ -160,14 +160,16 @@ def generate_launch_description():
     )
     
     # 맵 토픽 통합 노드 (Cartographer 맵을 /map으로 리맵핑)
+    # topic_tools가 없으므로 직접 토픽 리맵핑
     map_remap_node = Node(
-        package='topic_tools',
-        executable='relay',
+        package='map_mode_manager',
+        executable='map_topic_relay',
         name='map_relay',
-        arguments=['/cartographer_map', '/map'],
         output='screen',
         parameters=[{
             'use_sim_time': use_sim_time,
+            'input_topic': '/cartographer_map',
+            'output_topic': '/map',
         }]
     )
     
