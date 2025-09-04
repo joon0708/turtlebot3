@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - TF 브로드캐스트 비활성화 (AMCL과 충돌 방지)
+        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - TF 브로드캐스트 활성화
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
@@ -55,7 +55,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'publish_tf': False,  # TF 브로드캐스트 비활성화 (AMCL과 충돌 방지)
+                'publish_tf': True,  # TF 브로드캐스트 활성화 (카토그래퍼가 TF 담당)
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
@@ -78,14 +78,15 @@ def generate_launch_description():
             ]
         ),
         
-        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해)
+        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(
-                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml')
+                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
+                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화
             }.items(),
         ),
         
