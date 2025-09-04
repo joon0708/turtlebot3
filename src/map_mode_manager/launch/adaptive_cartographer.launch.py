@@ -69,9 +69,19 @@ def generate_launch_description():
     )
     
     # MapComparator 노드
-    map_comparator_node = ExecuteProcess(
-        cmd=['python3', '-m', 'map_mode_manager.map_comparator'],
+    map_comparator_node = Node(
+        package='map_mode_manager',
+        executable='map_comparator',
+        name='map_comparator',
         output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'scan_sampling_ratio': 0.1,
+            'map_resolution': 0.05,
+            'comparison_area_size': 5.0,
+            'min_scan_points': 10,
+            'max_scan_range': 3.5,
+        }],
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
@@ -81,9 +91,20 @@ def generate_launch_description():
     )
     
     # MapSimilarityChecker 노드
-    map_similarity_checker_node = ExecuteProcess(
-        cmd=['python3', '-m', 'map_mode_manager.map_similarity_checker'],
+    map_similarity_checker_node = Node(
+        package='map_mode_manager',
+        executable='map_similarity_checker',
+        name='map_similarity_checker',
         output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'similarity_threshold': 0.8,
+            'check_interval': 5.0,
+            'mode_switch_delay': 2.0,
+            'min_samples_for_decision': 3,
+            'similarity_window_size': 10,
+            'stability_threshold': 0.1,
+        }],
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
@@ -93,9 +114,20 @@ def generate_launch_description():
     )
     
     # ModeSwitcher 노드 - ExecuteProcess로 직접 실행
-    mode_switcher_node = ExecuteProcess(
-        cmd=['python3', '-m', 'map_mode_manager.mode_switcher'],
+    mode_switcher_node = Node(
+        package='map_mode_manager',
+        executable='mode_switcher',
+        name='mode_switcher',
         output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'slam_config_file': 'turtlebot3_lds_2d.lua',
+            'localization_config_file': 'turtlebot3_lds_2d_localization.lua',
+            'cartographer_node_name': 'cartographer_node',
+            'config_directory': default_cartographer_config_dir,
+            'mode_switch_timeout': 10.0,
+            'enable_parameter_validation': True,
+        }],
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
