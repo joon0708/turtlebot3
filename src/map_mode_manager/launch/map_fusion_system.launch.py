@@ -64,15 +64,23 @@ def generate_launch_description():
             ]
         ),
         
-        # 2.5. 초기 위치 설정 노드
-        Node(
-            package='map_mode_manager',
-            executable='initial_pose_setter.py',
-            name='initial_pose_setter',
+        # 2.5. 초기 위치 설정 노드 (ExecuteProcess로 직접 실행)
+        ExecuteProcess(
+            cmd=['python3', os.path.join(
+                get_package_share_directory('map_mode_manager'),
+                '..', '..', '..', '..', 'src', 'map_mode_manager', 
+                'map_mode_manager', 'initial_pose_setter.py'
+            )],
             output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-            }]
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
+            }
         ),
         
         # 3. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
