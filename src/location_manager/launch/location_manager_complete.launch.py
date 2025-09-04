@@ -46,10 +46,10 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. Cartographer (SLAM) - 하드웨어 제외
+        # 2. 적응형 Cartographer (SLAM) - map_mode_manager 사용
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer_only.launch.py')]),
+                get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time
             }.items(),
