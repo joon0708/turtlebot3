@@ -2,7 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, LivelinessPolicy
+from rclpy.duration import Duration
 from std_msgs.msg import String, Bool
 from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 from rcl_interfaces.srv import SetParameters, GetParameters
@@ -22,11 +23,14 @@ class ModeSwitcher(Node):
     def __init__(self):
         super().__init__('mode_switcher')
         
-        # QoS 설정
+        # QoS 설정 (안정성 향상)
         qos_profile = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT,
+            reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.VOLATILE,
-            depth=10
+            depth=10,
+            deadline=Duration(seconds=1.0),
+            liveliness=LivelinessPolicy.SYSTEM_DEFAULT,
+            liveliness_lease_duration=Duration(seconds=2.0)
         )
         
         # 파라미터 설정
@@ -442,6 +446,7 @@ class ModeSwitcher(Node):
 
 def main(args=None):
     rclpy.init(args=args)
+    node = None
     
     try:
         node = ModeSwitcher()
@@ -453,10 +458,23 @@ def main(args=None):
         
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
+        if node:
+            node.get_logger().info('키보드 인터럽트로 노드를 종료합니다.')
+    except Exception as e:
+        if node:
+            node.get_logger().error(f'노드 실행 중 오류 발생: {e}')
     finally:
-        node.destroy_node()
-        rclpy.shutdown()
+        if node:
+            try:
+                node.destroy_node()
+            except Exception as e:
+                print(f'노드 파괴 중 오류: {e}')
+        
+        if rclpy.ok():
+            try:
+                rclpy.shutdown()
+            except Exception as e:
+                print(f'ROS2 종료 중 오류: {e}')
 
 
 if __name__ == '__main__':

@@ -284,15 +284,29 @@ class MapComparator(Node):
 
 def main(args=None):
     rclpy.init(args=args)
+    node = None
     
     try:
         node = MapComparator()
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
+        if node:
+            node.get_logger().info('키보드 인터럽트로 노드를 종료합니다.')
+    except Exception as e:
+        if node:
+            node.get_logger().error(f'노드 실행 중 오류 발생: {e}')
     finally:
-        node.destroy_node()
-        rclpy.shutdown()
+        if node:
+            try:
+                node.destroy_node()
+            except Exception as e:
+                print(f'노드 파괴 중 오류: {e}')
+        
+        if rclpy.ok():
+            try:
+                rclpy.shutdown()
+            except Exception as e:
+                print(f'ROS2 종료 중 오류: {e}')
 
 
 if __name__ == '__main__':
