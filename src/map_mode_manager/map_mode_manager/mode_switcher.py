@@ -88,6 +88,7 @@ class ModeSwitcher(Node):
         self.switch_success_count = 0
         self.switch_failure_count = 0
         
+        
         # 모드별 설정 파일 매핑
         self.mode_config_files = {
             'SLAM': self.slam_config_file,
@@ -263,6 +264,7 @@ class ModeSwitcher(Node):
         if msg.data and not self.is_switching:
             self.get_logger().info('모드 전환 요청을 받았습니다.')
             self.initiate_mode_switch()
+    
     
     def initiate_mode_switch(self):
         """모드 전환을 시작합니다."""

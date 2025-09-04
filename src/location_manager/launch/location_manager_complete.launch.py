@@ -69,7 +69,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 적응형 Cartographer (SLAM) - map_mode_manager 사용 (선택적)
+        # 2. 적응형 Cartographer (SLAM/Localization) - map_mode_manager 사용 (선택적)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
@@ -79,7 +79,8 @@ def generate_launch_description():
                 'enable_map_protection': 'true',
                 'auto_backup_maps': 'true',
                 'use_external_map': use_external_map,
-                'external_map_path': external_map_path
+                'external_map_path': external_map_path,
+                'start_mode': 'localization'  # 기존 맵을 로드하고 Localization 모드로 시작
             }.items(),
             condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
@@ -92,6 +93,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml')
             }.items(),
+            condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
         
         # 4. 위치 관리 노드 - Python 모듈로 직접 실행

@@ -215,6 +215,12 @@ def generate_launch_description():
         description='Use map topic relay node'
     )
     
+    declare_start_mode_cmd = DeclareLaunchArgument(
+        'start_mode',
+        default_value='slam',
+        description='Start mode: slam or localization'
+    )
+    
     # 시스템 상태 모니터링 노드 (선택적) - 향후 구현 예정이므로 주석 처리
     # system_monitor_node = ExecuteProcess(
     #     cmd=['python3', os.path.join(
@@ -264,6 +270,7 @@ def generate_launch_description():
     ld.add_action(declare_cartographer_config_basename_cmd)
     ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_use_map_relay_cmd)
+    ld.add_action(declare_start_mode_cmd)
     ld.add_action(declare_enable_monitoring_cmd)
     
     # 핵심 노드들 추가 (즉시 시작)

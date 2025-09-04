@@ -6,6 +6,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Float32
 import numpy as np
 import math
 from typing import Tuple, List, Optional
@@ -57,6 +58,9 @@ class MapComparator(Node):
             OccupancyGrid, 'map', self.map_callback, qos_profile
         )
         
+        # 유사도 점수 발행자
+        self.similarity_pub = self.create_publisher(Float32, 'map_similarity_score', qos_profile)
+        
         # TF 리스너
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
@@ -66,6 +70,7 @@ class MapComparator(Node):
         self.current_map = None
         self.robot_pose = None
         self.last_comparison_time = None
+        self.last_similarity_score = 0.0
         
         # 타이머 설정 (1초마다 맵 비교)
         self.comparison_timer = self.create_timer(1.0, self.perform_comparison)
@@ -271,15 +276,19 @@ class MapComparator(Node):
             f'맵: {len(map_occupancy)} 셀)'
         )
         
-        # 유사도 점수 발행 (다른 노드에서 사용)
-        # TODO: std_msgs/Float32 메시지로 발행
+        # 유사도 점수 발행
+        similarity_msg = Float32()
+        similarity_msg.data = similarity_score
+        self.similarity_pub.publish(similarity_msg)
+        
+        # 최근 유사도 점수 저장
+        self.last_similarity_score = similarity_score
         
         self.last_comparison_time = self.get_clock().now()
     
     def get_similarity_score(self) -> float:
         """최근 유사도 점수를 반환합니다."""
-        # TODO: 실제 구현에서는 저장된 유사도 점수 반환
-        return 0.5  # 임시 값
+        return self.last_similarity_score
 
 
 def main(args=None):

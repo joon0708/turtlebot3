@@ -58,6 +58,7 @@ class MapSimilarityChecker(Node):
         self.mode_pub = self.create_publisher(String, 'current_mode', qos_profile)
         self.mode_switch_pub = self.create_publisher(Bool, 'mode_switch_request', qos_profile)
         self.similarity_analysis_pub = self.create_publisher(Float32, 'similarity_analysis', qos_profile)
+        self.similarity_status_pub = self.create_publisher(String, 'map_similarity_status', qos_profile)
         
         # 상태 변수
         self.current_mode = 'SLAM'  # 초기 모드
@@ -90,9 +91,24 @@ class MapSimilarityChecker(Node):
             if len(self.similarity_scores) > self.similarity_window_size:
                 self.similarity_scores.pop(0)
             
+            # 맵 변화 감지 상태 발행
+            self.publish_similarity_status(similarity_score)
+            
             self.get_logger().debug(f'새로운 유사도 점수: {similarity_score:.3f}')
         else:
             self.get_logger().warn(f'잘못된 유사도 점수: {similarity_score}')
+    
+    def publish_similarity_status(self, similarity_score: float):
+        """맵 유사도 상태를 발행합니다."""
+        status_msg = String()
+        
+        # 유사도에 따른 상태 메시지 생성
+        if similarity_score < self.similarity_threshold:
+            status_msg.data = f'CHANGE_DETECTED:{similarity_score:.3f}'
+        else:
+            status_msg.data = f'SIMILARITY:{similarity_score:.3f}'
+        
+        self.similarity_status_pub.publish(status_msg)
     
     def calculate_stability(self) -> float:
         """유사도 점수의 안정성을 계산합니다."""
