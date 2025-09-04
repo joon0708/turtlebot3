@@ -207,6 +207,29 @@ class MapFusionNode(Node):
             base_image = self.occupancy_grid_to_image(self.base_map)
             realtime_image = self.occupancy_grid_to_image(self.realtime_map)
             
+            # 좌표계 변환: 실시간 맵을 기존 맵의 좌표계에 맞춤
+            base_origin_x = self.base_map.info.origin.position.x
+            base_origin_y = self.base_map.info.origin.position.y
+            realtime_origin_x = self.realtime_map.info.origin.position.x
+            realtime_origin_y = self.realtime_map.info.origin.position.y
+            
+            # 원점 차이 계산
+            origin_diff_x = base_origin_x - realtime_origin_x
+            origin_diff_y = base_origin_y - realtime_origin_y
+            
+            # 픽셀 단위로 변환
+            resolution = self.base_map.info.resolution
+            pixel_diff_x = int(origin_diff_x / resolution)
+            pixel_diff_y = int(origin_diff_y / resolution)
+            
+            # 실시간 맵을 기존 맵 좌표계로 변환
+            if pixel_diff_x != 0 or pixel_diff_y != 0:
+                # 이미지 변환 (이동)
+                rows, cols = realtime_image.shape
+                M = np.float32([[1, 0, pixel_diff_x], [0, 1, pixel_diff_y]])
+                realtime_image = cv2.warpAffine(realtime_image, M, (cols, rows))
+                self.get_logger().info(f'좌표계 변환 적용: x={pixel_diff_x}, y={pixel_diff_y}')
+            
             # 맵 크기 맞추기
             base_image, realtime_image = self.resize_maps_to_match(base_image, realtime_image)
             
