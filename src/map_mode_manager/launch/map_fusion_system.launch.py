@@ -3,9 +3,10 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
 
@@ -36,16 +37,14 @@ def generate_launch_description():
             description='Connected USB port with OpenCR'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF)
-        Node(
-            package='turtlebot3_hardware_bringup',
-            executable='hardware.launch.py',
-            name='hardware_bringup',
-            output='screen',
-            parameters=[{
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_hardware_bringup'), 'launch', 'hardware.launch.py')]),
+            launch_arguments={
                 'lidar_port': lidar_port,
                 'usb_port': usb_port,
                 'use_sim_time': use_sim_time
-            }]
+            }.items(),
         ),
         
         # 2. 실시간 맵 생성 (카토그래퍼 SLAM)
@@ -79,16 +78,14 @@ def generate_launch_description():
         ),
         
         # 4. Navigation2 (기존 맵 사용)
-        Node(
-            package='turtlebot3_navigation2',
-            executable='navigation2_only.launch.py',
-            name='navigation2',
-            output='screen',
-            parameters=[{
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
+            launch_arguments={
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml')
-            }]
+            }.items(),
         ),
         
         # 5. 맵 비교 및 통합 노드 (지연 시작)
