@@ -60,8 +60,19 @@ def generate_launch_description():
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # SLAM 모드로 새로운 맵 생성
+                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능한 SLAM 모드
             ]
+        ),
+        
+        # 2.5. 초기 위치 설정 노드
+        Node(
+            package='map_mode_manager',
+            executable='initial_pose_setter.py',
+            name='initial_pose_setter',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }]
         ),
         
         # 3. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행

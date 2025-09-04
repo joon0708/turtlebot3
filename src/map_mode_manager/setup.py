@@ -29,6 +29,7 @@ setup(
             'map_comparator = map_mode_manager.map_comparator:main',
             'map_similarity_checker = map_mode_manager.map_similarity_checker:main',
             'mode_switcher = map_mode_manager.mode_switcher:main',
+            'initial_pose_setter = map_mode_manager.initial_pose_setter:main',
         ],
     },
 )
