@@ -91,7 +91,8 @@ def generate_launch_description():
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml')
+                'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml'),
+                'amcl_use_map_topic': 'true'  # AMCL이 맵 토픽을 사용하도록 설정
             }.items(),
         ),
         

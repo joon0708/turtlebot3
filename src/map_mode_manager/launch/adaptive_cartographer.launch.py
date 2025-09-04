@@ -140,7 +140,8 @@ def generate_launch_description():
         }],
         arguments=[
             '-configuration_directory', cartographer_config_dir,
-            '-configuration_basename', cartographer_config_basename,
+            '-configuration_basename', 'turtlebot3_lds_2d_localization.lua',
+            '-load_state_filename', os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.pbstream'),
         ]
     )
     
@@ -217,7 +218,7 @@ def generate_launch_description():
     
     declare_start_mode_cmd = DeclareLaunchArgument(
         'start_mode',
-        default_value='slam',
+        default_value='localization',
         description='Start mode: slam or localization'
     )
     
