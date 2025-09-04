@@ -31,6 +31,9 @@ def generate_launch_description():
     4. Cartographer: SLAM/Localization 엔진
     """
     
+    # 환경 변수 설정
+    TURTLEBOT3_MODEL = os.environ.get('TURTLEBOT3_MODEL', 'waffle_pi_4wheel')
+    
     # 패키지 경로 설정
     map_mode_manager_pkg = get_package_share_directory('map_mode_manager')
     turtlebot3_cartographer_pkg = get_package_share_directory('turtlebot3_cartographer')
