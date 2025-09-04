@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - TF 브로드캐스트 비활성화
+        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - TF 브로드캐스트 비활성화 (AMCL과 충돌 방지)
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
