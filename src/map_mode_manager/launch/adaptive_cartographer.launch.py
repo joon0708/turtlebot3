@@ -161,17 +161,24 @@ def generate_launch_description():
     
     # 맵 토픽 통합 노드 (Cartographer 맵을 /map으로 리맵핑)
     # topic_tools가 없으므로 직접 토픽 리맵핑
-    map_remap_node = Node(
-        package='map_mode_manager',
-        executable='map_topic_relay',
-        name='map_relay',
+    map_remap_node = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_topic_relay.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'input_topic': '/cartographer_map',
-            'output_topic': '/map',
-        }],
-        condition=IfCondition(LaunchConfiguration('use_map_relay', default='true'))
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        },
+        condition=IfCondition(LaunchConfiguration('use_map_relay', default='false'))
     )
     
     # RViz2 노드 (선택적)

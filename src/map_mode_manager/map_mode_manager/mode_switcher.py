@@ -23,9 +23,9 @@ class ModeSwitcher(Node):
     def __init__(self):
         super().__init__('mode_switcher')
         
-        # QoS 설정 (안정성 향상)
+        # QoS 설정 (호환성 향상)
         qos_profile = QoSProfile(
-            reliability=ReliabilityPolicy.RELIABLE,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
             durability=DurabilityPolicy.VOLATILE,
             depth=10,
             deadline=Duration(seconds=1.0),

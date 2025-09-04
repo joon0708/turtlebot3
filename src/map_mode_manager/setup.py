@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'map_topic_relay = map_mode_manager.map_topic_relay:main',
+            # map_topic_relay는 Python 스크립트로 직접 실행
         ],
     },
 )
