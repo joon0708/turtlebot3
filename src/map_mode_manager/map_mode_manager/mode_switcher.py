@@ -145,29 +145,72 @@ class ModeSwitcher(Node):
     def copy_external_map_to_local(self):
         """외부 맵을 로컬 디렉토리로 복사합니다."""
         if not self.use_external_map or not self.external_map_path:
+            self.get_logger().info('외부 맵 사용이 비활성화되어 있습니다.')
             return
         
         if not os.path.exists(self.external_map_path):
             self.get_logger().warn(f'외부 맵 경로가 존재하지 않습니다: {self.external_map_path}')
             return
         
-        # 외부 맵 파일들을 로컬로 복사
-        map_files = ['map.pbstream', 'map.yaml', 'map.pgm']
+        self.get_logger().info(f'외부 맵 복사 시작: {self.external_map_path} → {self.map_directory}')
+        
+        # 외부 맵 파일들을 로컬로 복사 (pbstream 파일이 없을 수 있으므로 선택적 복사)
+        map_files = ['map.yaml', 'map.pgm']  # 필수 파일들
+        optional_files = ['map.pbstream']    # 선택적 파일들
         copied_files = []
         
+        # 필수 파일들 복사
         for file_name in map_files:
             source_path = os.path.join(self.external_map_path, file_name)
             if os.path.exists(source_path):
                 dest_path = os.path.join(self.map_directory, file_name)
                 import shutil
-                shutil.copy2(source_path, dest_path)
-                copied_files.append(file_name)
-                self.get_logger().info(f'외부 맵 복사 완료: {file_name}')
+                try:
+                    shutil.copy2(source_path, dest_path)
+                    copied_files.append(file_name)
+                    self.get_logger().info(f'외부 맵 복사 완료: {file_name}')
+                except Exception as e:
+                    self.get_logger().error(f'맵 파일 복사 실패 {file_name}: {e}')
+            else:
+                self.get_logger().error(f'필수 맵 파일이 없습니다: {file_name}')
+        
+        # 선택적 파일들 복사
+        for file_name in optional_files:
+            source_path = os.path.join(self.external_map_path, file_name)
+            if os.path.exists(source_path):
+                dest_path = os.path.join(self.map_directory, file_name)
+                import shutil
+                try:
+                    shutil.copy2(source_path, dest_path)
+                    copied_files.append(file_name)
+                    self.get_logger().info(f'외부 맵 복사 완료: {file_name}')
+                except Exception as e:
+                    self.get_logger().error(f'맵 파일 복사 실패 {file_name}: {e}')
+            else:
+                self.get_logger().info(f'선택적 맵 파일이 없습니다 (정상): {file_name}')
         
         if copied_files:
             self.get_logger().info(f'외부 맵 복사 완료: {copied_files}')
+            # 복사된 맵 파일 확인
+            self.verify_copied_maps()
         else:
             self.get_logger().warn('복사할 외부 맵 파일이 없습니다.')
+    
+    def verify_copied_maps(self):
+        """복사된 맵 파일들을 확인합니다."""
+        map_files = ['map.pbstream', 'map.yaml', 'map.pgm']
+        existing_files = []
+        
+        for file_name in map_files:
+            file_path = os.path.join(self.map_directory, file_name)
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                existing_files.append(f'{file_name} ({file_size} bytes)')
+        
+        if existing_files:
+            self.get_logger().info(f'로컬 맵 파일 확인: {existing_files}')
+        else:
+            self.get_logger().warn('로컬 맵 파일이 없습니다.')
     
     def backup_existing_map(self, map_name: str = None):
         """기존 맵을 백업합니다."""

@@ -72,12 +72,13 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 3. Navigation2 - 하드웨어 제외
+        # 3. Navigation2 - 하드웨어 제외 (복사된 맵 사용)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
             launch_arguments={
-                'use_sim_time': use_sim_time
+                'use_sim_time': use_sim_time,
+                'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml')
             }.items(),
         ),
         
