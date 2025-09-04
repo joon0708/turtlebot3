@@ -101,6 +101,14 @@ def generate_launch_description():
                 '..', '..', '..', '..', 'src', 'location_manager', 'location_manager', 'location_manager.py'
             )],
             output='screen',
-            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL},
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
+            },
             condition=IfCondition(LaunchConfiguration('use_location_manager', default='false'))),
     ])

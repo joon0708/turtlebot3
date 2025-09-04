@@ -164,7 +164,7 @@ def generate_launch_description():
     map_remap_node = ExecuteProcess(
         cmd=['python3', os.path.join(
             get_package_share_directory('map_mode_manager'),
-            '..', '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_topic_relay.py'
+            '..', '..', '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_topic_relay.py'
         )],
         output='screen',
         env={
