@@ -75,12 +75,12 @@ def generate_launch_description():
                 get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'map_directory': os.path.join(get_package_share_directory('location_manager'), 'maps'),
+                'map_directory': os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map'),
                 'enable_map_protection': 'true',
                 'auto_backup_maps': 'true',
                 'use_external_map': use_external_map,
                 'external_map_path': external_map_path,
-                'start_mode': 'localization'  # 기존 맵을 로드하고 Localization 모드로 시작
+                'start_mode': 'slam'  # 실시간 맵 생성을 위해 SLAM 모드로 시작
             }.items(),
             condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
         ),
@@ -91,7 +91,7 @@ def generate_launch_description():
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
             launch_arguments={
                 'use_sim_time': use_sim_time,
-                'map': os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.yaml'),
+                'map': os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
                 'amcl_use_map_topic': 'true'  # AMCL이 맵 토픽을 사용하도록 설정
             }.items(),
         ),

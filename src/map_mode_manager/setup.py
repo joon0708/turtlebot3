@@ -24,7 +24,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # map_topic_relay는 Python 스크립트로 직접 실행
+            'map_fusion_node = map_mode_manager.map_fusion_node:main',
+            'incremental_map_updater = map_mode_manager.incremental_map_updater:main',
+            'map_comparator = map_mode_manager.map_comparator:main',
+            'map_similarity_checker = map_mode_manager.map_similarity_checker:main',
+            'mode_switcher = map_mode_manager.mode_switcher:main',
         ],
     },
 )

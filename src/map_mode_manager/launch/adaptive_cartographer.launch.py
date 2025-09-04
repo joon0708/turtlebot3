@@ -140,8 +140,7 @@ def generate_launch_description():
         }],
         arguments=[
             '-configuration_directory', cartographer_config_dir,
-            '-configuration_basename', 'turtlebot3_lds_2d_localization.lua',
-            '-load_state_filename', os.path.join(get_package_share_directory('location_manager'), 'maps', 'map.pbstream'),
+            '-configuration_basename', 'turtlebot3_lds_2d.lua',
         ]
     )
     
