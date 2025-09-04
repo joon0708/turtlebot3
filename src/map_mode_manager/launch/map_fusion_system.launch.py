@@ -77,7 +77,7 @@ def generate_launch_description():
             ]
         ),
         
-        # 4. Navigation2 (기존 맵 사용)
+        # 4. Navigation2 (기존 맵 사용, AMCL 포함)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
