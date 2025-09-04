@@ -83,6 +83,8 @@ def generate_launch_description():
             'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
             'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
             'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
         }
     )
     
@@ -101,6 +103,8 @@ def generate_launch_description():
             'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
             'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
             'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
         }
     )
     
@@ -119,6 +123,8 @@ def generate_launch_description():
             'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
             'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
             'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
         }
     )
     
