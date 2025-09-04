@@ -7,6 +7,7 @@ from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 
 def generate_launch_description():
@@ -46,6 +47,11 @@ def generate_launch_description():
             'use_external_map',
             default_value='true',
             description='Use external map from another package'),
+        
+        DeclareLaunchArgument(
+            'use_location_manager',
+            default_value='true',
+            description='Launch location manager node'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(

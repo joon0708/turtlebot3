@@ -202,6 +202,12 @@ def generate_launch_description():
         description='Launch RViz2 if true'
     )
     
+    declare_use_map_relay_cmd = DeclareLaunchArgument(
+        'use_map_relay',
+        default_value='true',
+        description='Use map topic relay node'
+    )
+    
     # 시스템 상태 모니터링 노드 (선택적) - 향후 구현 예정이므로 주석 처리
     # system_monitor_node = ExecuteProcess(
     #     cmd=['python3', os.path.join(
@@ -250,6 +256,7 @@ def generate_launch_description():
     ld.add_action(declare_cartographer_config_dir_cmd)
     ld.add_action(declare_cartographer_config_basename_cmd)
     ld.add_action(declare_use_rviz_cmd)
+    ld.add_action(declare_use_map_relay_cmd)
     ld.add_action(declare_enable_monitoring_cmd)
     
     # 핵심 노드들 추가 (즉시 시작)
