@@ -92,7 +92,7 @@ def generate_launch_description():
         ExecuteProcess(
             cmd=['python3', os.path.join(
                 get_package_share_directory('location_manager'),
-                '..', '..', 'src', 'location_manager', 'location_manager', 'location_manager.py'
+                '..', '..', '..', 'src', 'location_manager', 'location_manager', 'location_manager.py'
             )],
             output='screen',
             env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL},
