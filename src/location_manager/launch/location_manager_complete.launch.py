@@ -17,6 +17,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
+    external_map_path = LaunchConfiguration('external_map_path', default='')
+    use_external_map = LaunchConfiguration('use_external_map', default='false')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -35,6 +37,16 @@ def generate_launch_description():
             default_value='/dev/ttyACM0',
             description='Connected USB port with OpenCR'),
         
+        DeclareLaunchArgument(
+            'external_map_path',
+            default_value=os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map'),
+            description='External map path (e.g., turtlebot3_navigation2/map)'),
+        
+        DeclareLaunchArgument(
+            'use_external_map',
+            default_value='true',
+            description='Use external map from another package'),
+        
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -51,7 +63,12 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
             launch_arguments={
-                'use_sim_time': use_sim_time
+                'use_sim_time': use_sim_time,
+                'map_directory': os.path.join(get_package_share_directory('location_manager'), 'maps'),
+                'enable_map_protection': 'true',
+                'auto_backup_maps': 'true',
+                'use_external_map': use_external_map,
+                'external_map_path': external_map_path
             }.items(),
         ),
         
