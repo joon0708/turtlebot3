@@ -66,20 +66,14 @@ def generate_launch_description():
     )
     
     # MapComparator 노드
-    map_comparator_node = Node(
-        package='map_mode_manager',
-        executable='map_comparator',
-        name='map_comparator',
+    map_comparator_node = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_comparator.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'scan_sampling_ratio': 0.1,
-            'map_resolution': 0.05,
-            'comparison_area_size': 5.0,
-            'min_scan_points': 10,
-            'max_scan_range': 3.5,
-        }],
         env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
             'ROS_DISTRO': 'humble'
@@ -87,43 +81,29 @@ def generate_launch_description():
     )
     
     # MapSimilarityChecker 노드
-    map_similarity_checker_node = Node(
-        package='map_mode_manager',
-        executable='map_similarity_checker',
-        name='map_similarity_checker',
+    map_similarity_checker_node = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_similarity_checker.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'similarity_threshold': 0.8,
-            'check_interval': 5.0,
-            'mode_switch_delay': 2.0,
-            'min_samples_for_decision': 3,
-            'similarity_window_size': 10,
-            'stability_threshold': 0.1,
-        }],
         env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
             'ROS_DISTRO': 'humble'
         }
     )
     
-    # ModeSwitcher 노드
-    mode_switcher_node = Node(
-        package='map_mode_manager',
-        executable='mode_switcher',
-        name='mode_switcher',
+    # ModeSwitcher 노드 - ExecuteProcess로 직접 실행
+    mode_switcher_node = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'mode_switcher.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'slam_config_file': 'turtlebot3_lds_2d.lua',
-            'localization_config_file': 'turtlebot3_lds_2d_localization.lua',
-            'cartographer_node_name': 'cartographer_node',
-            'config_directory': default_cartographer_config_dir,
-            'mode_switch_timeout': 10.0,
-            'enable_parameter_validation': True,
-        }],
         env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
             'ROS_DOMAIN_ID': '10',
             'ROS_VERSION': '2',
             'ROS_DISTRO': 'humble'
@@ -196,24 +176,21 @@ def generate_launch_description():
         description='Launch RViz2 if true'
     )
     
-    # 시스템 상태 모니터링 노드 (선택적)
-    system_monitor_node = Node(
-        package='map_mode_manager',
-        executable='system_monitor',  # 향후 구현 예정
-        name='system_monitor',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'monitor_interval': 2.0,
-            'enable_performance_monitoring': True,
-        }],
-        condition=IfCondition(LaunchConfiguration('enable_monitoring')),
-        env={
-            'ROS_DOMAIN_ID': '10',
-            'ROS_VERSION': '2',
-            'ROS_DISTRO': 'humble'
-        }
-    )
+    # 시스템 상태 모니터링 노드 (선택적) - 향후 구현 예정이므로 주석 처리
+    # system_monitor_node = ExecuteProcess(
+    #     cmd=['python3', os.path.join(
+    #         get_package_share_directory('map_mode_manager'),
+    #         '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'system_monitor.py'
+    #     )],
+    #     output='screen',
+    #     condition=IfCondition(LaunchConfiguration('enable_monitoring')),
+    #     env={
+    #         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+    #         'ROS_DOMAIN_ID': '10',
+    #         'ROS_VERSION': '2',
+    #         'ROS_DISTRO': 'humble'
+    #     }
+    # )
     
     # 모니터링 활성화 인자
     declare_enable_monitoring_cmd = DeclareLaunchArgument(
@@ -255,6 +232,6 @@ def generate_launch_description():
     
     # 선택적 노드들 추가
     ld.add_action(rviz_node)
-    ld.add_action(system_monitor_node)
+    # ld.add_action(system_monitor_node)  # 향후 구현 예정
     
     return ld
