@@ -70,10 +70,7 @@ def generate_launch_description():
     
     # MapComparator 노드
     map_comparator_node = ExecuteProcess(
-        cmd=['python3', os.path.join(
-            get_package_share_directory('map_mode_manager'),
-            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_comparator.py'
-        )],
+        cmd=['python3', '-m', 'map_mode_manager.map_comparator'],
         output='screen',
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
@@ -85,10 +82,7 @@ def generate_launch_description():
     
     # MapSimilarityChecker 노드
     map_similarity_checker_node = ExecuteProcess(
-        cmd=['python3', os.path.join(
-            get_package_share_directory('map_mode_manager'),
-            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'map_similarity_checker.py'
-        )],
+        cmd=['python3', '-m', 'map_mode_manager.map_similarity_checker'],
         output='screen',
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
@@ -100,10 +94,7 @@ def generate_launch_description():
     
     # ModeSwitcher 노드 - ExecuteProcess로 직접 실행
     mode_switcher_node = ExecuteProcess(
-        cmd=['python3', os.path.join(
-            get_package_share_directory('map_mode_manager'),
-            '..', '..', 'src', 'map_mode_manager', 'map_mode_manager', 'mode_switcher.py'
-        )],
+        cmd=['python3', '-m', 'map_mode_manager.mode_switcher'],
         output='screen',
         env={
             'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
