@@ -39,6 +39,11 @@ class ModeSwitcher(Node):
                 ('config_directory', '/root/turtlebot3/install/turtlebot3_cartographer/share/turtlebot3_cartographer/config'),  # 설정 파일 디렉토리
                 ('mode_switch_timeout', 10.0),                          # 모드 전환 타임아웃 (초)
                 ('enable_parameter_validation', True),                  # 파라미터 검증 활성화
+                ('map_directory', '/root/turtlebot3/maps'),             # 맵 저장 디렉토리
+                ('enable_map_protection', True),                        # 맵 보호 기능 활성화
+                ('auto_backup_maps', True),                             # 자동 맵 백업
+                ('external_map_path', ''),                              # 외부 맵 경로 (다른 패키지)
+                ('use_external_map', False),                            # 외부 맵 사용 여부
             ]
         )
         
@@ -49,6 +54,11 @@ class ModeSwitcher(Node):
         self.config_directory = self.get_parameter('config_directory').value
         self.mode_switch_timeout = self.get_parameter('mode_switch_timeout').value
         self.enable_parameter_validation = self.get_parameter('enable_parameter_validation').value
+        self.map_directory = self.get_parameter('map_directory').value
+        self.enable_map_protection = self.get_parameter('enable_map_protection').value
+        self.auto_backup_maps = self.get_parameter('auto_backup_maps').value
+        self.external_map_path = self.get_parameter('external_map_path').value
+        self.use_external_map = self.get_parameter('use_external_map').value
         
         # 구독자 및 발행자
         self.mode_sub = self.create_subscription(
@@ -96,14 +106,102 @@ class ModeSwitcher(Node):
             }
         }
         
+        # 맵 디렉토리 생성
+        self.ensure_map_directory()
+        
+        # 외부 맵 처리
+        if self.use_external_map:
+            self.copy_external_map_to_local()
+        
         # 초기 상태 발행
         self.publish_mode_status()
         
         self.get_logger().info(
             f'ModeSwitcher 노드가 초기화되었습니다. '
             f'SLAM 설정: {self.slam_config_file}, '
-            f'Localization 설정: {self.localization_config_file}'
+            f'Localization 설정: {self.localization_config_file}, '
+            f'맵 보호: {self.enable_map_protection}, '
+            f'외부 맵 사용: {self.use_external_map}'
         )
+    
+    def ensure_map_directory(self):
+        """맵 디렉토리가 존재하는지 확인하고 생성합니다."""
+        if not os.path.exists(self.map_directory):
+            os.makedirs(self.map_directory, exist_ok=True)
+            self.get_logger().info(f'맵 디렉토리 생성: {self.map_directory}')
+    
+    def get_effective_map_directory(self):
+        """실제 사용할 맵 디렉토리를 반환합니다."""
+        if self.use_external_map and self.external_map_path:
+            if os.path.exists(self.external_map_path):
+                self.get_logger().info(f'외부 맵 경로 사용: {self.external_map_path}')
+                return self.external_map_path
+            else:
+                self.get_logger().warn(f'외부 맵 경로가 존재하지 않습니다: {self.external_map_path}')
+                self.get_logger().warn('기본 맵 디렉토리를 사용합니다.')
+        
+        return self.map_directory
+    
+    def copy_external_map_to_local(self):
+        """외부 맵을 로컬 디렉토리로 복사합니다."""
+        if not self.use_external_map or not self.external_map_path:
+            return
+        
+        if not os.path.exists(self.external_map_path):
+            self.get_logger().warn(f'외부 맵 경로가 존재하지 않습니다: {self.external_map_path}')
+            return
+        
+        # 외부 맵 파일들을 로컬로 복사
+        map_files = ['map.pbstream', 'map.yaml', 'map.pgm']
+        copied_files = []
+        
+        for file_name in map_files:
+            source_path = os.path.join(self.external_map_path, file_name)
+            if os.path.exists(source_path):
+                dest_path = os.path.join(self.map_directory, file_name)
+                import shutil
+                shutil.copy2(source_path, dest_path)
+                copied_files.append(file_name)
+                self.get_logger().info(f'외부 맵 복사 완료: {file_name}')
+        
+        if copied_files:
+            self.get_logger().info(f'외부 맵 복사 완료: {copied_files}')
+        else:
+            self.get_logger().warn('복사할 외부 맵 파일이 없습니다.')
+    
+    def backup_existing_map(self, map_name: str = None):
+        """기존 맵을 백업합니다."""
+        if not self.auto_backup_maps:
+            return
+        
+        if map_name is None:
+            map_name = f'map_{int(time.time())}'
+        
+        backup_dir = os.path.join(self.map_directory, 'backups')
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir, exist_ok=True)
+        
+        # 기존 맵 파일들을 백업
+        map_files = ['map.pbstream', 'map.yaml', 'map.pgm']
+        for file_name in map_files:
+            source_path = os.path.join(self.map_directory, file_name)
+            if os.path.exists(source_path):
+                backup_path = os.path.join(backup_dir, f'{map_name}_{file_name}')
+                import shutil
+                shutil.copy2(source_path, backup_path)
+                self.get_logger().info(f'맵 백업 완료: {file_name} → {backup_path}')
+    
+    def check_existing_map(self):
+        """기존 맵이 있는지 확인합니다."""
+        map_files = ['map.pbstream', 'map.yaml', 'map.pgm']
+        existing_maps = []
+        
+        for file_name in map_files:
+            file_path = os.path.join(self.map_directory, file_name)
+            if os.path.exists(file_path):
+                existing_maps.append(file_name)
+        
+        return existing_maps
     
     def mode_callback(self, msg: String):
         """현재 모드 콜백"""
@@ -130,6 +228,17 @@ class ModeSwitcher(Node):
             target_mode = 'Localization'
         else:
             target_mode = 'SLAM'
+        
+        # 맵 보호 기능이 활성화된 경우
+        if self.enable_map_protection and target_mode == 'SLAM':
+            existing_maps = self.check_existing_map()
+            if existing_maps:
+                self.get_logger().warn(f'기존 맵이 발견되었습니다: {existing_maps}')
+                self.get_logger().warn('SLAM 모드로 전환하면 기존 맵이 덮어씌워질 수 있습니다.')
+                
+                # 기존 맵 백업
+                self.backup_existing_map()
+                self.get_logger().info('기존 맵을 백업했습니다.')
         
         self.target_mode = target_mode
         self.is_switching = True
