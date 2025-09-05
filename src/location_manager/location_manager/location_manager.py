@@ -190,7 +190,7 @@ class LocationManager(Node):
         siny_cosp = 2 * (orientation.w * orientation.z + orientation.x * orientation.y)
         cosy_cosp = 1 - 2 * (orientation.y * orientation.y + orientation.z * orientation.z)
         yaw = np.arctan2(siny_cosp, cosy_cosp)
-        return yaw
+        return float(yaw)  # numpy 객체를 일반 Python float로 변환
     
     def go_to_location(self, name):
         """저장된 위치로 이동"""
