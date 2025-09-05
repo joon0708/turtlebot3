@@ -47,25 +47,24 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 카토그래퍼 노드 (로컬라이제이션 모드로 시작)
+        # 2. 맵 저장 서비스 (네비게이션 중 맵 갱신)
         Node(
-            package='cartographer_ros',
-            executable='cartographer_node',
-            name='cartographer_node',
+            package='nav2_map_server',
+            executable='map_saver_server',
+            name='map_saver_server',
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-            }],
-            arguments=[
-                '-configuration_directory', os.path.join(
-                    get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d_localization.lua'
-            ]
+                'save_map_timeout': 5.0,
+                'free_thresh_default': 0.25,
+                'occupied_thresh_default': 0.65,
+                'map_subscribe_transient_local': True
+            }]
         ),
         
-        # 3. 영점 기반 SLAM 모드 전환기 (영점 지정 시 SLAM 모드로 전환)
+        # 3. 맵 업데이터 (자동 맵 저장)
         ExecuteProcess(
-            cmd=['python3', '/root/turtlebot3/src/map_mode_manager/map_mode_manager/pose_based_slam_launcher.py'],
+            cmd=['python3', '/root/turtlebot3/src/map_mode_manager/map_mode_manager/map_updater.py'],
             output='screen',
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
@@ -80,21 +79,6 @@ def generate_launch_description():
             }
         ),
         
-        # 4. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
-        Node(
-            package='cartographer_ros',
-            executable='cartographer_occupancy_grid_node',
-            name='cartographer_occupancy_grid_node',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-            }],
-            arguments=['-resolution', '0.05', '-publish_period_sec', '0.5'],
-            remappings=[
-                ('/map', '/cartographer_map')
-            ]
-        ),
-        
         # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 활성화)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -107,131 +91,4 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 5. 맵 비교 및 통합 노드 (지연 시작)
-        TimerAction(
-            period=5.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=['python3', os.path.join(
-                        get_package_share_directory('map_mode_manager'),
-                        '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                        'map_mode_manager', 'map_fusion_node.py'
-                    )],
-                    output='screen',
-                    env={
-                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                        'PATH': os.environ.get('PATH', ''),
-                        'ROS_DOMAIN_ID': '10',
-                        'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble',
-                        'ROS_LOG_DIR': '/root/.ros/log',
-                        'HOME': '/root'
-                    }
-                )
-            ]
-        ),
-        
-        # 6. 점진적 맵 업데이트 노드 (지연 시작)
-        TimerAction(
-            period=7.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=['python3', os.path.join(
-                        get_package_share_directory('map_mode_manager'),
-                        '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                        'map_mode_manager', 'incremental_map_updater.py'
-                    )],
-                    output='screen',
-                    env={
-                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                        'PATH': os.environ.get('PATH', ''),
-                        'ROS_DOMAIN_ID': '10',
-                        'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble',
-                        'ROS_LOG_DIR': '/root/.ros/log',
-                        'HOME': '/root'
-                    }
-                )
-            ]
-        ),
-        
-        # 7. 기존 map_mode_manager 노드들 (지연 시작)
-        TimerAction(
-            period=8.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=['python3', os.path.join(
-                        get_package_share_directory('map_mode_manager'),
-                        '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                        'map_mode_manager', 'map_comparator.py'
-                    )],
-                    output='screen',
-                    env={
-                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                        'PATH': os.environ.get('PATH', ''),
-                        'ROS_DOMAIN_ID': '10',
-                        'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble',
-                        'ROS_LOG_DIR': '/root/.ros/log',
-                        'HOME': '/root'
-                    }
-                )
-            ]
-        ),
-        
-        TimerAction(
-            period=9.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=['python3', os.path.join(
-                        get_package_share_directory('map_mode_manager'),
-                        '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                        'map_mode_manager', 'map_similarity_checker.py'
-                    )],
-                    output='screen',
-                    env={
-                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                        'PATH': os.environ.get('PATH', ''),
-                        'ROS_DOMAIN_ID': '10',
-                        'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble',
-                        'ROS_LOG_DIR': '/root/.ros/log',
-                        'HOME': '/root'
-                    }
-                )
-            ]
-        ),
-        
-        TimerAction(
-            period=10.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=['python3', os.path.join(
-                        get_package_share_directory('map_mode_manager'),
-                        '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                        'map_mode_manager', 'mode_switcher.py'
-                    )],
-                    output='screen',
-                    env={
-                        'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                        'PATH': os.environ.get('PATH', ''),
-                        'ROS_DOMAIN_ID': '10',
-                        'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble',
-                        'ROS_LOG_DIR': '/root/.ros/log',
-                        'HOME': '/root'
-                    }
-                )
-            ]
-        ),
     ])
