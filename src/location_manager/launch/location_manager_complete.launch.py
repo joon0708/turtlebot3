@@ -64,18 +64,23 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드
-        Node(
-            package='location_manager',
-            executable='location_manager',
-            name='location_manager',
+        # 4. 위치 관리 노드 - ExecuteProcess로 실행
+        ExecuteProcess(
+            cmd=[os.path.join(
+                get_package_share_directory('location_manager'),
+                '..', '..', 'bin', 'location_manager'
+            )],
             output='screen',
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
                 'ROS_DISTRO': 'humble',
                 'ROS_LOG_DIR': '/root/.ros/log'
             }
+            
         ),
     ])
