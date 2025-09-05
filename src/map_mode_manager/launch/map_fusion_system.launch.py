@@ -66,7 +66,9 @@ def generate_launch_description():
                 'RCLCPP_LOG_LEVEL': 'INFO',  # INFO 레벨로 변경
                 'RCUTILS_LOGGING_USE_STDOUT': '1',
                 'RCUTILS_LOGGING_BUFFERED_STREAM': '1',
-                'ROS_DOMAIN_ID': '10'  # 도메인 ID 명시적 설정
+                'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
+                'AMENT_PREFIX_PATH': '/opt/ros/humble'
             }
         ),
         
@@ -103,7 +105,9 @@ def generate_launch_description():
                 ('/map', '/cartographer_map')
             ],
             env={
-                'ROS_DOMAIN_ID': '10'  # 도메인 ID 명시적 설정
+                'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
+                'AMENT_PREFIX_PATH': '/opt/ros/humble'
             }
         ),
         

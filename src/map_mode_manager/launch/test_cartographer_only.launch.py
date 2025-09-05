@@ -40,7 +40,9 @@ def generate_launch_description():
                 'RCLCPP_LOG_LEVEL': 'INFO',
                 'RCUTILS_LOGGING_USE_STDOUT': '1',
                 'RCUTILS_LOGGING_BUFFERED_STREAM': '1',
-                'ROS_DOMAIN_ID': '10'
+                'ROS_DOMAIN_ID': '10',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
+                'AMENT_PREFIX_PATH': '/opt/ros/humble'
             }
         ),
         
@@ -55,7 +57,9 @@ def generate_launch_description():
             }],
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
             env={
-                'ROS_DOMAIN_ID': '10'
+                'ROS_DOMAIN_ID': '10',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
+                'AMENT_PREFIX_PATH': '/opt/ros/humble'
             }
         ),
     ])
