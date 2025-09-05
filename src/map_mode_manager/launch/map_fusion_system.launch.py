@@ -58,7 +58,9 @@ def generate_launch_description():
                 'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble'
+                'ROS_DISTRO': 'humble',
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'HOME': '/root'
             }
         ),
         
@@ -102,12 +104,14 @@ def generate_launch_description():
                     output='screen',
                     env={
                         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                         'PATH': os.environ.get('PATH', ''),
                         'ROS_DOMAIN_ID': '10',
                         'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble'
+                        'ROS_DISTRO': 'humble',
+                        'ROS_LOG_DIR': '/root/.ros/log',
+                        'HOME': '/root'
                     }
                 )
             ]
@@ -126,12 +130,14 @@ def generate_launch_description():
                     output='screen',
                     env={
                         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                         'PATH': os.environ.get('PATH', ''),
                         'ROS_DOMAIN_ID': '10',
                         'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble'
+                        'ROS_DISTRO': 'humble',
+                        'ROS_LOG_DIR': '/root/.ros/log',
+                        'HOME': '/root'
                     }
                 )
             ]
@@ -150,12 +156,14 @@ def generate_launch_description():
                     output='screen',
                     env={
                         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                         'PATH': os.environ.get('PATH', ''),
                         'ROS_DOMAIN_ID': '10',
                         'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble'
+                        'ROS_DISTRO': 'humble',
+                        'ROS_LOG_DIR': '/root/.ros/log',
+                        'HOME': '/root'
                     }
                 )
             ]
@@ -173,12 +181,14 @@ def generate_launch_description():
                     output='screen',
                     env={
                         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                         'PATH': os.environ.get('PATH', ''),
                         'ROS_DOMAIN_ID': '10',
                         'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble'
+                        'ROS_DISTRO': 'humble',
+                        'ROS_LOG_DIR': '/root/.ros/log',
+                        'HOME': '/root'
                     }
                 )
             ]
@@ -196,12 +206,14 @@ def generate_launch_description():
                     output='screen',
                     env={
                         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                        'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                        'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                         'PATH': os.environ.get('PATH', ''),
                         'ROS_DOMAIN_ID': '10',
                         'ROS_VERSION': '2',
-                        'ROS_DISTRO': 'humble'
+                        'ROS_DISTRO': 'humble',
+                        'ROS_LOG_DIR': '/root/.ros/log',
+                        'HOME': '/root'
                     }
                 )
             ]
