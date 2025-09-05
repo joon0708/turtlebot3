@@ -64,15 +64,13 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드 - ROS2 Node로 실행
-        Node(
-            package='location_manager',
-            executable='location_manager',
-            name='location_manager',
+        # 4. 위치 관리 노드 - ExecuteProcess로 실행
+        ExecuteProcess(
+            cmd=[os.path.join(
+                get_package_share_directory('location_manager'),
+                '..', '..', 'install', 'location_manager', 'bin', 'location_manager'
+            )],
             output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time
-            }],
             env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}
         ),
     ])
