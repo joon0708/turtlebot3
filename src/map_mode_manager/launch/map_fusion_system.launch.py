@@ -55,12 +55,12 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'publish_tf': True,  # TF 브로드캐스트 활성화 (카토그래퍼가 TF 담당)
+                'configuration_basename': 'turtlebot3_lds_2d.lua'  # 기본 설정 사용
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능한 SLAM 모드
+                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
             ]
         ),
         
