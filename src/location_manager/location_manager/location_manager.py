@@ -71,8 +71,9 @@ class LocationManager(Node):
             self.get_logger().error(f'Error saving locations: {e}')
     
     def create_default_locations(self):
-        """기본 위치들 생성 (저장된 위치가 없을 때)"""
-        if not self.saved_locations:
+        """기본 위치들 생성 (파일이 존재하지 않을 때만)"""
+        # 파일이 존재하지 않을 때만 기본 위치 생성
+        if not os.path.exists(self.locations_file):
             self.saved_locations = {
                 'home': {
                     'name': 'Home',
