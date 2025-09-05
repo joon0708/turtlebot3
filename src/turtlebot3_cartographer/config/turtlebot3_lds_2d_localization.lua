@@ -36,12 +36,12 @@ options = {
   num_point_clouds = 0,
   lookup_transform_timeout_sec = 0.2,
   
-  -- 맵 보존을 위한 설정
-  submap_publish_period_sec = 2.0,        -- 맵 갱신 주기 증가 (0.3 → 2.0)
-  pose_publish_period_sec = 0.1,          -- 포즈 발행 주기 증가 (5e-3 → 0.1)
-  trajectory_publish_period_sec = 0.5,    -- 궤적 발행 주기 증가 (30e-3 → 0.5)
+  -- 빠른 갱신을 위한 설정
+  submap_publish_period_sec = 0.3,        -- 맵 갱신 주기 (빠른 갱신)
+  pose_publish_period_sec = 0.05,         -- 포즈 발행 주기 (빠른 갱신)
+  trajectory_publish_period_sec = 0.1,    -- 궤적 발행 주기 (빠른 갱신)
   
-  rangefinder_sampling_ratio = 0.5,       -- 스캔 데이터 샘플링 비율 감소 (1.0 → 0.5)
+  rangefinder_sampling_ratio = 1.0,       -- 스캔 데이터 샘플링 비율 (모든 데이터 사용)
   odometry_sampling_ratio = 1.,
   fixed_frame_pose_sampling_ratio = 1.,
   imu_sampling_ratio = 1.,
@@ -58,15 +58,15 @@ TRAJECTORY_BUILDER_2D.use_imu_data = false
 -- Localization 모드에서는 실시간 스캔 매칭 비활성화하여 기존 맵 보존
 TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = false
 
--- 모션 필터링 강화하여 불필요한 맵 업데이트 방지
-TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.5)  -- 0.1 → 0.5
-TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.1          -- 추가: 거리 기반 필터링
+-- 모션 필터링 완화하여 빠른 갱신
+TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.1)  -- 빠른 갱신을 위해 완화
+TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.05         -- 빠른 갱신을 위해 완화
 
--- 포즈 그래프 최적화 빈도 감소
-POSE_GRAPH.constraint_builder.min_score = 0.75        -- 0.65 → 0.75 (더 엄격한 매칭)
-POSE_GRAPH.constraint_builder.global_localization_min_score = 0.8  -- 0.7 → 0.8
+-- 포즈 그래프 최적화 설정 (빠른 갱신)
+POSE_GRAPH.constraint_builder.min_score = 0.65        -- 빠른 갱신을 위해 완화
+POSE_GRAPH.constraint_builder.global_localization_min_score = 0.7  -- 빠른 갱신을 위해 완화
 
--- 포즈 그래프 최적화 빈도 감소하여 맵 안정성 향상
-POSE_GRAPH.optimize_every_n_nodes = 20               -- 추가: 20개 노드마다 최적화
+-- 포즈 그래프 최적화 빈도 증가하여 빠른 갱신
+POSE_GRAPH.optimize_every_n_nodes = 10               -- 10개 노드마다 최적화 (더 자주)
 
 return options

@@ -34,9 +34,9 @@ options = {
   num_subdivisions_per_laser_scan = 1,
   num_point_clouds = 0,
   lookup_transform_timeout_sec = 0.2,
-  submap_publish_period_sec = 0.3,
-  pose_publish_period_sec = 5e-3,
-  trajectory_publish_period_sec = 30e-3,
+  submap_publish_period_sec = 0.2,        -- 더 빠른 맵 갱신
+  pose_publish_period_sec = 0.02,         -- 더 빠른 포즈 발행
+  trajectory_publish_period_sec = 0.1,    -- 더 빠른 궤적 발행
   rangefinder_sampling_ratio = 1.,
   odometry_sampling_ratio = 1.,
   fixed_frame_pose_sampling_ratio = 1.,
@@ -51,11 +51,12 @@ TRAJECTORY_BUILDER_2D.max_range = 3.5
 TRAJECTORY_BUILDER_2D.missing_data_ray_length = 3.
 TRAJECTORY_BUILDER_2D.use_imu_data = false
 TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true 
-TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.1)
+TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.05)  -- 더 빠른 갱신
+TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.02          -- 더 빠른 갱신
 
 POSE_GRAPH.constraint_builder.min_score = 0.65
 POSE_GRAPH.constraint_builder.global_localization_min_score = 0.7
 
--- POSE_GRAPH.optimize_every_n_nodes = 0
+POSE_GRAPH.optimize_every_n_nodes = 5  -- 빠른 갱신을 위해 5개 노드마다 최적화
 
 return options
