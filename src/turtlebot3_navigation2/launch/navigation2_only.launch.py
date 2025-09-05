@@ -33,7 +33,8 @@ def generate_launch_description():
                     'map', 'map.yaml'),
                 'params_file': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'),
-                    'param', 'humble', TURTLEBOT3_MODEL + '.yaml')
+                    'param', 'humble', TURTLEBOT3_MODEL + '.yaml'),
+                'amcl_tf_broadcast': LaunchConfiguration('amcl_tf_broadcast', default='true')
             }.items(),
         ),
     ])
