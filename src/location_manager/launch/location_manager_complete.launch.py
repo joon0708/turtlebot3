@@ -78,7 +78,8 @@ def generate_launch_description():
                 'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble'
+                'ROS_DISTRO': 'humble',
+                'ROS_LOG_DIR': '/root/.ros/log'
             }
         ),
     ])
