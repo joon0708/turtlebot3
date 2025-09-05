@@ -98,23 +98,96 @@ def generate_launch_description():
             ]
         ),
         
-        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
-            launch_arguments={
+        # 4. 기존 맵 서버 (map_server)
+        Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='map_server',
+            output='screen',
+            parameters=[{
                 'use_sim_time': use_sim_time,
-                'map': os.path.join(
-                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
-                'amcl_tf_broadcast': 'false',  # AMCL TF 브로드캐스트만 비활성화
-                'amcl_use_map_topic': 'true',  # 맵 토픽 사용
-                'amcl_global_frame_id': 'map',  # 글로벌 프레임 명시
-                'amcl_odom_frame_id': 'odom',  # 오도메트리 프레임 명시
-                'amcl_base_frame_id': 'base_footprint',  # 베이스 프레임 명시
-                'amcl_initial_pose_x': '0.0',  # 초기 위치 설정
-                'amcl_initial_pose_y': '0.0',
-                'amcl_initial_pose_a': '0.0'
-            }.items(),
+                'yaml_filename': os.path.join(
+                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml')
+            }]
+        ),
+        
+        # 5. AMCL (TF 브로드캐스트 비활성화)
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'tf_broadcast': False,  # TF 브로드캐스트 비활성화
+                'use_map_topic': True,
+                'global_frame_id': 'map',
+                'odom_frame_id': 'odom',
+                'base_frame_id': 'base_footprint',
+                'initial_pose': {
+                    'x': 0.0,
+                    'y': 0.0,
+                    'yaw': 0.0
+                }
+            }]
+        ),
+        
+        # 6. 경로 계획자 (Global Planner)
+        Node(
+            package='nav2_planner',
+            executable='planner_server',
+            name='planner_server',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'expected_planner_frequency': 20.0,
+                'planner_plugins': ['GridBased']
+            }]
+        ),
+        
+        # 7. 제어기 (Controller)
+        Node(
+            package='nav2_controller',
+            executable='controller_server',
+            name='controller_server',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'controller_frequency': 20.0,
+                'min_x_velocity_threshold': 0.001,
+                'min_y_velocity_threshold': 0.5,
+                'min_theta_velocity_threshold': 0.001
+            }]
+        ),
+        
+        # 8. 회복 동작 (Recovery)
+        Node(
+            package='nav2_recoveries',
+            executable='recoveries_server',
+            name='recoveries_server',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'costmap_topic': '/local_costmap/costmap',
+                'footprint_topic': '/local_costmap/published_footprint',
+                'cycle_frequency': 10.0,
+                'recovery_plugins': ['spin', 'backup'],
+                'spin': {'plugin': 'nav2_recoveries/Spin'},
+                'backup': {'plugin': 'nav2_recoveries/BackUp'}
+            }]
+        ),
+        
+        # 9. 네비게이션 라이프사이클 매니저
+        Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_navigation',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'autostart': True,
+                'node_names': ['map_server', 'amcl', 'planner_server', 'controller_server', 'recoveries_server']
+            }]
         ),
         
         # 5. 맵 비교 및 통합 노드 (지연 시작)
