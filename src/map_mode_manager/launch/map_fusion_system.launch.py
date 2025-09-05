@@ -62,6 +62,10 @@ def generate_launch_description():
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
                 '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
             ],
+            remappings=[
+                ('/tf', '/cartographer_tf'),  # 카토그래퍼 TF를 별도 토픽으로 발행
+                ('/tf_static', '/cartographer_tf_static')
+            ],
             env={
                 'RCLCPP_LOG_LEVEL': 'INFO',  # INFO 레벨로 변경
                 'RCUTILS_LOGGING_USE_STDOUT': '1',
@@ -104,7 +108,9 @@ def generate_launch_description():
             }],
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
             remappings=[
-                ('/map', '/cartographer_map')
+                ('/map', '/cartographer_map'),
+                ('/tf', '/cartographer_tf'),  # 카토그래퍼 TF 토픽 사용
+                ('/tf_static', '/cartographer_tf_static')
             ],
             env={
                 'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
@@ -112,6 +118,18 @@ def generate_launch_description():
                 'AMENT_PREFIX_PATH': '/opt/ros/humble',
                 'ROS_LOG_DIR': '/tmp/ros_logs',  # 로깅 디렉토리 명시적 설정
                 'HOME': '/root'  # 홈 디렉토리 설정
+            }
+        ),
+        
+        # 3.5. TF 브리지 (카토그래퍼 TF를 메인 TF로 변환)
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='cartographer_to_main_tf_bridge',
+            output='screen',
+            arguments=['0', '0', '0', '0', '0', '0', 'cartographer_map', 'map'],
+            env={
+                'ROS_DOMAIN_ID': '10'
             }
         ),
         
