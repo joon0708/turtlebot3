@@ -95,7 +95,7 @@ class PoseBasedSLAMLauncher(Node):
             'share', 'turtlebot3_cartographer', 'config'
         )
         
-        # 카토그래퍼 노드 실행 명령
+        # 카토그래퍼 SLAM 노드 실행 명령
         cmd = [
             'ros2', 'run', 'cartographer_ros', 'cartographer_node',
             '-configuration_directory', config_dir,

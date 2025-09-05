@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 영점 기반 SLAM 런처 (영점 지정 시 SLAM 시작)
+        # 2. 영점 기반 SLAM 런처 (영점 지정 시 카토그래퍼 SLAM 시작)
         ExecuteProcess(
             cmd=['python3', '/root/turtlebot3/src/map_mode_manager/map_mode_manager/pose_based_slam_launcher.py'],
             output='screen',
@@ -62,8 +62,7 @@ def generate_launch_description():
             }
         ),
         
-        
-        # 3. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
+        # 4. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
         Node(
             package='cartographer_ros',
             executable='cartographer_occupancy_grid_node',
