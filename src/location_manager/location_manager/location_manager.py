@@ -246,16 +246,20 @@ class LocationManager(Node):
     def list_locations(self):
         """저장된 위치 목록 출력"""
         if not self.saved_locations:
-            self.get_logger().info('No saved locations')
+            message = 'No saved locations'
+            self.get_logger().info(message)
+            self.publish_status_message(message)
             return
         
-        self.get_logger().info(f'\n=== Saved Locations ({len(self.saved_locations)}) ===')
+        message = f'=== Saved Locations ({len(self.saved_locations)}) ===\n'
         for location_id, location in self.saved_locations.items():
-            self.get_logger().info(f'{location_id}: {location["name"]}')
-            self.get_logger().info(f'  Position: ({location["x"]:.2f}, {location["y"]:.2f})')
-            self.get_logger().info(f'  Yaw: {location["yaw"]:.2f}')
-            self.get_logger().info(f'  Created: {location["created"]}')
-            self.get_logger().info('')
+            message += f'{location_id}: {location["name"]}\n'
+            message += f'  Position: ({location["x"]:.2f}, {location["y"]:.2f})\n'
+            message += f'  Yaw: {location["yaw"]:.2f}\n'
+            message += f'  Created: {location["created"]}\n\n'
+        
+        self.get_logger().info(f'\n{message}')
+        self.publish_status_message(message)
     
     def publish_status(self):
         """상태 정보 발행"""
