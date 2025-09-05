@@ -55,12 +55,12 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d.lua'  # 기본 설정 사용 (정상 작동 확인됨)
+                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 초기 위치 설정 가능한 SLAM 모드
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
+                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능한 SLAM 모드
             ],
                                # TF 리매핑 제거 - 기본 TF 사용
             env={
@@ -104,7 +104,9 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
             }],
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
-                               # TF 리매핑 제거 - 기본 TF 사용
+            remappings=[
+                ('/map', '/cartographer_map'),  # 카토그래퍼 맵을 별도 토픽으로 발행
+            ],
             env={
                 'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
