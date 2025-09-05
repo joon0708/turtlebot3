@@ -55,13 +55,23 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d.lua'  # 기본 설정 사용
+                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 초기 위치 설정 가능
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
-            ]
+                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능한 SLAM 모드
+            ],
+            remappings=[
+                ('/scan', '/scan'),      # 센서 데이터 토픽
+                ('/odom', '/odom'),      # 오도메트리 토픽
+                ('/imu', '/imu')         # IMU 토픽
+            ],
+            env={
+                'RCLCPP_LOG_LEVEL': 'DEBUG',  # 디버그 로그 활성화
+                'RCUTILS_LOGGING_USE_STDOUT': '1',
+                'RCUTILS_LOGGING_BUFFERED_STREAM': '1'
+            }
         ),
         
         # 2.5. 초기 위치 설정 노드 (ExecuteProcess로 직접 실행)
