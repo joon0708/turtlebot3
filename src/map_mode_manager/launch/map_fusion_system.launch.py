@@ -47,7 +47,23 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 영점 기반 SLAM 런처 (영점 지정 시 카토그래퍼 SLAM 시작)
+        # 2. 카토그래퍼 노드 (로컬라이제이션 모드로 시작)
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_node',
+            name='cartographer_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }],
+            arguments=[
+                '-configuration_directory', os.path.join(
+                    get_package_share_directory('turtlebot3_cartographer'), 'config'),
+                '-configuration_basename', 'turtlebot3_lds_2d_localization.lua'
+            ]
+        ),
+        
+        # 3. 영점 기반 SLAM 모드 전환기 (영점 지정 시 SLAM 모드로 전환)
         ExecuteProcess(
             cmd=['python3', '/root/turtlebot3/src/map_mode_manager/map_mode_manager/pose_based_slam_launcher.py'],
             output='screen',

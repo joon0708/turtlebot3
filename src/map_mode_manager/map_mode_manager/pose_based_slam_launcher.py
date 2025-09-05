@@ -42,12 +42,18 @@ class PoseBasedSLAMLauncher(Node):
         # 타이머
         self.slam_start_timer = None
         
+        # 초기 포즈 저장용
+        self.last_initial_pose = None
+        
         self.get_logger().info('Pose-based SLAM Launcher 노드가 시작되었습니다.')
         self.get_logger().info('영점이 지정되면 {}초 후 SLAM을 시작합니다.'.format(self.slam_start_delay))
         self.publish_status("영점 대기 중...")
     
     def initial_pose_callback(self, msg: PoseWithCovarianceStamped):
         """영점 지정 콜백"""
+        # 초기 포즈 저장
+        self.last_initial_pose = msg.pose.pose
+        
         if not self.initial_pose_received:
             self.initial_pose_received = True
             self.get_logger().info('영점이 지정되었습니다!')
@@ -88,35 +94,41 @@ class PoseBasedSLAMLauncher(Node):
                 self.publish_status("SLAM 시작 실패")
     
     def launch_cartographer(self):
-        """카토그래퍼 노드 실행"""
-        # 카토그래퍼 설정 파일 경로
-        config_dir = os.path.join(
-            os.environ.get('AMENT_PREFIX_PATH', '/opt/ros/humble'),
-            'share', 'turtlebot3_cartographer', 'config'
-        )
-        
-        # 카토그래퍼 SLAM 노드 실행 명령
-        cmd = [
-            'ros2', 'run', 'cartographer_ros', 'cartographer_node',
-            '-configuration_directory', config_dir,
-            '-configuration_basename', 'turtlebot3_lds_2d.lua'
-        ]
-        
-        # 환경 변수 설정
-        env = os.environ.copy()
-        env['ROS_DOMAIN_ID'] = '10'
-        env['USE_SIM_TIME'] = 'false'
-        
-        # 프로세스 시작
-        self.cartographer_process = subprocess.Popen(
-            cmd,
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            preexec_fn=os.setsid
-        )
-        
-        self.get_logger().info(f'카토그래퍼 프로세스 시작됨 (PID: {self.cartographer_process.pid})')
+        """카토그래퍼를 SLAM 모드로 전환"""
+        try:
+            # 카토그래퍼 서비스 클라이언트 생성
+            from cartographer_ros_msgs.srv import StartTrajectory, FinishTrajectory
+            
+            # 기존 trajectory 종료 (로컬라이제이션 모드)
+            finish_client = self.create_client(FinishTrajectory, '/finish_trajectory')
+            if finish_client.wait_for_service(timeout_sec=5.0):
+                finish_req = FinishTrajectory.Request()
+                finish_req.trajectory_id = 0  # 기본 trajectory ID
+                finish_future = finish_client.call_async(finish_req)
+                self.get_logger().info('기존 로컬라이제이션 trajectory를 종료합니다.')
+                
+                # 잠시 대기
+                time.sleep(1.0)
+            
+            # 새로운 SLAM trajectory 시작
+            start_client = self.create_client(StartTrajectory, '/start_trajectory')
+            if start_client.wait_for_service(timeout_sec=5.0):
+                start_req = StartTrajectory.Request()
+                start_req.configuration_directory = os.path.join(
+                    get_package_share_directory('turtlebot3_cartographer'), 'config')
+                start_req.configuration_basename = 'turtlebot3_lds_2d.lua'  # SLAM 설정
+                start_req.use_initial_pose = True
+                start_req.initial_pose = self.last_initial_pose
+                start_req.relative_to_trajectory_id = 0
+                
+                start_future = start_client.call_async(start_req)
+                self.get_logger().info('새로운 SLAM trajectory를 시작합니다.')
+                self.get_logger().info(f'초기 포즈: ({self.last_initial_pose.position.x:.2f}, {self.last_initial_pose.position.y:.2f})')
+            else:
+                self.get_logger().error('카토그래퍼 서비스를 찾을 수 없습니다.')
+                
+        except Exception as e:
+            self.get_logger().error(f'카토그래퍼 SLAM 모드 전환 실패: {e}')
     
     def restart_slam(self):
         """SLAM 재시작"""
