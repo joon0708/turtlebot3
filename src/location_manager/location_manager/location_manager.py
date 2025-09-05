@@ -251,14 +251,22 @@ class LocationManager(Node):
             self.publish_status_message(message)
             return
         
-        message = f'=== Saved Locations ({len(self.saved_locations)}) ===\n'
+        # 간결한 메시지로 토픽 발행
+        message = f'Saved Locations ({len(self.saved_locations)}): '
+        location_list = []
         for location_id, location in self.saved_locations.items():
-            message += f'{location_id}: {location["name"]}\n'
-            message += f'  Position: ({location["x"]:.2f}, {location["y"]:.2f})\n'
-            message += f'  Yaw: {location["yaw"]:.2f}\n'
-            message += f'  Created: {location["created"]}\n\n'
+            location_list.append(f'{location_id}({location["x"]:.1f},{location["y"]:.1f})')
+        message += ', '.join(location_list)
         
-        self.get_logger().info(f'\n{message}')
+        # 상세 정보는 로그에만 출력
+        self.get_logger().info(f'\n=== Saved Locations ({len(self.saved_locations)}) ===')
+        for location_id, location in self.saved_locations.items():
+            self.get_logger().info(f'{location_id}: {location["name"]}')
+            self.get_logger().info(f'  Position: ({location["x"]:.2f}, {location["y"]:.2f})')
+            self.get_logger().info(f'  Yaw: {location["yaw"]:.2f}')
+            self.get_logger().info(f'  Created: {location["created"]}')
+            self.get_logger().info('')
+        
         self.publish_status_message(message)
     
     def publish_status(self):
