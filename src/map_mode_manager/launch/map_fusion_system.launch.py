@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - 새로운 맵 생성
+        # 2. 카토그래퍼 SLAM 모드 (초기 위치 설정 가능)
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
@@ -55,12 +55,15 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 기본 설정 사용
+                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 초기 위치 설정 가능
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 기본 SLAM 모드
+                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능
+            ],
+            remappings=[
+                ('/initialpose', '/initialpose')  # 초기 위치 설정 토픽 매핑
             ]
         ),
         
