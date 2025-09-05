@@ -16,9 +16,8 @@ class LocationManager(Node):
     def __init__(self):
         super().__init__('location_manager')
         
-        # 저장 파일 경로
-        self.package_dir = os.path.dirname(os.path.dirname(__file__))
-        self.config_dir = os.path.join(self.package_dir, 'config')
+        # 저장 파일 경로 (홈 디렉토리 사용)
+        self.config_dir = os.path.expanduser('~/.turtlebot3_locations')
         self.locations_file = os.path.join(self.config_dir, 'saved_locations.yaml')
         
         # 저장된 위치들
@@ -72,8 +71,9 @@ class LocationManager(Node):
             self.get_logger().error(f'Error saving locations: {e}')
     
     def create_default_locations(self):
-        """기본 위치들 생성 (저장된 위치가 없을 때)"""
-        if not self.saved_locations:
+        """기본 위치들 생성 (파일이 존재하지 않을 때만)"""
+        # 파일이 존재하지 않을 때만 기본 위치 생성
+        if not os.path.exists(self.locations_file):
             self.saved_locations = {
                 'home': {
                     'name': 'Home',
@@ -190,7 +190,7 @@ class LocationManager(Node):
         siny_cosp = 2 * (orientation.w * orientation.z + orientation.x * orientation.y)
         cosy_cosp = 1 - 2 * (orientation.y * orientation.y + orientation.z * orientation.z)
         yaw = np.arctan2(siny_cosp, cosy_cosp)
-        return yaw
+        return float(yaw)  # numpy 객체를 일반 Python float로 변환
     
     def go_to_location(self, name):
         """저장된 위치로 이동"""
@@ -246,9 +246,19 @@ class LocationManager(Node):
     def list_locations(self):
         """저장된 위치 목록 출력"""
         if not self.saved_locations:
-            self.get_logger().info('No saved locations')
+            message = 'No saved locations'
+            self.get_logger().info(message)
+            self.publish_status_message(message)
             return
         
+        # 간결한 메시지로 토픽 발행
+        message = f'Saved Locations ({len(self.saved_locations)}): '
+        location_list = []
+        for location_id, location in self.saved_locations.items():
+            location_list.append(f'{location_id}({location["x"]:.1f},{location["y"]:.1f})')
+        message += ', '.join(location_list)
+        
+        # 상세 정보는 로그에만 출력
         self.get_logger().info(f'\n=== Saved Locations ({len(self.saved_locations)}) ===')
         for location_id, location in self.saved_locations.items():
             self.get_logger().info(f'{location_id}: {location["name"]}')
@@ -256,6 +266,8 @@ class LocationManager(Node):
             self.get_logger().info(f'  Yaw: {location["yaw"]:.2f}')
             self.get_logger().info(f'  Created: {location["created"]}')
             self.get_logger().info('')
+        
+        self.publish_status_message(message)
     
     def publish_status(self):
         """상태 정보 발행"""
@@ -278,9 +290,17 @@ def main(args=None):
         rclpy.spin(location_manager)
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        location_manager.get_logger().error(f'Error in location_manager: {e}')
     finally:
-        location_manager.destroy_node()
-        rclpy.shutdown()
+        try:
+            location_manager.destroy_node()
+        except:
+            pass
+        try:
+            rclpy.shutdown()
+        except:
+            pass
 
 if __name__ == '__main__':
     main()
