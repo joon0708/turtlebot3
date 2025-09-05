@@ -106,7 +106,14 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
-                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화
+                'amcl_tf_broadcast': 'false',  # AMCL TF 브로드캐스트만 비활성화
+                'amcl_use_map_topic': 'true',  # 맵 토픽 사용
+                'amcl_global_frame_id': 'map',  # 글로벌 프레임 명시
+                'amcl_odom_frame_id': 'odom',  # 오도메트리 프레임 명시
+                'amcl_base_frame_id': 'base_footprint',  # 베이스 프레임 명시
+                'amcl_initial_pose_x': '0.0',  # 초기 위치 설정
+                'amcl_initial_pose_y': '0.0',
+                'amcl_initial_pose_a': '0.0'
             }.items(),
         ),
         
