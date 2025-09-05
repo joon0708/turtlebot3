@@ -16,9 +16,8 @@ class LocationManager(Node):
     def __init__(self):
         super().__init__('location_manager')
         
-        # 저장 파일 경로
-        self.package_dir = os.path.dirname(os.path.dirname(__file__))
-        self.config_dir = os.path.join(self.package_dir, 'config')
+        # 저장 파일 경로 (홈 디렉토리 사용)
+        self.config_dir = os.path.expanduser('~/.turtlebot3_locations')
         self.locations_file = os.path.join(self.config_dir, 'saved_locations.yaml')
         
         # 저장된 위치들
