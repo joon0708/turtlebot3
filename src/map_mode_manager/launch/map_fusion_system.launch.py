@@ -49,15 +49,11 @@ def generate_launch_description():
         
         # 2. 영점 기반 SLAM 런처 (영점 지정 시 SLAM 시작)
         ExecuteProcess(
-            cmd=['python3', os.path.join(
-                get_package_share_directory('map_mode_manager'),
-                '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                'map_mode_manager', 'pose_based_slam_launcher.py'
-            )],
+            cmd=['python3', '/root/turtlebot3/src/map_mode_manager/map_mode_manager/pose_based_slam_launcher.py'],
             output='screen',
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
                 'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
                 'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
