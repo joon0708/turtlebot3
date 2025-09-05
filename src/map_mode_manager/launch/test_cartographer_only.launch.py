@@ -42,7 +42,9 @@ def generate_launch_description():
                 'RCUTILS_LOGGING_BUFFERED_STREAM': '1',
                 'ROS_DOMAIN_ID': '10',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
-                'AMENT_PREFIX_PATH': '/opt/ros/humble'
+                'AMENT_PREFIX_PATH': '/opt/ros/humble',
+                'ROS_LOG_DIR': '/tmp/ros_logs',  # 로깅 디렉토리 명시적 설정
+                'HOME': '/root'  # 홈 디렉토리 설정
             }
         ),
         
@@ -59,7 +61,9 @@ def generate_launch_description():
             env={
                 'ROS_DOMAIN_ID': '10',
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
-                'AMENT_PREFIX_PATH': '/opt/ros/humble'
+                'AMENT_PREFIX_PATH': '/opt/ros/humble',
+                'ROS_LOG_DIR': '/tmp/ros_logs',  # 로깅 디렉토리 명시적 설정
+                'HOME': '/root'  # 홈 디렉토리 설정
             }
         ),
     ])
