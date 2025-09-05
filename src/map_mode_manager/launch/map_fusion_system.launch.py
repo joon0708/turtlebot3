@@ -47,31 +47,12 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 카토그래퍼 SLAM 모드 (초기 위치 설정 가능)
-        Node(
-            package='cartographer_ros',
-            executable='cartographer_node',
-            name='cartographer_node',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-            }],
-            arguments=[
-                '-configuration_directory', os.path.join(
-                    get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',
-            ],
-            remappings=[
-                ('/initialpose', '/initialpose')  # 초기 위치 설정 토픽 매핑
-            ]
-        ),
-        
-        # 2.5. 초기 위치 설정 노드 (ExecuteProcess로 직접 실행)
+        # 2. 영점 기반 SLAM 런처 (영점 지정 시 SLAM 시작)
         ExecuteProcess(
             cmd=['python3', os.path.join(
                 get_package_share_directory('map_mode_manager'),
                 '..', '..', '..', '..', 'src', 'map_mode_manager', 
-                'map_mode_manager', 'initial_pose_setter.py'
+                'map_mode_manager', 'pose_based_slam_launcher.py'
             )],
             output='screen',
             env={
@@ -84,6 +65,7 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }
         ),
+        
         
         # 3. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
         Node(
@@ -100,7 +82,7 @@ def generate_launch_description():
             ]
         ),
         
-        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
+        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 활성화)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
@@ -108,7 +90,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
-                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화
+                'amcl_tf_broadcast': 'true'  # AMCL TF 브로드캐스트 활성화 (map->odom 발행)
             }.items(),
         ),
         
