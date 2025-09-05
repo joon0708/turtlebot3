@@ -62,10 +62,7 @@ def generate_launch_description():
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
                 '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
             ],
-            remappings=[
-                ('/tf', '/cartographer_tf'),  # 카토그래퍼 TF를 별도 토픽으로 발행
-                ('/tf_static', '/cartographer_tf_static')
-            ],
+                               # TF 리매핑 제거 - 기본 TF 사용
             env={
                 'RCLCPP_LOG_LEVEL': 'INFO',  # INFO 레벨로 변경
                 'RCUTILS_LOGGING_USE_STDOUT': '1',
@@ -107,11 +104,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
             }],
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
-            remappings=[
-                ('/map', '/cartographer_map'),
-                ('/tf', '/cartographer_tf'),  # 카토그래퍼 TF 토픽 사용
-                ('/tf_static', '/cartographer_tf_static')
-            ],
+                               # TF 리매핑 제거 - 기본 TF 사용
             env={
                 'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
                 'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
@@ -121,17 +114,8 @@ def generate_launch_description():
             }
         ),
         
-        # 3.5. TF 브리지 (카토그래퍼 TF를 메인 TF로 변환)
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='cartographer_to_main_tf_bridge',
-            output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', 'map', 'cartographer_map'],
-            env={
-                'ROS_DOMAIN_ID': '10'
-            }
-        ),
+        # 3.5. TF 브리지 (카토그래퍼 TF를 메인 TF로 변환) - 제거
+        # static_transform_publisher 라이브러리 문제로 인해 제거
         
         # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
         IncludeLaunchDescription(
