@@ -46,14 +46,14 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. Cartographer (SLAM) - 하드웨어 제외
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer_only.launch.py')]),
-            launch_arguments={
-                'use_sim_time': use_sim_time
-            }.items(),
-        ),
+        # 2. Cartographer (SLAM) - 하드웨어 제외 (일시적으로 비활성화)
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource([os.path.join(
+        #         get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer_only.launch.py')]),
+        #     launch_arguments={
+        #         'use_sim_time': use_sim_time
+        #     }.items(),
+        # ),
         
         # 3. Navigation2 - 하드웨어 제외
         IncludeLaunchDescription(
