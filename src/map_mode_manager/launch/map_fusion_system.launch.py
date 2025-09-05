@@ -127,7 +127,7 @@ def generate_launch_description():
             executable='static_transform_publisher',
             name='cartographer_to_main_tf_bridge',
             output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', 'cartographer_map', 'map'],
+            arguments=['0', '0', '0', '0', '0', '0', 'map', 'cartographer_map'],
             env={
                 'ROS_DOMAIN_ID': '10'
             }
