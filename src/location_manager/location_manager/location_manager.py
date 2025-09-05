@@ -289,9 +289,17 @@ def main(args=None):
         rclpy.spin(location_manager)
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        location_manager.get_logger().error(f'Error in location_manager: {e}')
     finally:
-        location_manager.destroy_node()
-        rclpy.shutdown()
+        try:
+            location_manager.destroy_node()
+        except:
+            pass
+        try:
+            rclpy.shutdown()
+        except:
+            pass
 
 if __name__ == '__main__':
     main()
