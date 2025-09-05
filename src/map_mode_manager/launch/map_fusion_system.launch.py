@@ -55,44 +55,33 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 초기 위치 설정 가능한 SLAM 모드
+                'configuration_basename': 'turtlebot3_lds_2d.lua'  # 기본 설정 사용
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 초기 위치 설정 가능한 SLAM 모드
-            ],
-                               # TF 리매핑 제거 - 기본 TF 사용
-            env={
-                'RCLCPP_LOG_LEVEL': 'INFO',  # INFO 레벨로 변경
-                'RCUTILS_LOGGING_USE_STDOUT': '1',
-                'RCUTILS_LOGGING_BUFFERED_STREAM': '1',
-                'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
-                'AMENT_PREFIX_PATH': '/opt/ros/humble',
-                'ROS_LOG_DIR': '/tmp/ros_logs',  # 로깅 디렉토리 명시적 설정
-                'HOME': '/root'  # 홈 디렉토리 설정
-            }
+                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
+            ]
         ),
         
-        # 2.5. 초기 위치 설정 노드 (기본 카토그래퍼에서는 수동 설정 필요)
-        # ExecuteProcess(
-        #     cmd=['python3', os.path.join(
-        #         get_package_share_directory('map_mode_manager'),
-        #         '..', '..', '..', '..', 'src', 'map_mode_manager', 
-        #         'map_mode_manager', 'initial_pose_setter.py'
-        #     )],
-        #     output='screen',
-        #     env={
-        #         'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-        #         'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
-        #         'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-        #         'PATH': os.environ.get('PATH', ''),
-        #         'ROS_DOMAIN_ID': '10',
-        #         'ROS_VERSION': '2',
-        #         'ROS_DISTRO': 'humble'
-        #     }
-        # ),
+        # 2.5. 초기 위치 설정 노드 (ExecuteProcess로 직접 실행)
+        ExecuteProcess(
+            cmd=['python3', os.path.join(
+                get_package_share_directory('map_mode_manager'),
+                '..', '..', '..', '..', 'src', 'map_mode_manager', 
+                'map_mode_manager', 'initial_pose_setter.py'
+            )],
+            output='screen',
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
+            }
+        ),
         
         # 3. 카토그래퍼 맵을 /cartographer_map 토픽으로 발행
         Node(
@@ -105,19 +94,9 @@ def generate_launch_description():
             }],
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
             remappings=[
-                ('/map', '/cartographer_map'),  # 카토그래퍼 맵을 별도 토픽으로 발행
-            ],
-            env={
-                'ROS_DOMAIN_ID': '10',  # 도메인 ID 명시적 설정
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/opt/ros/humble/lib/aarch64-linux-gnu:' + os.environ.get('LD_LIBRARY_PATH', ''),
-                'AMENT_PREFIX_PATH': '/opt/ros/humble',
-                'ROS_LOG_DIR': '/tmp/ros_logs',  # 로깅 디렉토리 명시적 설정
-                'HOME': '/root'  # 홈 디렉토리 설정
-            }
+                ('/map', '/cartographer_map')
+            ]
         ),
-        
-        # 3.5. TF 브리지 (카토그래퍼 TF를 메인 TF로 변환) - 제거
-        # static_transform_publisher 라이브러리 문제로 인해 제거
         
         # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
         IncludeLaunchDescription(
@@ -127,14 +106,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'map': os.path.join(
                     get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
-                'amcl_tf_broadcast': 'false',  # AMCL TF 브로드캐스트 비활성화
-                'amcl_use_map_topic': 'true',  # 맵 토픽 사용
-                'amcl_global_frame_id': 'map',  # 글로벌 프레임 명시
-                'amcl_odom_frame_id': 'odom',   # 오도메트리 프레임 명시
-                'amcl_base_frame_id': 'base_footprint',  # 베이스 프레임 명시
-                'amcl_initial_pose_x': '0.0',   # 초기 위치 설정
-                'amcl_initial_pose_y': '0.0',
-                'amcl_initial_pose_a': '0.0'
+                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화
             }.items(),
         ),
         
