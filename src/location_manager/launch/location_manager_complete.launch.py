@@ -68,7 +68,7 @@ def generate_launch_description():
         ExecuteProcess(
             cmd=[os.path.join(
                 get_package_share_directory('location_manager'),
-                '..', '..', '..', 'install', 'location_manager', 'bin', 'location_manager'
+                '..', '..', 'bin', 'location_manager'
             )],
             output='screen',
             env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}
