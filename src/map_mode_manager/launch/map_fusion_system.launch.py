@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - 새로운 맵 생성
+        # 2. 카토그래퍼 로컬라이제이션 모드 (기존 맵 보존하면서 위치 추정)
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
@@ -55,12 +55,12 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d.lua'  # 기본 설정 사용
+                'configuration_basename': 'turtlebot3_lds_2d_localization.lua'  # 로컬라이제이션 모드
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d.lua',  # 기본 SLAM 모드
+                '-configuration_basename', 'turtlebot3_lds_2d_localization.lua',  # 로컬라이제이션 모드
             ]
         ),
         
