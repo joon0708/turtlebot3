@@ -160,24 +160,7 @@ def generate_launch_description():
             }]
         ),
         
-        # 8. 회복 동작 (Recovery)
-        Node(
-            package='nav2_recoveries',
-            executable='recoveries_server',
-            name='recoveries_server',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'costmap_topic': '/local_costmap/costmap',
-                'footprint_topic': '/local_costmap/published_footprint',
-                'cycle_frequency': 10.0,
-                'recovery_plugins': ['spin', 'backup'],
-                'spin': {'plugin': 'nav2_recoveries/Spin'},
-                'backup': {'plugin': 'nav2_recoveries/BackUp'}
-            }]
-        ),
-        
-        # 9. 네비게이션 라이프사이클 매니저
+        # 8. 네비게이션 라이프사이클 매니저
         Node(
             package='nav2_lifecycle_manager',
             executable='lifecycle_manager',
@@ -186,7 +169,7 @@ def generate_launch_description():
             parameters=[{
                 'use_sim_time': use_sim_time,
                 'autostart': True,
-                'node_names': ['map_server', 'amcl', 'planner_server', 'controller_server', 'recoveries_server']
+                'node_names': ['map_server', 'amcl', 'planner_server', 'controller_server']
             }]
         ),
         
