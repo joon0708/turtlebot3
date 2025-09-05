@@ -47,7 +47,7 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 카토그래퍼 로컬라이제이션 모드 (기존 맵 보존하면서 위치 추정)
+        # 2. 실시간 맵 생성 (카토그래퍼 SLAM) - 새로운 맵 생성
         Node(
             package='cartographer_ros',
             executable='cartographer_node',
@@ -55,12 +55,12 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'configuration_basename': 'turtlebot3_lds_2d_localization.lua'  # 로컬라이제이션 모드
+                'configuration_basename': 'turtlebot3_lds_2d_with_initial_pose.lua'  # 기본 설정 사용
             }],
             arguments=[
                 '-configuration_directory', os.path.join(
                     get_package_share_directory('turtlebot3_cartographer'), 'config'),
-                '-configuration_basename', 'turtlebot3_lds_2d_localization.lua',  # 로컬라이제이션 모드
+                '-configuration_basename', 'turtlebot3_lds_2d_with_initial_pose.lua',  # 기본 SLAM 모드
             ]
         ),
         
@@ -98,79 +98,16 @@ def generate_launch_description():
             ]
         ),
         
-        # 4. 기존 맵 서버 (map_server)
-        Node(
-            package='nav2_map_server',
-            executable='map_server',
-            name='map_server',
-            output='screen',
-            parameters=[{
+        # 4. Navigation2 (기존 맵 사용, AMCL 포함 - 맵 비교를 위해, TF 브로드캐스트 비활성화)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
+            launch_arguments={
                 'use_sim_time': use_sim_time,
-                'yaml_filename': os.path.join(
-                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml')
-            }]
-        ),
-        
-        # 5. AMCL (TF 브로드캐스트 비활성화)
-        Node(
-            package='nav2_amcl',
-            executable='amcl',
-            name='amcl',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'tf_broadcast': False,  # TF 브로드캐스트 비활성화
-                'use_map_topic': True,
-                'global_frame_id': 'map',
-                'odom_frame_id': 'odom',
-                'base_frame_id': 'base_footprint',
-                'initial_pose': {
-                    'x': 0.0,
-                    'y': 0.0,
-                    'yaw': 0.0
-                }
-            }]
-        ),
-        
-        # 6. 경로 계획자 (Global Planner)
-        Node(
-            package='nav2_planner',
-            executable='planner_server',
-            name='planner_server',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'expected_planner_frequency': 20.0,
-                'planner_plugins': ['GridBased']
-            }]
-        ),
-        
-        # 7. 제어기 (Controller)
-        Node(
-            package='nav2_controller',
-            executable='controller_server',
-            name='controller_server',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'controller_frequency': 20.0,
-                'min_x_velocity_threshold': 0.001,
-                'min_y_velocity_threshold': 0.5,
-                'min_theta_velocity_threshold': 0.001
-            }]
-        ),
-        
-        # 8. 네비게이션 라이프사이클 매니저
-        Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_navigation',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'autostart': True,
-                'node_names': ['map_server', 'amcl', 'planner_server', 'controller_server']
-            }]
+                'map': os.path.join(
+                    get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
+                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화
+            }.items(),
         ),
         
         # 5. 맵 비교 및 통합 노드 (지연 시작)
