@@ -71,6 +71,9 @@ def generate_launch_description():
                 '..', '..', 'bin', 'location_manager'
             )],
             output='screen',
-            env={'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL}
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'ROS_DOMAIN_ID': '10'
+            }
         ),
     ])
