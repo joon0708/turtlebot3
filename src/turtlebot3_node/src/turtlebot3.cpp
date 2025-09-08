@@ -153,7 +153,10 @@ void TurtleBot3::add_sensors()
   this->declare_parameter<uint8_t>("sensors.bumper_2");
   this->declare_parameter<uint8_t>("sensors.illumination");
   this->declare_parameter<uint8_t>("sensors.ir");
-  this->declare_parameter<uint8_t>("sensors.sonar");  // 초음파 센서 활성화
+  this->declare_parameter<uint8_t>("sensors.sonar");  // 기존 초음파 센서 활성화
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_left");   // 왼쪽 초음파 센서
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_front");  // 앞쪽 초음파 센서
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_right");  // 오른쪽 초음파 센서
 
   this->get_parameter_or<uint8_t>(
     "sensors.bumper_1",
@@ -174,6 +177,23 @@ void TurtleBot3::add_sensors()
   this->get_parameter_or<uint8_t>(
     "sensors.sonar",
     is_connected_sonar,
+    0);
+  
+  uint8_t is_connected_ultrasonic_left = 0;
+  uint8_t is_connected_ultrasonic_front = 0;
+  uint8_t is_connected_ultrasonic_right = 0;
+  
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_left",
+    is_connected_ultrasonic_left,
+    0);
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_front",
+    is_connected_ultrasonic_front,
+    0);
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_right",
+    is_connected_ultrasonic_right,
     0);
 
   sensors_.push_back(

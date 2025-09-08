@@ -144,9 +144,10 @@ def generate_launch_description():
                     'bumper_2': 0,
                     'illumination': 0,
                     'ir': 0,
-                    'ultrasonic_left': 0,
-                    'ultrasonic_front': 0,
-                    'ultrasonic_right': 0
+                    'sonar': 1,  # 기존 초음파 센서 활성화
+                    'ultrasonic_left': 1,   # 왼쪽 초음파 센서 활성화
+                    'ultrasonic_front': 1,  # 앞쪽 초음파 센서 활성화
+                    'ultrasonic_right': 1   # 오른쪽 초음파 센서 활성화
                 },
                 'odometry': {
                     'frame_id': 'odom',
