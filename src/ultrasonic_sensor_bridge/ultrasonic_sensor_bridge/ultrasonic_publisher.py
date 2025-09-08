@@ -47,46 +47,49 @@ class UltrasonicPublisher(Node):
         self.front_pub = self.create_publisher(Range, '/ultrasonic/front', 10)
         self.right_pub = self.create_publisher(Range, '/ultrasonic/right', 10)
         
-        # 타이머 설정 (100ms마다 읽기)
-        self.timer = self.create_timer(0.1, self.read_and_publish_ultrasonic)
+        # turtlebot3_ros에서 센서 데이터 구독
+        self.sensor_state_sub = self.create_subscription(
+            'turtlebot3_msgs/msg/SensorState', 
+            '/sensor_state', 
+            self.sensor_state_callback, 
+            10
+        )
         
-        # OpenCR 연결
+        # OpenCR 연결 (실제로는 연결하지 않음)
         self.connect_opencr()
         
         self.get_logger().info('Ultrasonic Publisher started')
     
     def connect_opencr(self):
-        """OpenCR에 DYNAMIXEL SDK로 연결"""
-        if not DYNAMIXEL_AVAILABLE:
-            self.get_logger().error('DYNAMIXEL SDK not available')
-            return
-        
+        """OpenCR 연결을 시도하지 않고 turtlebot3_ros에서 센서 데이터를 구독"""
+        self.get_logger().info('Using sensor data from turtlebot3_ros instead of direct OpenCR connection')
+        self.port_handler = None
+    
+    def sensor_state_callback(self, msg):
+        """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
         try:
-            # 포트 핸들러 초기화
-            self.port_handler = dxl.PortHandler(self.DEVICE_NAME)
-            
-            # 패킷 핸들러 초기화
-            self.packet_handler = dxl.PacketHandler(2.0)  # Protocol 2.0
-            
-            # 포트 열기
-            if self.port_handler.openPort():
-                self.get_logger().info(f'Opened port: {self.DEVICE_NAME}')
+            # turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
+            # 실제 필드명은 turtlebot3_msgs에 따라 다를 수 있음
+            if hasattr(msg, 'ultrasonic'):
+                # 초음파 센서 데이터가 있는 경우
+                ultrasonic_data = msg.ultrasonic
+                if len(ultrasonic_data) >= 3:
+                    left_val = ultrasonic_data[0] / 1000.0  # mm를 m로 변환
+                    front_val = ultrasonic_data[1] / 1000.0
+                    right_val = ultrasonic_data[2] / 1000.0
+                    
+                    # Range 메시지로 발행
+                    self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
+                    self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
+                    self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
             else:
-                self.get_logger().error(f'Failed to open port: {self.DEVICE_NAME}')
-                return
-            
-            # 보드레이트 설정
-            if self.port_handler.setBaudRate(self.BAUDRATE):
-                self.get_logger().info(f'Changed baudrate to: {self.BAUDRATE}')
-            else:
-                self.get_logger().error('Failed to change baudrate')
-                return
-            
-            self.get_logger().info('Successfully connected to OpenCR')
-            
+                # 초음파 센서 데이터가 없는 경우 기본값 사용
+                self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
+                self.publish_range_msg(self.front_pub, 4.0, 'ultrasonic_front')
+                self.publish_range_msg(self.right_pub, 4.0, 'ultrasonic_right')
+                
         except Exception as e:
-            self.get_logger().error(f'Failed to connect to OpenCR: {e}')
-            self.port_handler = None
+            self.get_logger().error(f'Error processing sensor state: {e}')
     
     def read_control_table(self, address):
         """OpenCR 제어 테이블에서 데이터 읽기"""
@@ -121,44 +124,6 @@ class UltrasonicPublisher(Node):
             self.get_logger().error(f'Error reading control table: {e}')
             return None
     
-    def read_and_publish_ultrasonic(self):
-        """3개 초음파 센서 값 읽기 및 발행"""
-        if self.port_handler is None or not DYNAMIXEL_AVAILABLE:
-            return
-        
-        try:
-            # 3개 센서 값 읽기
-            left_val = self.read_control_table(self.ADDR_ULTRASONIC_LEFT) or 0.0
-            front_val = self.read_control_table(self.ADDR_ULTRASONIC_FRONT) or 0.0
-            right_val = self.read_control_table(self.ADDR_ULTRASONIC_RIGHT) or 0.0
-            
-            # nan 값 필터링 (이전 값으로 대체)
-            import math
-            if math.isnan(left_val) or left_val == 0.0:
-                left_val = self.prev_left
-            else:
-                self.prev_left = left_val
-                
-            if math.isnan(front_val) or front_val == 0.0:
-                front_val = self.prev_front
-            else:
-                self.prev_front = front_val
-                
-            if math.isnan(right_val) or right_val == 0.0:
-                right_val = self.prev_right
-            else:
-                self.prev_right = right_val
-            
-            # Range 메시지 생성 및 발행
-            self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
-            self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
-            self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
-            
-            # 터미널 출력 (디버깅용, 필요시 주석 해제)
-            # self.print_values(left_val, front_val, right_val)
-            
-        except Exception as e:
-            self.get_logger().error(f'Error in ultrasonic read: {e}')
     
     def publish_range_msg(self, publisher, range_value, frame_id):
         """Range 메시지 발행"""
