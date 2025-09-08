@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'ultrasonic_publisher = ultrasonic_sensor_bridge.ultrasonic_publisher:main',
             'ultrasonic_lcd_display = ultrasonic_sensor_bridge.ultrasonic_lcd_display:main',
+            'ultrasonic_to_laserscan = ultrasonic_sensor_bridge.ultrasonic_to_laserscan:main',
         ],
     },
 )
