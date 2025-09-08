@@ -216,7 +216,10 @@ void TurtleBot3::add_sensors()
       is_connected_bumper_2,
       is_connected_illumination,
       is_connected_ir,
-      is_connected_sonar));
+      is_connected_sonar,
+      is_connected_ultrasonic_left,
+      is_connected_ultrasonic_front,
+      is_connected_ultrasonic_right));
 
   dxl_sdk_wrapper_->read_data_set();
   sensors_.push_back(

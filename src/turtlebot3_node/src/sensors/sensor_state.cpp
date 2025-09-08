@@ -29,13 +29,19 @@ SensorState::SensorState(
   const uint8_t & bumper_backward,
   const uint8_t & illumination,
   const uint8_t & cliff,
-  const uint8_t & sonar)
+  const uint8_t & sonar,
+  const uint8_t & ultrasonic_left,
+  const uint8_t & ultrasonic_front,
+  const uint8_t & ultrasonic_right)
 : Sensors(nh),
   bumper_forward_(bumper_forward),
   bumper_backward_(bumper_backward),
   illumination_(illumination),
   cliff_(cliff),
-  sonar_(sonar)
+  sonar_(sonar),
+  ultrasonic_left_(ultrasonic_left),
+  ultrasonic_front_(ultrasonic_front),
+  ultrasonic_right_(ultrasonic_right)
 {
   pub_ = nh->create_publisher<custom_turtlebot3_msgs::msg::SensorState>(topic_name, this->qos_);
 
@@ -138,23 +144,33 @@ void SensorState::publish(
     extern_control_table.battery_voltage.addr,
     extern_control_table.battery_voltage.length);
 
-  // Read 3 ultrasonic sensors (always read, but use individual parameters)
-  float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_left.addr,
-    extern_control_table.ultrasonic_left.length);
+  // Read 3 ultrasonic sensors (only if individual parameters are enabled)
+  if (ultrasonic_left_) {
+    float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_left.addr,
+      extern_control_table.ultrasonic_left.length);
+    msg->ultrasonic_left = ultrasonic_left;
+  } else {
+    msg->ultrasonic_left = 0.0f;
+  }
 
-  float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_front.addr,
-    extern_control_table.ultrasonic_front.length);
+  if (ultrasonic_front_) {
+    float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_front.addr,
+      extern_control_table.ultrasonic_front.length);
+    msg->ultrasonic_front = ultrasonic_front;
+  } else {
+    msg->ultrasonic_front = 0.0f;
+  }
 
-  float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_right.addr,
-    extern_control_table.ultrasonic_right.length);
-
-  // Set ultrasonic sensor values
-  msg->ultrasonic_left = ultrasonic_left;
-  msg->ultrasonic_front = ultrasonic_front;
-  msg->ultrasonic_right = ultrasonic_right;
+  if (ultrasonic_right_) {
+    float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_right.addr,
+      extern_control_table.ultrasonic_right.length);
+    msg->ultrasonic_right = ultrasonic_right;
+  } else {
+    msg->ultrasonic_right = 0.0f;
+  }
 
   pub_->publish(std::move(msg));
 }

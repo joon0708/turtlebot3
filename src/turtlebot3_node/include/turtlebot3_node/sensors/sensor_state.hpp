@@ -40,7 +40,10 @@ public:
     const uint8_t & bumper_backward = 0,
     const uint8_t & illumination = 0,
     const uint8_t & cliff = 0,
-    const uint8_t & sonar = 0);
+    const uint8_t & sonar = 0,
+    const uint8_t & ultrasonic_left = 0,
+    const uint8_t & ultrasonic_front = 0,
+    const uint8_t & ultrasonic_right = 0);
 
   void publish(
     const rclcpp::Time & now,
@@ -54,6 +57,9 @@ private:
   uint8_t illumination_;
   uint8_t cliff_;
   uint8_t sonar_;
+  uint8_t ultrasonic_left_;
+  uint8_t ultrasonic_front_;
+  uint8_t ultrasonic_right_;
 };
 }  // namespace sensors
 }  // namespace turtlebot3
