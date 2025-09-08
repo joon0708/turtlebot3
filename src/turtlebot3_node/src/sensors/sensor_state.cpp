@@ -138,23 +138,30 @@ void SensorState::publish(
     extern_control_table.battery_voltage.addr,
     extern_control_table.battery_voltage.length);
 
-  // Read 3 ultrasonic sensors
-  float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_left.addr,
-    extern_control_table.ultrasonic_left.length);
+  // Read 3 ultrasonic sensors (only if sonar is enabled)
+  if (sonar_) {
+    float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_left.addr,
+      extern_control_table.ultrasonic_left.length);
 
-  float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_front.addr,
-    extern_control_table.ultrasonic_front.length);
+    float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_front.addr,
+      extern_control_table.ultrasonic_front.length);
 
-  float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_right.addr,
-    extern_control_table.ultrasonic_right.length);
+    float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
+      extern_control_table.ultrasonic_right.addr,
+      extern_control_table.ultrasonic_right.length);
 
-  // Set ultrasonic sensor values
-  msg->ultrasonic_left = ultrasonic_left;
-  msg->ultrasonic_front = ultrasonic_front;
-  msg->ultrasonic_right = ultrasonic_right;
+    // Set ultrasonic sensor values
+    msg->ultrasonic_left = ultrasonic_left;
+    msg->ultrasonic_front = ultrasonic_front;
+    msg->ultrasonic_right = ultrasonic_right;
+  } else {
+    // Set to 0 if sonar is disabled
+    msg->ultrasonic_left = 0.0f;
+    msg->ultrasonic_front = 0.0f;
+    msg->ultrasonic_right = 0.0f;
+  }
 
   pub_->publish(std::move(msg));
 }

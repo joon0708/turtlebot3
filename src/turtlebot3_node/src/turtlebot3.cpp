@@ -153,7 +153,7 @@ void TurtleBot3::add_sensors()
   this->declare_parameter<uint8_t>("sensors.bumper_2");
   this->declare_parameter<uint8_t>("sensors.illumination");
   this->declare_parameter<uint8_t>("sensors.ir");
-  // this->declare_parameter<uint8_t>("sensors.sonar");  // 소나 센서 사용하지 않음
+  this->declare_parameter<uint8_t>("sensors.sonar");  // 초음파 센서 활성화
 
   this->get_parameter_or<uint8_t>(
     "sensors.bumper_1",

@@ -22,7 +22,7 @@ turtlebot3_node:
       bumper_2: 0
       illumination: 0
       ir: 0
-      sonar: 0
+      sonar: 1  # 초음파 센서 활성화
 
 diff_drive_controller:
   ros__parameters:
