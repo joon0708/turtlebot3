@@ -81,7 +81,7 @@ class UltrasonicPublisher(Node):
             self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
             
             # 디버깅용 로그 (필요시 주석 해제)
-            # self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
+            self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
                 
         except Exception as e:
             self.get_logger().error(f'Error processing sensor state: {e}')
