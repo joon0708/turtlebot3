@@ -3,7 +3,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
@@ -169,41 +169,38 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
-        # 초음파 센서 브리지 (OpenCR에서 3개 센서 데이터 읽기)
-        Node(
-            package='ultrasonic_sensor_bridge',
-            executable='ultrasonic_publisher',
-            name='ultrasonic_publisher',
+        # 초음파 센서 발행 (Python 스크립트 직접 실행)
+        ExecuteProcess(
+            cmd=['python3', '/root/turtlebot3/src/ultrasonic_sensor_bridge/ultrasonic_sensor_bridge/ultrasonic_publisher.py'],
             output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-            }],
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'AMENT_PREFIX_PATH': '/opt/ros/humble:/root/turtlebot3/install',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib',
-                'ROS_LOG_DIR': '/root/.ros/log',
+                'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble'
-            }),
+                'ROS_DISTRO': 'humble',
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'HOME': '/root'
+            }
+        ),
         
-        # 초음파 센서를 LaserScan으로 변환 (네비게이션용)
-        Node(
-            package='ultrasonic_sensor_bridge',
-            executable='ultrasonic_to_laserscan',
-            name='ultrasonic_to_laserscan',
+        # 초음파 센서 LaserScan 변환 (Python 스크립트 직접 실행)
+        ExecuteProcess(
+            cmd=['python3', '/root/turtlebot3/src/ultrasonic_sensor_bridge/ultrasonic_sensor_bridge/ultrasonic_to_laserscan.py'],
             output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-            }],
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'AMENT_PREFIX_PATH': '/opt/ros/humble:/root/turtlebot3/install',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib',
-                'ROS_LOG_DIR': '/root/.ros/log',
+                'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble'
-            }),
+                'ROS_DISTRO': 'humble',
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'HOME': '/root'
+            }
+        ),
+        
     ])
