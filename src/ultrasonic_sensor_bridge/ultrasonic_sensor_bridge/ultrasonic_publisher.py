@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Range
 from std_msgs.msg import Header
+from turtlebot3_msgs.msg import SensorState
 import time
 
 # DYNAMIXEL SDK import
@@ -49,7 +50,7 @@ class UltrasonicPublisher(Node):
         
         # turtlebot3_ros에서 센서 데이터 구독
         self.sensor_state_sub = self.create_subscription(
-            'turtlebot3_msgs/msg/SensorState', 
+            SensorState, 
             '/sensor_state', 
             self.sensor_state_callback, 
             10
@@ -82,6 +83,11 @@ class UltrasonicPublisher(Node):
                     self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
                     self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
                     self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
+                else:
+                    # 데이터가 부족한 경우 기본값 사용
+                    self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
+                    self.publish_range_msg(self.front_pub, 4.0, 'ultrasonic_front')
+                    self.publish_range_msg(self.right_pub, 4.0, 'ultrasonic_right')
             else:
                 # 초음파 센서 데이터가 없는 경우 기본값 사용
                 self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
@@ -90,6 +96,10 @@ class UltrasonicPublisher(Node):
                 
         except Exception as e:
             self.get_logger().error(f'Error processing sensor state: {e}')
+            # 에러 발생 시 기본값 사용
+            self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
+            self.publish_range_msg(self.front_pub, 4.0, 'ultrasonic_front')
+            self.publish_range_msg(self.right_pub, 4.0, 'ultrasonic_right')
     
     def read_control_table(self, address):
         """OpenCR 제어 테이블에서 데이터 읽기"""
