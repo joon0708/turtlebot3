@@ -4,7 +4,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Range
 from std_msgs.msg import Header
-from custom_turtlebot3_msgs.msg import SensorState
 import time
 
 # DYNAMIXEL SDK import
@@ -20,9 +19,9 @@ except ImportError as e:
     print(f"Warning: DYNAMIXEL SDK not available: {e}")
 
 
-class UltrasonicPublisher(Node):
+class UltrasonicPublisherDirect(Node):
     def __init__(self):
-        super().__init__('ultrasonic_publisher')
+        super().__init__('ultrasonic_publisher_direct')
         
         # DYNAMIXEL SDK 설정
         self.port_handler = None
@@ -54,7 +53,7 @@ class UltrasonicPublisher(Node):
         # 타이머로 주기적으로 센서 데이터 읽기
         self.timer = self.create_timer(0.1, self.read_and_publish_sensors)  # 10Hz
         
-        self.get_logger().info('Ultrasonic Publisher started with direct OpenCR connection')
+        self.get_logger().info('Ultrasonic Publisher Direct started with OpenCR connection')
     
     def connect_opencr(self):
         """OpenCR에 직접 연결"""
@@ -157,7 +156,6 @@ class UltrasonicPublisher(Node):
             self.get_logger().error(f'Error reading control table: {e}')
             return None
     
-    
     def publish_range_msg(self, publisher, range_value, frame_id):
         """Range 메시지 발행"""
         msg = Range()
@@ -171,16 +169,6 @@ class UltrasonicPublisher(Node):
         
         publisher.publish(msg)
     
-    def print_values(self, left_val, front_val, right_val):
-        """터미널에 값 출력 (디버깅용)"""
-        print(f"\n=== OpenCR Ultrasonic Sensors ===")
-        print(f"Left (addr 190):   {left_val:.3f}m")
-        print(f"Front (addr 194):  {front_val:.3f}m")
-        print(f"Right (addr 198):  {right_val:.3f}m")
-        print(f"Time:              {time.strftime('%H:%M:%S')}")
-        print("=" * 45)
-
-    
     def destroy_node(self):
         """노드 종료 시 정리"""
         if self.port_handler:
@@ -191,7 +179,7 @@ class UltrasonicPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    publisher = UltrasonicPublisher()
+    publisher = UltrasonicPublisherDirect()
     
     try:
         rclpy.spin(publisher)

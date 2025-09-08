@@ -170,5 +170,26 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
+        # 초음파 센서 발행 (ROS 구독 방식)
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_publisher_ros',
+            name='ultrasonic_publisher_ros',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }],
+        ),
+        
+        # 초음파 센서 LaserScan 변환
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_to_laserscan',
+            name='ultrasonic_to_laserscan',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }],
+        ),
         
     ])
