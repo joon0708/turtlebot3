@@ -85,11 +85,12 @@ void SensorState::publish(
     msg->cliff = 0.0f;
   }
 
-  if (sonar_) {
+  // sonar_ 파라미터는 개별 초음파 센서가 비활성화된 경우에만 사용
+  if (sonar_ && !ultrasonic_front_) {
     msg->ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
       extern_control_table.sonar.addr,
       extern_control_table.sonar.length);
-  } else {
+  } else if (!ultrasonic_front_) {
     msg->ultrasonic_front = 0.0f;
   }
 
