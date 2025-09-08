@@ -69,6 +69,12 @@ class UltrasonicPublisher(Node):
     def sensor_state_callback(self, msg):
         """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
         try:
+            # 센서 데이터 디버깅 - 모든 필드 확인
+            self.get_logger().info(f'SensorState received: {type(msg)}')
+            self.get_logger().info(f'Has ultrasonic_left: {hasattr(msg, "ultrasonic_left")}')
+            self.get_logger().info(f'Has ultrasonic_front: {hasattr(msg, "ultrasonic_front")}')
+            self.get_logger().info(f'Has ultrasonic_right: {hasattr(msg, "ultrasonic_right")}')
+            
             # custom_turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
             # 필드명: ultrasonic_left, ultrasonic_front, ultrasonic_right
             left_val = msg.ultrasonic_left / 1000.0  # mm를 m로 변환
