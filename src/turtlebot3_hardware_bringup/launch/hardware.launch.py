@@ -170,38 +170,5 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
-        # 초음파 센서 발행 (Python 스크립트 직접 실행)
-        ExecuteProcess(
-            cmd=['python3', '/root/turtlebot3/src/ultrasonic_sensor_bridge/ultrasonic_sensor_bridge/ultrasonic_publisher.py'],
-            output='screen',
-            env={
-                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                'PATH': os.environ.get('PATH', ''),
-                'ROS_DOMAIN_ID': '10',
-                'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble',
-                'ROS_LOG_DIR': '/root/.ros/log',
-                'HOME': '/root'
-            }
-        ),
-        
-        # 초음파 센서 LaserScan 변환 (Python 스크립트 직접 실행)
-        ExecuteProcess(
-            cmd=['python3', '/root/turtlebot3/src/ultrasonic_sensor_bridge/ultrasonic_sensor_bridge/ultrasonic_to_laserscan.py'],
-            output='screen',
-            env={
-                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'PYTHONPATH': '/root/turtlebot3/src:' + os.environ.get('PYTHONPATH', ''),
-                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-                'PATH': os.environ.get('PATH', ''),
-                'ROS_DOMAIN_ID': '10',
-                'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble',
-                'ROS_LOG_DIR': '/root/.ros/log',
-                'HOME': '/root'
-            }
-        ),
         
     ])
