@@ -151,10 +151,8 @@ void SensorState::publish(
       extern_control_table.ultrasonic_left.addr,
       extern_control_table.ultrasonic_left.length);
     msg->ultrasonic_left = ultrasonic_left;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Left: %.3f", ultrasonic_left);
   } else {
     msg->ultrasonic_left = 0.0f;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Left: disabled");
   }
 
   if (ultrasonic_front_) {
@@ -162,10 +160,8 @@ void SensorState::publish(
       extern_control_table.ultrasonic_front.addr,
       extern_control_table.ultrasonic_front.length);
     msg->ultrasonic_front = ultrasonic_front;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Front: %.3f", ultrasonic_front);
   } else {
     msg->ultrasonic_front = 0.0f;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Front: disabled");
   }
 
   if (ultrasonic_right_) {
@@ -173,10 +169,8 @@ void SensorState::publish(
       extern_control_table.ultrasonic_right.addr,
       extern_control_table.ultrasonic_right.length);
     msg->ultrasonic_right = ultrasonic_right;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Right: %.3f", ultrasonic_right);
   } else {
     msg->ultrasonic_right = 0.0f;
-    RCLCPP_DEBUG(this->get_logger(), "Ultrasonic Right: disabled");
   }
 
   pub_->publish(std::move(msg));
