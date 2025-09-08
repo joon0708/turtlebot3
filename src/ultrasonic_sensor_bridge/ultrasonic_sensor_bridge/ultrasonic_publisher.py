@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Range
 from std_msgs.msg import Header
-from turtlebot3_msgs.msg import SensorState
+from custom_turtlebot3_msgs.msg import SensorState
 import time
 
 # DYNAMIXEL SDK import
@@ -69,30 +69,19 @@ class UltrasonicPublisher(Node):
     def sensor_state_callback(self, msg):
         """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
         try:
-            # turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
-            # 실제 필드명은 turtlebot3_msgs에 따라 다를 수 있음
-            if hasattr(msg, 'ultrasonic'):
-                # 초음파 센서 데이터가 있는 경우
-                ultrasonic_data = msg.ultrasonic
-                if len(ultrasonic_data) >= 3:
-                    left_val = ultrasonic_data[0] / 1000.0  # mm를 m로 변환
-                    front_val = ultrasonic_data[1] / 1000.0
-                    right_val = ultrasonic_data[2] / 1000.0
-                    
-                    # Range 메시지로 발행
-                    self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
-                    self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
-                    self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
-                else:
-                    # 데이터가 부족한 경우 기본값 사용
-                    self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
-                    self.publish_range_msg(self.front_pub, 4.0, 'ultrasonic_front')
-                    self.publish_range_msg(self.right_pub, 4.0, 'ultrasonic_right')
-            else:
-                # 초음파 센서 데이터가 없는 경우 기본값 사용
-                self.publish_range_msg(self.left_pub, 4.0, 'ultrasonic_left')
-                self.publish_range_msg(self.front_pub, 4.0, 'ultrasonic_front')
-                self.publish_range_msg(self.right_pub, 4.0, 'ultrasonic_right')
+            # custom_turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
+            # 필드명: ultrasonic_left, ultrasonic_front, ultrasonic_right
+            left_val = msg.ultrasonic_left / 1000.0  # mm를 m로 변환
+            front_val = msg.ultrasonic_front / 1000.0
+            right_val = msg.ultrasonic_right / 1000.0
+            
+            # Range 메시지로 발행
+            self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
+            self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
+            self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
+            
+            # 디버깅용 로그 (필요시 주석 해제)
+            # self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
                 
         except Exception as e:
             self.get_logger().error(f'Error processing sensor state: {e}')
