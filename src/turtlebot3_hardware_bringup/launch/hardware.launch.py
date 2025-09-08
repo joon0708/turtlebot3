@@ -94,81 +94,15 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
-        # TurtleBot3 Node (Motor Control) - 직접 실행
-        Node(
-            package='turtlebot3_node',
-            executable='turtlebot3_ros',
-            name='turtlebot3_ros',  # 기본 이름 사용
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'namespace': '',
-                'opencr': {
-                    'id': 200,
-                    'baud_rate': 1000000,
-                    'protocol_version': 2.0
-                },
-                'wheels': {
-                    'separation': 0.287,
-                    'radius': 0.033,
-                    'front_separation': 0.287,
-                    'rear_separation': 0.287,
-                    'wheelbase': 0.287
-                },
-                'motors': {
-                    'profile_acceleration_constant': 214.577,
-                    'profile_acceleration': 0.0,
-                    'front_left_id': 1,
-                    'front_right_id': 2,
-                    'rear_left_id': 3,
-                    'rear_right_id': 4,
-                    'front_left_position_addr': 136,
-                    'front_right_position_addr': 140,
-                    'rear_left_position_addr': 141,
-                    'rear_right_position_addr': 142,
-                    'front_left_velocity_addr': 128,
-                    'front_right_velocity_addr': 132,
-                    'rear_left_velocity_addr': 133,
-                    'rear_right_velocity_addr': 134,
-                    'front_left_current_addr': 120,
-                    'front_right_current_addr': 124,
-                    'rear_left_current_addr': 125,
-                    'rear_right_current_addr': 126,
-                    'front_left_accel_addr': 174,
-                    'front_right_accel_addr': 178,
-                    'rear_left_accel_addr': 179,
-                    'rear_right_accel_addr': 180
-                },
-                'sensors': {
-                    'bumper_1': 0,
-                    'bumper_2': 0,
-                    'illumination': 0,
-                    'ir': 0,
-                    'sonar': 1,  # 기존 초음파 센서 활성화
-                    'ultrasonic_left': 1,   # 왼쪽 초음파 센서 활성화
-                    'ultrasonic_front': 1,  # 앞쪽 초음파 센서 활성화
-                    'ultrasonic_right': 1   # 오른쪽 초음파 센서 활성화
-                },
-                'odometry': {
-                    'frame_id': 'odom',
-                    'child_frame_id': 'base_footprint',
-                    'publish_tf': True,
-                    'use_imu': True,
-                    'use_4_wheel_odometry': True,
-                    'front_wheels_weight': 0.5,
-                    'rear_wheels_weight': 0.5
-                }
-            }],
-            arguments=['-i', usb_port],
-            env={
-                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
-                'AMENT_PREFIX_PATH': '/opt/ros/humble:/root/turtlebot3/install',
-                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/root/turtlebot3/install/lib:/root/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib',
-                'ROS_LOG_DIR': '/root/.ros/log',
-                'ROS_DOMAIN_ID': '10',
-                'ROS_VERSION': '2',
-                'ROS_DISTRO': 'humble'
-            }),
+        # TurtleBot3 Node (Motor Control) - 주석 처리 (포트 충돌 방지)
+        # Node(
+        #     package='turtlebot3_node',
+        #     executable='turtlebot3_ros',
+        #     name='turtlebot3_ros',
+        #     output='screen',
+        #     parameters=[{...}],
+        #     arguments=['-i', usb_port],
+        #     env={...}),
         
         # 초음파 센서 발행 (Python 스크립트 직접 실행)
         ExecuteProcess(

@@ -48,15 +48,13 @@ class UltrasonicPublisher(Node):
         self.front_pub = self.create_publisher(Range, '/ultrasonic/front', 10)
         self.right_pub = self.create_publisher(Range, '/ultrasonic/right', 10)
         
-        # turtlebot3_ros에서 센서 데이터 구독
-        self.sensor_state_sub = self.create_subscription(
-            SensorState, 
-            '/sensor_state', 
-            self.sensor_state_callback, 
-            10
-        )
+        # OpenCR 직접 연결
+        self.connect_opencr()
         
-        self.get_logger().info('Ultrasonic Publisher started - subscribing to turtlebot3_ros')
+        # 타이머로 주기적으로 센서 데이터 읽기
+        self.timer = self.create_timer(0.1, self.read_and_publish_sensors)  # 10Hz
+        
+        self.get_logger().info('Ultrasonic Publisher started with direct OpenCR connection')
     
     def connect_opencr(self):
         """OpenCR에 직접 연결"""
@@ -86,13 +84,32 @@ class UltrasonicPublisher(Node):
             self.get_logger().error(f"Error connecting to OpenCR: {e}")
             return False
     
-    def sensor_state_callback(self, msg):
-        """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
+    def read_and_publish_sensors(self):
+        """OpenCR에서 직접 초음파 센서 데이터를 읽어서 발행"""
+        if self.port_handler is None:
+            return
+        
         try:
-            # custom_turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
-            left_val = msg.ultrasonic_left / 1000.0  # mm를 m로 변환
-            front_val = msg.ultrasonic_front / 1000.0
-            right_val = msg.ultrasonic_right / 1000.0
+            # 3개 초음파 센서 데이터 읽기
+            left_val = self.read_control_table(self.ADDR_ULTRASONIC_LEFT)
+            front_val = self.read_control_table(self.ADDR_ULTRASONIC_FRONT)
+            right_val = self.read_control_table(self.ADDR_ULTRASONIC_RIGHT)
+            
+            # nan 값 필터링
+            if left_val is None or left_val != left_val:  # nan 체크
+                left_val = self.prev_left
+            else:
+                self.prev_left = left_val
+                
+            if front_val is None or front_val != front_val:
+                front_val = self.prev_front
+            else:
+                self.prev_front = front_val
+                
+            if right_val is None or right_val != right_val:
+                right_val = self.prev_right
+            else:
+                self.prev_right = right_val
             
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
@@ -103,7 +120,7 @@ class UltrasonicPublisher(Node):
             self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
                 
         except Exception as e:
-            self.get_logger().error(f'Error processing sensor state: {e}')
+            self.get_logger().error(f'Error reading sensors: {e}')
     
     def read_control_table(self, address):
         """OpenCR 제어 테이블에서 데이터 읽기"""
