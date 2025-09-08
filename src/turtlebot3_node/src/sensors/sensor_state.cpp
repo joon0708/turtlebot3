@@ -147,27 +147,37 @@ void SensorState::publish(
 
   // Read 3 ultrasonic sensors (only if individual parameters are enabled)
   if (ultrasonic_left_) {
-    float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
+    // 직접 4바이트 읽기 후 float로 변환 (ultrasonic_publisher_direct.py와 동일한 방식)
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
       extern_control_table.ultrasonic_left.addr,
       extern_control_table.ultrasonic_left.length);
+    
+    // 4바이트를 float로 변환
+    float ultrasonic_left = *reinterpret_cast<float*>(&raw_data);
     msg->ultrasonic_left = ultrasonic_left;
   } else {
     msg->ultrasonic_left = 0.0f;
   }
 
   if (ultrasonic_front_) {
-    float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
+    // 직접 4바이트 읽기 후 float로 변환
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
       extern_control_table.ultrasonic_front.addr,
       extern_control_table.ultrasonic_front.length);
+    
+    float ultrasonic_front = *reinterpret_cast<float*>(&raw_data);
     msg->ultrasonic_front = ultrasonic_front;
   } else {
     msg->ultrasonic_front = 0.0f;
   }
 
   if (ultrasonic_right_) {
-    float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
+    // 직접 4바이트 읽기 후 float로 변환
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
       extern_control_table.ultrasonic_right.addr,
       extern_control_table.ultrasonic_right.length);
+    
+    float ultrasonic_right = *reinterpret_cast<float*>(&raw_data);
     msg->ultrasonic_right = ultrasonic_right;
   } else {
     msg->ultrasonic_right = 0.0f;
