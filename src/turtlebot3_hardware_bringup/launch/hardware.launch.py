@@ -94,11 +94,11 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
-        # TurtleBot3 Node (Motor Control) - 직접 실행
+        # TurtleBot3 Node (Motor Control) - 활성화
         Node(
             package='turtlebot3_node',
             executable='turtlebot3_ros',
-            name='turtlebot3_ros',  # 기본 이름 사용
+            name='turtlebot3_ros',
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
