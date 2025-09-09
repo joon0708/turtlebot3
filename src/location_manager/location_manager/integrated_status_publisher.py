@@ -45,22 +45,9 @@ class IntegratedStatusPublisher(Node):
     
     def publish_integrated_status(self):
         """통합 상태 발행"""
-        # JSON 형태로 통합 상태 생성
-        integrated_data = {
-            'timestamp': datetime.now().isoformat(),
-            'location_manager': {
-                'status': self.location_status,
-                'active': True
-            },
-            'rfid_system': {
-                'status': self.rfid_status,
-                'active': True
-            }
-        }
-        
-        # JSON을 문자열로 변환
+        # 깔끔한 텍스트 형태로 통합 상태 생성
         status_msg = String()
-        status_msg.data = json.dumps(integrated_data, ensure_ascii=False, indent=2)
+        status_msg.data = f"=== 통합 시스템 상태 ===\n위치 관리: {self.location_status}\nRFID 시스템: {self.rfid_status}\n시간: {datetime.now().strftime('%H:%M:%S')}"
         
         # 통합 상태 발행
         self.integrated_status_pub.publish(status_msg)
