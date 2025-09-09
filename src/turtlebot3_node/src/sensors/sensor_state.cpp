@@ -194,7 +194,6 @@ void SensorState::publish(
       front_avg /= BUFFER_SIZE;
       right_avg /= BUFFER_SIZE;
       
-      RCLCPP_INFO(nh_->get_logger(), "Buffer avg: L=%.3f, F=%.3f, R=%.3f", left_avg, front_avg, right_avg);
       
       msg->ultrasonic_left = left_avg;
       msg->ultrasonic_front = front_avg;

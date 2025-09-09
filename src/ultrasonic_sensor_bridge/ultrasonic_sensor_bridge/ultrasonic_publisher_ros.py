@@ -23,7 +23,6 @@ class UltrasonicPublisherROS(Node):
             10
         )
         
-        self.get_logger().info('Ultrasonic Publisher ROS started - subscribing to turtlebot3_ros')
     
     def sensor_state_callback(self, msg):
         """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
@@ -44,9 +43,6 @@ class UltrasonicPublisherROS(Node):
             if right_val > MAX_RANGE or right_val < MIN_RANGE:
                 right_val = 0.0
             
-            # 딜레이 측정용 로그
-            current_time = self.get_clock().now().nanoseconds
-            self.get_logger().info(f'ROS: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f} at {current_time}')
             
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
