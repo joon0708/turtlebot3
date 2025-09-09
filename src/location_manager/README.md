@@ -43,6 +43,7 @@ ros2 pkg list | grep nav2
 ros2 launch location_manager location_navigation.launch.py
 ```
 
+
 ### 2. 위치 저장 명령어
 
 #### **좌표로 위치 저장**
@@ -69,6 +70,45 @@ ros2 topic pub /location_command std_msgs/msg/String "data: 'save_here 거실'" 
 ros2 topic pub /location_command std_msgs/msg/String "data: 'go home'" --once
 ros2 topic pub /location_command std_msgs/msg/String "data: 'go 회의실'" --once
 ```
+
+#### **명령 응답 확인**
+```bash
+# 위치 관리 명령의 응답을 실시간으로 확인
+ros2 topic echo /location_status
+
+# RFID 관련 응답 확인 (RFID 활성화 시)
+ros2 topic echo /rfid_status
+```
+
+### 4. RFID 태그 사용법 (선택적)
+
+#### **RFID 시스템 활성화**
+```bash
+# RFID 기능과 함께 실행
+ros2 launch location_manager location_manager_complete.launch.py enable_rfid:=true
+```
+
+#### **RFID 태그 ID 확인**
+```bash
+# RFID 태그를 찍으면 ID가 표시됩니다
+ros2 topic echo /rfid/tag
+```
+
+#### **RFID 태그와 위치 매핑**
+```bash
+# RFID 태그를 특정 위치에 매핑
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'map AA:BB:CC:DD home'" --once
+
+# RFID 매핑 목록 확인
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'list'" --once
+
+# RFID 매핑 제거
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'unmap AA:BB:CC:DD'" --once
+```
+
+#### **RFID 자동 복귀**
+- RFID 태그를 찍으면 자동으로 매핑된 위치로 이동합니다
+- 위치가 저장되어 있어야 RFID 매핑이 가능합니다
 
 #### **위치 목록 및 관리**
 ```bash

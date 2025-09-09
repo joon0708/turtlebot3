@@ -83,11 +83,11 @@ class RFIDLocationMapper(Node):
             self.get_logger().debug(f'쿨다운 중: {self.cooldown_sec - (current_time - self.last_rfid_time):.1f}초 남음')
             return
         
-        tag_id = msg.data.strip()
+        tag_id = msg.data.strip().lower()  # 소문자로 통일
         self.get_logger().info(f'RFID 태그 감지: {tag_id}')
         self.last_rfid_time = current_time
         
-        # RFID 태그와 위치 매핑 확인
+        # RFID 태그와 위치 매핑 확인 (대소문자 무시)
         if tag_id in self.rfid_location_mapping:
             location_name = self.rfid_location_mapping[tag_id]['name']
             self.get_logger().info(f'RFID 태그 {tag_id}에 매핑된 위치: {location_name}')
@@ -147,6 +147,9 @@ class RFIDLocationMapper(Node):
     
     def map_rfid_to_location(self, tag_id, location_name):
         """RFID 태그와 위치를 매핑"""
+        # RFID 태그 ID를 소문자로 통일
+        tag_id = tag_id.lower()
+        
         # location_manager에서 저장된 위치 정보를 가져와야 함
         # 일단 위치 이름만 저장하고, 실제 위치는 location_manager에서 가져오기
         location_data = {
@@ -165,6 +168,9 @@ class RFIDLocationMapper(Node):
     
     def unmap_rfid(self, tag_id):
         """RFID 태그 매핑 제거"""
+        # RFID 태그 ID를 소문자로 통일
+        tag_id = tag_id.lower()
+        
         if tag_id in self.rfid_location_mapping:
             location_name = self.rfid_location_mapping[tag_id]['name']
             del self.rfid_location_mapping[tag_id]
