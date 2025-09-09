@@ -147,15 +147,22 @@ class LCDController(Node):
         """배터리 상태 콜백"""
         # 배터리 퍼센티지 계산 (0-100%)
         if hasattr(msg, 'percentage') and msg.percentage >= 0:
-            self.current_battery_percentage = msg.percentage * 100.0
+            # percentage가 이미 0-1 범위인지 0-100 범위인지 확인
+            if msg.percentage <= 1.0:
+                self.current_battery_percentage = msg.percentage * 100.0
+            else:
+                self.current_battery_percentage = msg.percentage
         else:
             # percentage가 없으면 voltage로 계산 (대략적)
             voltage = msg.voltage
             if voltage > 0:
-                # 3.7V 기준으로 대략적 계산 (실제로는 더 정확한 공식 필요)
-                self.current_battery_percentage = min(100.0, max(0.0, (voltage - 3.0) / 0.7 * 100.0))
+                # Li-Po 배터리 기준: 3.0V(0%) ~ 4.2V(100%)
+                self.current_battery_percentage = min(100.0, max(0.0, (voltage - 3.0) / 1.2 * 100.0))
         
-        self.get_logger().debug(f"Battery: {self.current_battery_percentage:.1f}%")
+        # 0-100% 범위로 제한
+        self.current_battery_percentage = min(100.0, max(0.0, self.current_battery_percentage))
+        
+        self.get_logger().debug(f"Battery: {self.current_battery_percentage:.1f}% (voltage: {msg.voltage:.2f}V)")
     
     def update_display(self):
         """LCD 화면 주기적 업데이트"""
