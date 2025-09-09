@@ -27,11 +27,13 @@ class LCDController(Node):
         
         # 위치 정보 토픽 구독
         self.goal_pose_sub = self.create_subscription(PoseStamped, '/goal_pose', self.goal_pose_callback, 10)
+        self.goal_name_sub = self.create_subscription(String, '/goal_location_name', self.goal_name_callback, 10)
         self.location_status_sub = self.create_subscription(String, '/location_status', self.location_status_callback, 10)
         self.rfid_status_sub = self.create_subscription(String, '/rfid_status', self.rfid_status_callback, 10)
         
         # 상태 변수
         self.current_goal = None
+        self.current_goal_name = None
         self.current_location_status = "대기 중..."
         self.current_rfid_status = "대기 중..."
         self.last_update_time = time.time()
@@ -120,6 +122,12 @@ class LCDController(Node):
         self.last_update_time = time.time()
         self.get_logger().info(f"New goal: ({msg.pose.position.x:.2f}, {msg.pose.position.y:.2f})")
     
+    def goal_name_callback(self, msg):
+        """목표 위치 이름 콜백"""
+        self.current_goal_name = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().info(f"Goal location name: {msg.data}")
+    
     def location_status_callback(self, msg):
         """위치 관리 상태 콜백"""
         self.current_location_status = msg.data
@@ -171,13 +179,19 @@ class LCDController(Node):
             self.lcd.cursor_pos = (0, 0)
             self.lcd.write_string("Navigating to:")
             
-            # 목표 위치 좌표 표시
-            x = self.current_goal.pose.position.x
-            y = self.current_goal.pose.position.y
-            coord_text = f"({x:.1f}, {y:.1f})"
-            
-            self.lcd.cursor_pos = (1, 0)
-            self.lcd.write_string(coord_text)
+            # 목표 위치 이름 표시 (우선순위)
+            if self.current_goal_name:
+                # 위치 이름이 16자를 초과하면 줄임
+                location_name = self.current_goal_name[:16]
+                self.lcd.cursor_pos = (1, 0)
+                self.lcd.write_string(location_name)
+            elif self.current_goal:
+                # 좌표 표시 (백업)
+                x = self.current_goal.pose.position.x
+                y = self.current_goal.pose.position.y
+                coord_text = f"({x:.1f}, {y:.1f})"
+                self.lcd.cursor_pos = (1, 0)
+                self.lcd.write_string(coord_text)
             
         except Exception as e:
             self.get_logger().error(f"Navigation display error: {e}")
