@@ -67,9 +67,9 @@ void TurtleBot3::init_dynamixel_sdk_wrapper(const std::string & usb_port)
   dxl_sdk_wrapper_ = std::make_shared<DynamixelSDKWrapper>(opencr);
 
   dxl_sdk_wrapper_->init_read_memory(
-    extern_control_table.millis.addr,
-    (extern_control_table.profile_acceleration_right.addr - extern_control_table.millis.addr) +
-    extern_control_table.profile_acceleration_right.length
+    extern_control_table.millis.addr,                    // 10
+    (extern_control_table.ultrasonic_right.addr - extern_control_table.millis.addr) +
+    extern_control_table.ultrasonic_right.length 
   );
 }
 
