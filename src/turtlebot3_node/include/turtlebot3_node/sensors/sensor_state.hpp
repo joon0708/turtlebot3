@@ -60,6 +60,11 @@ private:
   uint8_t ultrasonic_left_;
   uint8_t ultrasonic_front_;
   uint8_t ultrasonic_right_;
+  
+  // 이전 초음파 센서 값 저장 (nan 필터링용)
+  float prev_ultrasonic_left_;
+  float prev_ultrasonic_front_;
+  float prev_ultrasonic_right_;
 };
 }  // namespace sensors
 }  // namespace turtlebot3

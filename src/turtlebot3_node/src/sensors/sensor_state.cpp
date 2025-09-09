@@ -41,7 +41,10 @@ SensorState::SensorState(
   sonar_(sonar),
   ultrasonic_left_(ultrasonic_left),
   ultrasonic_front_(ultrasonic_front),
-  ultrasonic_right_(ultrasonic_right)
+  ultrasonic_right_(ultrasonic_right),
+  prev_ultrasonic_left_(0.0f),
+  prev_ultrasonic_front_(0.0f),
+  prev_ultrasonic_right_(0.0f)
 {
   pub_ = nh->create_publisher<custom_turtlebot3_msgs::msg::SensorState>(topic_name, this->qos_);
 
@@ -159,10 +162,12 @@ void SensorState::publish(
     RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Left - Raw: %u (0x%08X), Float: %f, Addr: %d", 
                 raw_data, raw_data, ultrasonic_left, extern_control_table.ultrasonic_left.addr);
     
-    // nan 값 체크
+    // nan 값 체크 - 이전 값 사용
     if (ultrasonic_left != ultrasonic_left) {  // nan 체크
-      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Left: nan detected, setting to 0.0");
-      ultrasonic_left = 0.0f;
+      RCLCPP_DEBUG(nh_->get_logger(), "Ultrasonic Left: nan detected, using previous value: %f", prev_ultrasonic_left_);
+      ultrasonic_left = prev_ultrasonic_left_;
+    } else {
+      prev_ultrasonic_left_ = ultrasonic_left;
     }
     
     msg->ultrasonic_left = ultrasonic_left;
@@ -182,10 +187,12 @@ void SensorState::publish(
     RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Front - Raw: %u (0x%08X), Float: %f, Addr: %d", 
                 raw_data, raw_data, ultrasonic_front, extern_control_table.ultrasonic_front.addr);
     
-    // nan 값 체크
+    // nan 값 체크 - 이전 값 사용
     if (ultrasonic_front != ultrasonic_front) {  // nan 체크
-      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Front: nan detected, setting to 0.0");
-      ultrasonic_front = 0.0f;
+      RCLCPP_DEBUG(nh_->get_logger(), "Ultrasonic Front: nan detected, using previous value: %f", prev_ultrasonic_front_);
+      ultrasonic_front = prev_ultrasonic_front_;
+    } else {
+      prev_ultrasonic_front_ = ultrasonic_front;
     }
     
     msg->ultrasonic_front = ultrasonic_front;
@@ -205,10 +212,12 @@ void SensorState::publish(
     RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Right - Raw: %u (0x%08X), Float: %f, Addr: %d", 
                 raw_data, raw_data, ultrasonic_right, extern_control_table.ultrasonic_right.addr);
     
-    // nan 값 체크
+    // nan 값 체크 - 이전 값 사용
     if (ultrasonic_right != ultrasonic_right) {  // nan 체크
-      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Right: nan detected, setting to 0.0");
-      ultrasonic_right = 0.0f;
+      RCLCPP_DEBUG(nh_->get_logger(), "Ultrasonic Right: nan detected, using previous value: %f", prev_ultrasonic_right_);
+      ultrasonic_right = prev_ultrasonic_right_;
+    } else {
+      prev_ultrasonic_right_ = ultrasonic_right;
     }
     
     msg->ultrasonic_right = ultrasonic_right;
