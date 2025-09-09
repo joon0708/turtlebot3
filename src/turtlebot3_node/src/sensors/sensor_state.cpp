@@ -154,6 +154,17 @@ void SensorState::publish(
     
     // 4바이트를 float로 변환
     float ultrasonic_left = *reinterpret_cast<float*>(&raw_data);
+    
+    // 디버깅 로그 추가
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Left - Raw: %u (0x%08X), Float: %f, Addr: %d", 
+                raw_data, raw_data, ultrasonic_left, extern_control_table.ultrasonic_left.addr);
+    
+    // nan 값 체크
+    if (ultrasonic_left != ultrasonic_left) {  // nan 체크
+      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Left: nan detected, setting to 0.0");
+      ultrasonic_left = 0.0f;
+    }
+    
     msg->ultrasonic_left = ultrasonic_left;
   } else {
     msg->ultrasonic_left = 0.0f;
@@ -166,6 +177,17 @@ void SensorState::publish(
       extern_control_table.ultrasonic_front.length);
     
     float ultrasonic_front = *reinterpret_cast<float*>(&raw_data);
+    
+    // 디버깅 로그 추가
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Front - Raw: %u (0x%08X), Float: %f, Addr: %d", 
+                raw_data, raw_data, ultrasonic_front, extern_control_table.ultrasonic_front.addr);
+    
+    // nan 값 체크
+    if (ultrasonic_front != ultrasonic_front) {  // nan 체크
+      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Front: nan detected, setting to 0.0");
+      ultrasonic_front = 0.0f;
+    }
+    
     msg->ultrasonic_front = ultrasonic_front;
   } else {
     msg->ultrasonic_front = 0.0f;
@@ -178,6 +200,17 @@ void SensorState::publish(
       extern_control_table.ultrasonic_right.length);
     
     float ultrasonic_right = *reinterpret_cast<float*>(&raw_data);
+    
+    // 디버깅 로그 추가
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Right - Raw: %u (0x%08X), Float: %f, Addr: %d", 
+                raw_data, raw_data, ultrasonic_right, extern_control_table.ultrasonic_right.addr);
+    
+    // nan 값 체크
+    if (ultrasonic_right != ultrasonic_right) {  // nan 체크
+      RCLCPP_WARN(nh_->get_logger(), "Ultrasonic Right: nan detected, setting to 0.0");
+      ultrasonic_right = 0.0f;
+    }
+    
     msg->ultrasonic_right = ultrasonic_right;
   } else {
     msg->ultrasonic_right = 0.0f;
