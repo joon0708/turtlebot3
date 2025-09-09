@@ -33,6 +33,17 @@ class UltrasonicPublisherROS(Node):
             front_val = msg.ultrasonic_front
             right_val = msg.ultrasonic_right
             
+            # 초음파 센서 범위 제한 (너무 멀면 감지 안함)
+            MAX_RANGE = 1.0  # 1미터 이상이면 무효
+            MIN_RANGE = 0.02  # 2cm 미만이면 무효
+            
+            if left_val > MAX_RANGE or left_val < MIN_RANGE:
+                left_val = 0.0
+            if front_val > MAX_RANGE or front_val < MIN_RANGE:
+                front_val = 0.0
+            if right_val > MAX_RANGE or right_val < MIN_RANGE:
+                right_val = 0.0
+            
             # 간단한 디버깅 로그
             self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
             
