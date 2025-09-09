@@ -61,6 +61,14 @@ private:
   uint8_t ultrasonic_front_;
   uint8_t ultrasonic_right_;
   
+  // 50Hz 데이터를 20개씩 버퍼링해서 처리
+  static constexpr size_t BUFFER_SIZE = 20;
+  std::vector<float> left_buffer_;
+  std::vector<float> front_buffer_;
+  std::vector<float> right_buffer_;
+  size_t buffer_index_;
+  bool buffer_full_;
+  
   // 이전 초음파 센서 값 저장 (nan 필터링용)
   float prev_ultrasonic_left_;
   float prev_ultrasonic_front_;

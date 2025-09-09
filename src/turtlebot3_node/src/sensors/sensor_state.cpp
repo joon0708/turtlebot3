@@ -42,6 +42,11 @@ SensorState::SensorState(
   ultrasonic_left_(ultrasonic_left),
   ultrasonic_front_(ultrasonic_front),
   ultrasonic_right_(ultrasonic_right),
+  left_buffer_(BUFFER_SIZE, 0.0f),
+  front_buffer_(BUFFER_SIZE, 0.0f),
+  right_buffer_(BUFFER_SIZE, 0.0f),
+  buffer_index_(0),
+  buffer_full_(false),
   prev_ultrasonic_left_(0.0f),
   prev_ultrasonic_front_(0.0f),
   prev_ultrasonic_right_(0.0f)
@@ -158,16 +163,48 @@ void SensorState::publish(
     // 4바이트를 float로 변환
     float ultrasonic_left = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
+    // nan 값 체크 - 버퍼에 저장
     if (ultrasonic_left != ultrasonic_left) {  // nan 체크
-      RCLCPP_INFO(nh_->get_logger(), "Left: nan detected at %ld", now.nanoseconds());
-      ultrasonic_left = prev_ultrasonic_left_;
+      left_buffer_[buffer_index_] = prev_ultrasonic_left_;  // nan이면 이전 값 사용
     } else {
-      RCLCPP_INFO(nh_->get_logger(), "Left: valid value %.3f at %ld", ultrasonic_left, now.nanoseconds());
+      left_buffer_[buffer_index_] = ultrasonic_left;
       prev_ultrasonic_left_ = ultrasonic_left;
     }
     
-    msg->ultrasonic_left = ultrasonic_left;
+    // 버퍼 인덱스 증가
+    buffer_index_++;
+    if (buffer_index_ >= BUFFER_SIZE) {
+      buffer_index_ = 0;
+      buffer_full_ = true;
+    }
+    
+    // 버퍼가 가득 찼을 때만 평균값 계산해서 발행
+    if (buffer_full_) {
+      float left_avg = 0.0f;
+      float front_avg = 0.0f;
+      float right_avg = 0.0f;
+      
+      // 평균값 계산
+      for (size_t i = 0; i < BUFFER_SIZE; i++) {
+        left_avg += left_buffer_[i];
+        front_avg += front_buffer_[i];
+        right_avg += right_buffer_[i];
+      }
+      left_avg /= BUFFER_SIZE;
+      front_avg /= BUFFER_SIZE;
+      right_avg /= BUFFER_SIZE;
+      
+      RCLCPP_INFO(nh_->get_logger(), "Buffer avg: L=%.3f, F=%.3f, R=%.3f", left_avg, front_avg, right_avg);
+      
+      msg->ultrasonic_left = left_avg;
+      msg->ultrasonic_front = front_avg;
+      msg->ultrasonic_right = right_avg;
+    } else {
+      // 버퍼가 아직 가득 차지 않았으면 0.0으로 설정
+      msg->ultrasonic_left = 0.0f;
+      msg->ultrasonic_front = 0.0f;
+      msg->ultrasonic_right = 0.0f;
+    }
   } else {
     msg->ultrasonic_left = 0.0f;
   }
@@ -180,16 +217,13 @@ void SensorState::publish(
     
     float ultrasonic_front = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
+    // nan 값 체크 - 버퍼에 저장
     if (ultrasonic_front != ultrasonic_front) {  // nan 체크
-      RCLCPP_INFO(nh_->get_logger(), "Front: nan detected at %ld", now.nanoseconds());
-      ultrasonic_front = prev_ultrasonic_front_;
+      front_buffer_[buffer_index_] = prev_ultrasonic_front_;  // nan이면 이전 값 사용
     } else {
-      RCLCPP_INFO(nh_->get_logger(), "Front: valid value %.3f at %ld", ultrasonic_front, now.nanoseconds());
+      front_buffer_[buffer_index_] = ultrasonic_front;
       prev_ultrasonic_front_ = ultrasonic_front;
     }
-    
-    msg->ultrasonic_front = ultrasonic_front;
   } else {
     msg->ultrasonic_front = 0.0f;
   }
@@ -202,16 +236,13 @@ void SensorState::publish(
     
     float ultrasonic_right = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
+    // nan 값 체크 - 버퍼에 저장
     if (ultrasonic_right != ultrasonic_right) {  // nan 체크
-      RCLCPP_INFO(nh_->get_logger(), "Right: nan detected at %ld", now.nanoseconds());
-      ultrasonic_right = prev_ultrasonic_right_;
+      right_buffer_[buffer_index_] = prev_ultrasonic_right_;  // nan이면 이전 값 사용
     } else {
-      RCLCPP_INFO(nh_->get_logger(), "Right: valid value %.3f at %ld", ultrasonic_right, now.nanoseconds());
+      right_buffer_[buffer_index_] = ultrasonic_right;
       prev_ultrasonic_right_ = ultrasonic_right;
     }
-    
-    msg->ultrasonic_right = ultrasonic_right;
   } else {
     msg->ultrasonic_right = 0.0f;
   }
