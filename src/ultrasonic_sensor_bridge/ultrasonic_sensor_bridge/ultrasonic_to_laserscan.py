@@ -51,19 +51,19 @@ class UltrasonicToLaserScan(Node):
         """좌측 센서 콜백"""
         self.left_range = msg.range
         if math.isnan(self.left_range) or self.left_range <= 0:
-            self.left_range = self.range_max
+            self.left_range = float('inf')  # 무효한 값으로 설정
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
         self.front_range = msg.range
         if math.isnan(self.front_range) or self.front_range <= 0:
-            self.front_range = self.range_max
+            self.front_range = float('inf')  # 무효한 값으로 설정
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
         self.right_range = msg.range
         if math.isnan(self.right_range) or self.right_range <= 0:
-            self.right_range = self.range_max
+            self.right_range = float('inf')  # 무효한 값으로 설정
     
     def publish_laserscan(self):
         """LaserScan 메시지 생성 및 발행"""
@@ -94,6 +94,10 @@ class UltrasonicToLaserScan(Node):
     
     def set_sensor_range(self, ranges, sensor_angle, sensor_range):
         """특정 각도 범위에 센서 거리 값 설정"""
+        # 무효한 값(inf)인 경우 처리하지 않음
+        if math.isinf(sensor_range):
+            return
+            
         # 센서 각도를 배열 인덱스로 변환
         sensor_index = int((sensor_angle - self.angle_min) / self.angle_increment)
         
