@@ -23,16 +23,16 @@ class UltrasonicToLaserScan(Node):
         self.laserscan_pub = self.create_publisher(LaserScan, '/ultrasonic_scan', 10)
         
         # 센서 값 저장
-        self.left_range = 1.0  # 기본값 (최대 거리)
-        self.front_range = 1.0
-        self.right_range = 1.0
+        self.left_range = 0.15  # 기본값 (15cm)
+        self.front_range = 0.15
+        self.right_range = 0.15
         
         # LaserScan 파라미터 - 전면 집중 범위
         self.angle_min = -math.pi / 2.0  # -90도 (좌측)
         self.angle_max = math.pi / 2.0   # +90도 (우측)
         self.angle_increment = math.pi / 180.0  # 1도씩
         self.range_min = 0.02  # 2cm
-        self.range_max = 1.0   # 1m
+        self.range_max = 0.15  # 15cm
         
         # 센서 각도 (라디안) - 전면에 집중된 배치
         self.left_angle = math.pi / 4.0    # 45도 (좌측 전방)
