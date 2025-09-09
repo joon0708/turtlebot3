@@ -43,7 +43,7 @@ class UltrasonicToLaserScan(Node):
         self.sensor_angle_range = math.pi / 12.0  # 15도
         
         # 타이머로 LaserScan 발행
-        self.timer = self.create_timer(0.1, self.publish_laserscan)
+        self.timer = self.create_timer(0.05, self.publish_laserscan)  # 20Hz
         
         self.get_logger().info('Ultrasonic to LaserScan converter started')
     

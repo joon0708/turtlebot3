@@ -51,7 +51,7 @@ class UltrasonicPublisherDirect(Node):
         self.connect_opencr()
         
         # 타이머로 주기적으로 센서 데이터 읽기
-        self.timer = self.create_timer(0.1, self.read_and_publish_sensors)  # 10Hz
+        self.timer = self.create_timer(0.05, self.read_and_publish_sensors)  # 20Hz
         
         self.get_logger().info('Ultrasonic Publisher Direct started with OpenCR connection')
     
