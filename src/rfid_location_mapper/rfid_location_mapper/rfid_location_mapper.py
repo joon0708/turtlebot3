@@ -25,6 +25,7 @@ class RFIDLocationMapper(Node):
         self.nav_goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self.status_pub = self.create_publisher(String, '/rfid_status', 10)
         self.location_cmd_pub = self.create_publisher(String, '/location_command', 10)
+        self.integrated_status_pub = self.create_publisher(String, '/integrated_status', 10)
         
         # Subscribers
         self.rfid_sub = self.create_subscription(String, '/rfid/tag', self.rfid_callback, 10)
@@ -204,6 +205,15 @@ class RFIDLocationMapper(Node):
         status_msg = String()
         status_msg.data = message
         self.status_pub.publish(status_msg)
+        
+        # 통합 상태도 함께 발행
+        self.publish_integrated_status(message)
+    
+    def publish_integrated_status(self, rfid_message):
+        """통합 상태 발행"""
+        integrated_msg = String()
+        integrated_msg.data = rfid_message
+        self.integrated_status_pub.publish(integrated_msg)
     
     def send_location_command(self, command):
         """location_manager로 명령 전송"""

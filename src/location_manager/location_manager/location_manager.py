@@ -26,6 +26,7 @@ class LocationManager(Node):
         # Publishers
         self.nav_goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self.status_pub = self.create_publisher(String, '/location_status', 10)
+        self.integrated_status_pub = self.create_publisher(String, '/integrated_status', 10)
         
         # Subscribers
         self.location_cmd_sub = self.create_subscription(String, '/location_command', self.location_command_callback, 10)
@@ -279,6 +280,15 @@ class LocationManager(Node):
         status_msg = String()
         status_msg.data = message
         self.status_pub.publish(status_msg)
+        
+        # 통합 상태도 함께 발행
+        self.publish_integrated_status(message)
+    
+    def publish_integrated_status(self, location_message):
+        """통합 상태 발행"""
+        integrated_msg = String()
+        integrated_msg.data = location_message
+        self.integrated_status_pub.publish(integrated_msg)
     
 
 
