@@ -23,8 +23,8 @@ class IntegratedStatusPublisher(Node):
         self.location_status = "시스템 시작 중..."
         self.rfid_status = "RFID 시스템 시작 중..."
         
-        # 타이머로 주기적으로 통합 상태 발행
-        self.timer = self.create_timer(0.5, self.publish_integrated_status)  # 2Hz
+        # 타이머 비활성화 - 응답식으로만 발행
+        # self.timer = self.create_timer(2.0, self.publish_integrated_status)  # 주기적 발행 비활성화
         
         self.get_logger().info('Integrated Status Publisher initialized')
         self.get_logger().info('Publishing to /integrated_status topic')
@@ -33,11 +33,15 @@ class IntegratedStatusPublisher(Node):
         """위치 관리 상태 업데이트"""
         self.location_status = msg.data
         self.get_logger().debug(f'Location status updated: {self.location_status}')
+        # 상태 변경 시 즉시 통합 상태 발행 (응답식)
+        self.publish_integrated_status()
     
     def rfid_status_callback(self, msg):
         """RFID 상태 업데이트"""
         self.rfid_status = msg.data
         self.get_logger().debug(f'RFID status updated: {self.rfid_status}')
+        # 상태 변경 시 즉시 통합 상태 발행 (응답식)
+        self.publish_integrated_status()
     
     def publish_integrated_status(self):
         """통합 상태 발행"""
