@@ -30,7 +30,7 @@ class UltrasonicPublisherDirect(Node):
         # OpenCR 설정
         self.OPENCR_ID = 200  # OpenCR의 ID
         self.DEVICE_NAME = '/dev/ttyACM0'  # OpenCR USB 포트
-        self.BAUDRATE = 115200
+        self.BAUDRATE = 1000000
         
         # 초음파 센서 제어 테이블 주소
         self.ADDR_ULTRASONIC_LEFT = 190
