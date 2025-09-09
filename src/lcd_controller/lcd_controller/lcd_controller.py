@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Bool, UInt8
 from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import BatteryState
 import time
 
 class LCDController(Node):
@@ -30,12 +31,14 @@ class LCDController(Node):
         self.goal_name_sub = self.create_subscription(String, '/goal_location_name', self.goal_name_callback, 10)
         self.location_status_sub = self.create_subscription(String, '/location_status', self.location_status_callback, 10)
         self.rfid_status_sub = self.create_subscription(String, '/rfid_status', self.rfid_status_callback, 10)
+        self.battery_sub = self.create_subscription(BatteryState, '/battery_state', self.battery_callback, 10)
         
         # 상태 변수
         self.current_goal = None
         self.current_goal_name = None
         self.current_location_status = "대기 중..."
         self.current_rfid_status = "대기 중..."
+        self.current_battery_percentage = 0.0
         self.last_update_time = time.time()
         
         # 주기적 업데이트 타이머
@@ -140,6 +143,20 @@ class LCDController(Node):
         self.last_update_time = time.time()
         self.get_logger().debug(f"RFID status: {msg.data}")
     
+    def battery_callback(self, msg):
+        """배터리 상태 콜백"""
+        # 배터리 퍼센티지 계산 (0-100%)
+        if hasattr(msg, 'percentage') and msg.percentage >= 0:
+            self.current_battery_percentage = msg.percentage * 100.0
+        else:
+            # percentage가 없으면 voltage로 계산 (대략적)
+            voltage = msg.voltage
+            if voltage > 0:
+                # 3.7V 기준으로 대략적 계산 (실제로는 더 정확한 공식 필요)
+                self.current_battery_percentage = min(100.0, max(0.0, (voltage - 3.0) / 0.7 * 100.0))
+        
+        self.get_logger().debug(f"Battery: {self.current_battery_percentage:.1f}%")
+    
     def update_display(self):
         """LCD 화면 주기적 업데이트"""
         try:
@@ -162,13 +179,17 @@ class LCDController(Node):
             self.get_logger().error(f"Display update error: {e}")
     
     def show_default_display(self):
-        """기본 화면 표시"""
+        """기본 화면 표시 (배터리 정보 포함)"""
         try:
             self.lcd.clear()
             self.lcd.cursor_pos = (0, 0)
             self.lcd.write_string("TurtleBot3 Ready")
+            
+            # 배터리 퍼센티지 표시
+            battery_text = f"Battery: {self.current_battery_percentage:.0f}%"
             self.lcd.cursor_pos = (1, 0)
-            self.lcd.write_string("Waiting...")
+            self.lcd.write_string(battery_text)
+            
         except Exception as e:
             self.get_logger().error(f"Default display error: {e}")
     
