@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'location_manager = location_manager.location_manager:main',
+            'integrated_status_publisher = location_manager.integrated_status_publisher:main',
         ],
     },
 )
