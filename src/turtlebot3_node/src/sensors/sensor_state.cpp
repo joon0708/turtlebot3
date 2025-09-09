@@ -158,10 +158,12 @@ void SensorState::publish(
     // 4바이트를 float로 변환
     float ultrasonic_left = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용
+    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
     if (ultrasonic_left != ultrasonic_left) {  // nan 체크
+      RCLCPP_INFO(nh_->get_logger(), "Left: nan detected at %ld", now.nanoseconds());
       ultrasonic_left = prev_ultrasonic_left_;
     } else {
+      RCLCPP_INFO(nh_->get_logger(), "Left: valid value %.3f at %ld", ultrasonic_left, now.nanoseconds());
       prev_ultrasonic_left_ = ultrasonic_left;
     }
     
@@ -178,10 +180,12 @@ void SensorState::publish(
     
     float ultrasonic_front = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용
+    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
     if (ultrasonic_front != ultrasonic_front) {  // nan 체크
+      RCLCPP_INFO(nh_->get_logger(), "Front: nan detected at %ld", now.nanoseconds());
       ultrasonic_front = prev_ultrasonic_front_;
     } else {
+      RCLCPP_INFO(nh_->get_logger(), "Front: valid value %.3f at %ld", ultrasonic_front, now.nanoseconds());
       prev_ultrasonic_front_ = ultrasonic_front;
     }
     
@@ -198,10 +202,12 @@ void SensorState::publish(
     
     float ultrasonic_right = *reinterpret_cast<float*>(&raw_data);
     
-    // nan 값 체크 - 이전 값 사용
+    // nan 값 체크 - 이전 값 사용 (딜레이 측정용)
     if (ultrasonic_right != ultrasonic_right) {  // nan 체크
+      RCLCPP_INFO(nh_->get_logger(), "Right: nan detected at %ld", now.nanoseconds());
       ultrasonic_right = prev_ultrasonic_right_;
     } else {
+      RCLCPP_INFO(nh_->get_logger(), "Right: valid value %.3f at %ld", ultrasonic_right, now.nanoseconds());
       prev_ultrasonic_right_ = ultrasonic_right;
     }
     

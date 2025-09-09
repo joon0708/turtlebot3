@@ -44,8 +44,9 @@ class UltrasonicPublisherROS(Node):
             if right_val > MAX_RANGE or right_val < MIN_RANGE:
                 right_val = 0.0
             
-            # 간단한 디버깅 로그
-            self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
+            # 딜레이 측정용 로그
+            current_time = self.get_clock().now().nanoseconds
+            self.get_logger().info(f'ROS: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f} at {current_time}')
             
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
