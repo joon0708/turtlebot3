@@ -45,7 +45,8 @@ class UltrasonicToLaserScan(Node):
         # 타이머로 LaserScan 발행
         self.timer = self.create_timer(0.05, self.publish_laserscan)  # 20Hz
         
-    
+
+        
     def left_callback(self, msg):
         """좌측 센서 콜백"""
         self.left_range = msg.range
