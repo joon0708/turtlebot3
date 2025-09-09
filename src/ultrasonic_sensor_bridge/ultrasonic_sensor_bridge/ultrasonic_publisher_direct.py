@@ -111,7 +111,7 @@ class UltrasonicPublisherDirect(Node):
                 self.prev_right = right_val
             
             # 초음파 센서 범위 제한 (너무 멀면 감지 안함)
-            MAX_RANGE = 2.0  # 2미터 이상이면 무효
+            MAX_RANGE = 1.0  # 1미터 이상이면 무효
             MIN_RANGE = 0.02  # 2cm 미만이면 무효
             
             if left_val > MAX_RANGE or left_val < MIN_RANGE:
