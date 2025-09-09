@@ -8,6 +8,7 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+import launch
 
 def generate_launch_description():
     # 환경 변수 설정
@@ -17,6 +18,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
+    enable_rfid = LaunchConfiguration('enable_rfid', default='false')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -34,6 +36,11 @@ def generate_launch_description():
             'usb_port',
             default_value='/dev/ttyACM0',
             description='Connected USB port with OpenCR'),
+        
+        DeclareLaunchArgument(
+            'enable_rfid',
+            default_value='false',
+            description='Enable RFID tag detection and navigation'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
@@ -81,6 +88,21 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble',
                 'ROS_LOG_DIR': '/root/.ros/log'
             }
-            
+        ),
+        
+        # 5. RFID 태그 퍼블리셔 (조건부)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('rfid_tag_publisher'), 'launch', 'rfid_tag_publisher.launch.py')]),
+            condition=launch.conditions.IfCondition(enable_rfid),
+        ),
+        
+        # 6. RFID 위치 매핑 노드 (조건부)
+        Node(
+            package='rfid_location_mapper',
+            executable='rfid_location_mapper',
+            name='rfid_location_mapper',
+            output='screen',
+            condition=launch.conditions.IfCondition(enable_rfid),
         ),
     ])
