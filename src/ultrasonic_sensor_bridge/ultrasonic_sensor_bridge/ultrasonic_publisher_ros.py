@@ -29,9 +29,9 @@ class UltrasonicPublisherROS(Node):
         """turtlebot3_ros에서 센서 데이터를 받아서 초음파 센서 데이터로 변환"""
         try:
             # custom_turtlebot3_msgs/SensorState에서 초음파 센서 데이터 추출
-            left_val = msg.ultrasonic_left / 1000.0  # mm를 m로 변환
-            front_val = msg.ultrasonic_front / 1000.0
-            right_val = msg.ultrasonic_right / 1000.0
+            left_val = msg.ultrasonic_left  # 이미 미터 단위
+            front_val = msg.ultrasonic_front
+            right_val = msg.ultrasonic_right
             
             # 디버깅용 로그 - 원본 값과 변환된 값 모두 출력
             self.get_logger().info(f'Raw from turtlebot3_ros: L={msg.ultrasonic_left:.6f}, F={msg.ultrasonic_front:.6f}, R={msg.ultrasonic_right:.6f}')
