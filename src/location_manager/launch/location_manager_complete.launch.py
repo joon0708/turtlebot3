@@ -106,4 +106,12 @@ def generate_launch_description():
             condition=launch.conditions.IfCondition(enable_rfid),
         ),
         
+        # 7. LCD 컨트롤러 (위치 정보 표시)
+        Node(
+            package='lcd_controller',
+            executable='lcd_controller',
+            name='lcd_controller',
+            output='screen',
+        ),
+        
     ])

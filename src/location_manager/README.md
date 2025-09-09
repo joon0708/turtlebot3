@@ -11,6 +11,7 @@ TurtleBot3를 위한 위치 관리 시스템입니다. 자주 사용하는 위�
 - **Navigation2 연동**: ROS2 Navigation2와 완벽 호환
 - **RFID 연동**: RFID 태그를 통한 자동 위치 이동 (선택적)
 - **통합 상태 모니터링**: 두 시스템의 상태를 하나의 토픽으로 확인
+- **LCD 디스플레이**: 현재 향하는 위치와 상태 정보를 LCD에 실시간 표시
 
 ## 📋 시스템 요구사항
 
@@ -18,6 +19,7 @@ TurtleBot3를 위한 위치 관리 시스템입니다. 자주 사용하는 위�
 - **TurtleBot3** (Waffle Pi, Burger 등)
 - **Navigation2** 패키지
 - **Cartographer** (SLAM)
+- **LCD 디스플레이** (선택적, I2C 연결)
 
 ## 🛠️ 설치 및 빌드
 
@@ -241,3 +243,8 @@ Apache 2.0 License
 
 ### **네비게이션 토픽**
 - `/goal_pose` - 네비게이션 목표 위치
+
+### **LCD 토픽**
+- `/lcd/display` - LCD 전체 화면 텍스트 표시
+- `/lcd/clear` - LCD 화면 지우기
+- `/lcd/backlight` - LCD 백라이트 제어

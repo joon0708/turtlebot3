@@ -4,6 +4,8 @@ from RPLCD.i2c import CharLCD
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Bool, UInt8
+from geometry_msgs.msg import PoseStamped
+import time
 
 class LCDController(Node):
     def __init__(self, lcd):
@@ -22,6 +24,20 @@ class LCDController(Node):
         self.write_sub = self.create_subscription(String, '/lcd/write', self.write_callback, 10)
         self.clear_line_sub = self.create_subscription(UInt8, '/lcd/clear_line', self.clear_line_callback, 10)
         self.cursor_mode_sub = self.create_subscription(String, '/lcd/cursor_mode', self.cursor_mode_callback, 10)
+        
+        # 위치 정보 토픽 구독
+        self.goal_pose_sub = self.create_subscription(PoseStamped, '/goal_pose', self.goal_pose_callback, 10)
+        self.location_status_sub = self.create_subscription(String, '/location_status', self.location_status_callback, 10)
+        self.rfid_status_sub = self.create_subscription(String, '/rfid_status', self.rfid_status_callback, 10)
+        
+        # 상태 변수
+        self.current_goal = None
+        self.current_location_status = "대기 중..."
+        self.current_rfid_status = "대기 중..."
+        self.last_update_time = time.time()
+        
+        # 주기적 업데이트 타이머
+        self.update_timer = self.create_timer(1.0, self.update_display)  # 1초마다 업데이트
         
         self.get_logger().info('LCD Controller started')
         
@@ -97,6 +113,92 @@ class LCDController(Node):
                 self.get_logger().error("Invalid mode. Use 'hide', 'visible', or 'blink'")
         except Exception as e:
             self.get_logger().error(f"Cursor mode error: {e}")
+    
+    def goal_pose_callback(self, msg):
+        """네비게이션 목표 위치 콜백"""
+        self.current_goal = msg
+        self.last_update_time = time.time()
+        self.get_logger().info(f"New goal: ({msg.pose.position.x:.2f}, {msg.pose.position.y:.2f})")
+    
+    def location_status_callback(self, msg):
+        """위치 관리 상태 콜백"""
+        self.current_location_status = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().debug(f"Location status: {msg.data}")
+    
+    def rfid_status_callback(self, msg):
+        """RFID 상태 콜백"""
+        self.current_rfid_status = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().debug(f"RFID status: {msg.data}")
+    
+    def update_display(self):
+        """LCD 화면 주기적 업데이트"""
+        try:
+            # 현재 시간
+            current_time = time.time()
+            
+            # 5초 이상 업데이트가 없으면 기본 화면 표시
+            if current_time - self.last_update_time > 5.0:
+                self.show_default_display()
+                return
+            
+            # 목표 위치가 있으면 네비게이션 정보 표시
+            if self.current_goal:
+                self.show_navigation_display()
+            else:
+                # 상태 정보 표시
+                self.show_status_display()
+                
+        except Exception as e:
+            self.get_logger().error(f"Display update error: {e}")
+    
+    def show_default_display(self):
+        """기본 화면 표시"""
+        try:
+            self.lcd.clear()
+            self.lcd.cursor_pos = (0, 0)
+            self.lcd.write_string("TurtleBot3 Ready")
+            self.lcd.cursor_pos = (1, 0)
+            self.lcd.write_string("Waiting...")
+        except Exception as e:
+            self.get_logger().error(f"Default display error: {e}")
+    
+    def show_navigation_display(self):
+        """네비게이션 정보 표시"""
+        try:
+            self.lcd.clear()
+            self.lcd.cursor_pos = (0, 0)
+            self.lcd.write_string("Navigating to:")
+            
+            # 목표 위치 좌표 표시
+            x = self.current_goal.pose.position.x
+            y = self.current_goal.pose.position.y
+            coord_text = f"({x:.1f}, {y:.1f})"
+            
+            self.lcd.cursor_pos = (1, 0)
+            self.lcd.write_string(coord_text)
+            
+        except Exception as e:
+            self.get_logger().error(f"Navigation display error: {e}")
+    
+    def show_status_display(self):
+        """상태 정보 표시"""
+        try:
+            self.lcd.clear()
+            
+            # 첫 번째 줄: 위치 관리 상태
+            self.lcd.cursor_pos = (0, 0)
+            status_line1 = self.current_location_status[:16]  # 16자 제한
+            self.lcd.write_string(status_line1)
+            
+            # 두 번째 줄: RFID 상태
+            self.lcd.cursor_pos = (1, 0)
+            status_line2 = self.current_rfid_status[:16]  # 16자 제한
+            self.lcd.write_string(status_line2)
+            
+        except Exception as e:
+            self.get_logger().error(f"Status display error: {e}")
     
     def destroy_node(self):
         """노드 종료 시 정리"""
