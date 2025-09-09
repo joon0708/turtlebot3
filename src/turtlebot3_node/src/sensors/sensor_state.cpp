@@ -170,6 +170,9 @@ void SensorState::publish(
       prev_ultrasonic_left_ = ultrasonic_left;
     }
     
+    // 필터링 이후 최종 값 로그
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Left FINAL: %f (prev: %f)", ultrasonic_left, prev_ultrasonic_left_);
+    
     msg->ultrasonic_left = ultrasonic_left;
   } else {
     msg->ultrasonic_left = 0.0f;
@@ -195,6 +198,9 @@ void SensorState::publish(
       prev_ultrasonic_front_ = ultrasonic_front;
     }
     
+    // 필터링 이후 최종 값 로그
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Front FINAL: %f (prev: %f)", ultrasonic_front, prev_ultrasonic_front_);
+    
     msg->ultrasonic_front = ultrasonic_front;
   } else {
     msg->ultrasonic_front = 0.0f;
@@ -219,6 +225,9 @@ void SensorState::publish(
     } else {
       prev_ultrasonic_right_ = ultrasonic_right;
     }
+    
+    // 필터링 이후 최종 값 로그
+    RCLCPP_INFO(nh_->get_logger(), "Ultrasonic Right FINAL: %f (prev: %f)", ultrasonic_right, prev_ultrasonic_right_);
     
     msg->ultrasonic_right = ultrasonic_right;
   } else {

@@ -33,13 +33,14 @@ class UltrasonicPublisherROS(Node):
             front_val = msg.ultrasonic_front / 1000.0
             right_val = msg.ultrasonic_right / 1000.0
             
+            # 디버깅용 로그 - 원본 값과 변환된 값 모두 출력
+            self.get_logger().info(f'Raw from turtlebot3_ros: L={msg.ultrasonic_left:.6f}, F={msg.ultrasonic_front:.6f}, R={msg.ultrasonic_right:.6f}')
+            self.get_logger().info(f'Converted values: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
+            
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
             self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
             self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
-            
-            # 디버깅용 로그
-            self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
                 
         except Exception as e:
             self.get_logger().error(f'Error processing sensor state: {e}')
