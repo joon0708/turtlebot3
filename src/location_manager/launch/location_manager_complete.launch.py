@@ -19,6 +19,7 @@ def generate_launch_description():
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     enable_rfid = LaunchConfiguration('enable_rfid', default='false')
+    enable_ultrasonic_safety = LaunchConfiguration('enable_ultrasonic_safety', default='true')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -41,6 +42,11 @@ def generate_launch_description():
             'enable_rfid',
             default_value='false',
             description='Enable RFID tag detection and navigation'),
+        
+        DeclareLaunchArgument(
+            'enable_ultrasonic_safety',
+            default_value='true',
+            description='Enable ultrasonic safety controller'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
@@ -112,6 +118,34 @@ def generate_launch_description():
             executable='lcd_controller',
             name='lcd_controller',
             output='screen',
+        ),
+        
+        # 8. 초음파 센서 퍼블리셔 (조건부)
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_publisher_ros',
+            name='ultrasonic_publisher',
+            output='screen',
+            condition=launch.conditions.IfCondition(enable_ultrasonic_safety),
+        ),
+        
+        # 9. 초음파 안전 제어기 (조건부)
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_safety_controller',
+            name='ultrasonic_safety_controller',
+            output='screen',
+            condition=launch.conditions.IfCondition(enable_ultrasonic_safety),
+        ),
+        
+        # 10. cmd_vel 토픽 리맵핑 (안전 제어 사용 시)
+        Node(
+            package='topic_tools',
+            executable='relay',
+            name='cmd_vel_relay',
+            arguments=['/cmd_vel_safe', '/cmd_vel'],
+            output='screen',
+            condition=launch.conditions.IfCondition(enable_ultrasonic_safety),
         ),
         
     ])

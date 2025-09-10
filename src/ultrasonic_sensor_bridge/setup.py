@@ -12,7 +12,8 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', [
             'launch/ultrasonic_publisher.launch.py',
-            'launch/ultrasonic_with_lcd.launch.py'
+            'launch/ultrasonic_with_lcd.launch.py',
+            'launch/ultrasonic_safety_system.launch.py'
         ]),
     ],
     install_requires=['setuptools'],
@@ -29,6 +30,7 @@ setup(
             'ultrasonic_publisher_ros = ultrasonic_sensor_bridge.ultrasonic_publisher_ros:main',
             'ultrasonic_lcd_display = ultrasonic_sensor_bridge.ultrasonic_lcd_display:main',
             'ultrasonic_to_laserscan = ultrasonic_sensor_bridge.ultrasonic_to_laserscan:main',
+            'ultrasonic_safety_controller = ultrasonic_sensor_bridge.ultrasonic_safety_controller:main',
         ],
     },
 )
