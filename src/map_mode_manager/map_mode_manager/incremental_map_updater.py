@@ -78,9 +78,9 @@ class IncrementalMapUpdater(Node):
             os.makedirs(self.backup_dir, exist_ok=True)
         
         self.get_logger().info(
-            f'IncrementalMapUpdater 초기화 완료. '
-            f'기본 맵 경로: {self.base_map_path}, '
-            f'백업 활성화: {self.backup_enabled}'
+            f'IncrementalMapUpdater initialized. '
+            f'Base map path: {self.base_map_path}, '
+            f'Backup enabled: {self.backup_enabled}'
         )
     
     def fused_map_callback(self, msg: OccupancyGrid):

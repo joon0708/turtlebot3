@@ -76,9 +76,9 @@ class MapFusionNode(Node):
         self.fusion_timer = self.create_timer(self.update_interval, self.perform_fusion)
         
         self.get_logger().info(
-            f'MapFusionNode 초기화 완료. '
-            f'변화 임계값: {self.change_threshold}, '
-            f'업데이트 주기: {self.update_interval}초'
+            f'MapFusionNode initialized. '
+            f'Change threshold: {self.change_threshold}, '
+            f'Update interval: {self.update_interval}s'
         )
     
     def base_map_callback(self, msg: OccupancyGrid):

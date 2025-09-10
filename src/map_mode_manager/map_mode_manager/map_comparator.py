@@ -75,7 +75,7 @@ class MapComparator(Node):
         # 타이머 설정 (1초마다 맵 비교)
         self.comparison_timer = self.create_timer(1.0, self.perform_comparison)
         
-        self.get_logger().info('MapComparator 노드가 초기화되었습니다.')
+        self.get_logger().info('MapComparator node initialized.')
     
     def scan_callback(self, msg: LaserScan):
         """LiDAR 스캔 데이터 콜백"""

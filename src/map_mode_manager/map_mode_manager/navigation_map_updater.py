@@ -102,11 +102,11 @@ class NavigationMapUpdater(Node):
         self.status_timer = self.create_timer(2.0, self.publish_status)
         
         self.get_logger().info(
-            f'NavigationMapUpdater 초기화 완료. '
-            f'업데이트 간격: {self.update_interval}초, '
-            f'자동 업데이트: {self.auto_update_enabled}'
+            f'NavigationMapUpdater initialized. '
+            f'Update interval: {self.update_interval}s, '
+            f'Auto update: {self.auto_update_enabled}'
         )
-        self.publish_status_message("네비게이션 맵 업데이터 시작됨")
+        self.publish_status_message("Navigation map updater started")
     
     def map_callback(self, msg: OccupancyGrid):
         """맵 데이터 콜백"""
