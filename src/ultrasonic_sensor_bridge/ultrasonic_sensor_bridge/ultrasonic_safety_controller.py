@@ -50,6 +50,9 @@ class UltrasonicSafetyController(Node):
         self.declare_parameter('warning_distance', 0.35) # 경고 거리 (35cm)
         self.declare_parameter('stop_duration', 3.0)
         
+        # 히스테리시스 설정 (경계에서 변동 방지)
+        self.hysteresis = 0.02  # 2cm 여유
+        
         self.safety_distance = self.get_parameter('safety_distance').get_parameter_value().double_value
         self.slow_distance = self.get_parameter('slow_distance').get_parameter_value().double_value
         self.warning_distance = self.get_parameter('warning_distance').get_parameter_value().double_value
@@ -62,7 +65,7 @@ class UltrasonicSafetyController(Node):
         self.safety_status = "NORMAL"
         
         # 타이머로 안전 제어 실행
-        self.timer = self.create_timer(0.1, self.safety_control)  # 10Hz
+        self.timer = self.create_timer(0.2, self.safety_control)  # 5Hz (더 안정적)
         
         self.get_logger().info('Ultrasonic Safety Controller started')
         self.get_logger().info(f'Safety zones: STOP={self.safety_distance}m, SLOW={self.slow_distance}m, WARNING={self.warning_distance}m')
@@ -144,14 +147,14 @@ class UltrasonicSafetyController(Node):
                 self.safety_status = "STOPPED"
                 self.get_logger().warn(f'Obstacle detected at {min_distance:.3f}m - STOPPING')
             
-            # 정지 시간이 지나면 다시 움직임 허용 (센서 값이 안전해져야 함)
-            elif current_time - self.stop_start_time >= self.stop_duration and min_distance > self.safety_distance:
+            # 정지 시간이 지나면 다시 움직임 허용 (히스테리시스로 여유 추가)
+            elif current_time - self.stop_start_time >= self.stop_duration and min_distance > (self.safety_distance + self.hysteresis):
                 self.is_stopped = False
                 self.safety_status = "RESUMING"
                 self.get_logger().info('Stop duration completed and path clear - RESUMING')
         
-        # 2단계: 감속 구간 (25cm 이하)
-        elif min_distance <= self.slow_distance:
+        # 2단계: 감속 구간 (히스테리시스 적용)
+        elif min_distance <= (self.slow_distance + self.hysteresis):
             self.safety_status = "SLOWING"
             # 속도를 절반으로 감소
             safe_cmd = Twist()
@@ -160,8 +163,8 @@ class UltrasonicSafetyController(Node):
             self.safe_cmd_vel_pub.publish(safe_cmd)
             self.get_logger().info(f'Obstacle at {min_distance:.3f}m - SLOWING DOWN')
         
-        # 3단계: 경고 구간 (35cm 이하)
-        elif min_distance <= self.warning_distance:
+        # 3단계: 경고 구간 (히스테리시스 적용)
+        elif min_distance <= (self.warning_distance + self.hysteresis):
             self.safety_status = "WARNING"
             # 속도를 75%로 감소
             safe_cmd = Twist()
