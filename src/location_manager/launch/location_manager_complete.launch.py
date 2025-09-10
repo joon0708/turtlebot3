@@ -20,6 +20,8 @@ def generate_launch_description():
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     enable_rfid = LaunchConfiguration('enable_rfid', default='false')
     enable_ultrasonic_safety = LaunchConfiguration('enable_ultrasonic_safety', default='true')
+    safety_distance = LaunchConfiguration('safety_distance', default='0.15')
+    stop_duration = LaunchConfiguration('stop_duration', default='3.0')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -47,6 +49,16 @@ def generate_launch_description():
             'enable_ultrasonic_safety',
             default_value='true',
             description='Enable ultrasonic safety controller'),
+        
+        DeclareLaunchArgument(
+            'safety_distance',
+            default_value='0.15',
+            description='Safety distance in meters (default: 15cm)'),
+        
+        DeclareLaunchArgument(
+            'stop_duration',
+            default_value='3.0',
+            description='Stop duration in seconds (default: 3.0s)'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
@@ -135,6 +147,10 @@ def generate_launch_description():
             executable='ultrasonic_safety_controller',
             name='ultrasonic_safety_controller',
             output='screen',
+            parameters=[{
+                'safety_distance': safety_distance,
+                'stop_duration': stop_duration,
+            }],
             condition=launch.conditions.IfCondition(enable_ultrasonic_safety),
         ),
         

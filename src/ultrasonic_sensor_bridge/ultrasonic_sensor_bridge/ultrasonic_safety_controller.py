@@ -34,9 +34,22 @@ class UltrasonicSafetyController(Node):
         self.front_range = 0.30
         self.right_range = 0.30
         
-        # 안전 설정
-        self.safety_distance = 0.15  # 15cm 이하에서 정지
-        self.stop_duration = 1.0     # 1초간 정지
+        # 센서 값 히스토리 (최근 10개 데이터)
+        self.left_history = [0.30] * 10  # 기본값으로 초기화
+        self.front_history = [0.30] * 10
+        self.right_history = [0.30] * 10
+        
+        # 히스토리 인덱스
+        self.left_index = 0
+        self.front_index = 0
+        self.right_index = 0
+        
+        # 안전 설정 (파라미터에서 가져오기)
+        self.declare_parameter('safety_distance', 0.15)
+        self.declare_parameter('stop_duration', 3.0)
+        
+        self.safety_distance = self.get_parameter('safety_distance').get_parameter_value().double_value
+        self.stop_duration = self.get_parameter('stop_duration').get_parameter_value().double_value
         self.slow_distance = 0.25    # 25cm 이하에서 감속
         
         # 상태 변수
@@ -53,21 +66,30 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        self.left_range = msg.range
-        if self.left_range <= 0 or self.left_range > 0.30:
-            self.left_range = 0.30  # 무효한 값 처리
+        # 유효한 값이면 히스토리에 추가
+        if msg.range > 0 and msg.range <= 0.30:
+            self.left_history[self.left_index] = msg.range
+            self.left_index = (self.left_index + 1) % 10
+            # 최근 유효한 값으로 업데이트
+            self.left_range = msg.range
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
-        self.front_range = msg.range
-        if self.front_range <= 0 or self.front_range > 0.30:
-            self.front_range = 0.30  # 무효한 값 처리
+        # 유효한 값이면 히스토리에 추가
+        if msg.range > 0 and msg.range <= 0.30:
+            self.front_history[self.front_index] = msg.range
+            self.front_index = (self.front_index + 1) % 10
+            # 최근 유효한 값으로 업데이트
+            self.front_range = msg.range
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
-        self.right_range = msg.range
-        if self.right_range <= 0 or self.right_range > 0.30:
-            self.right_range = 0.30  # 무효한 값 처리
+        # 유효한 값이면 히스토리에 추가
+        if msg.range > 0 and msg.range <= 0.30:
+            self.right_history[self.right_index] = msg.range
+            self.right_index = (self.right_index + 1) % 10
+            # 최근 유효한 값으로 업데이트
+            self.right_range = msg.range
     
     def cmd_vel_callback(self, msg):
         """원본 cmd_vel 콜백"""
@@ -77,8 +99,33 @@ class UltrasonicSafetyController(Node):
         """안전 제어 로직"""
         current_time = time.time()
         
-        # 가장 가까운 거리 확인
-        min_distance = min(self.left_range, self.front_range, self.right_range)
+        # 각 센서의 최근 10개 데이터 중 유효한 값들 확인
+        valid_sensors = []
+        
+        # 좌측 센서: 최근 10개 중 유효한 값이 있으면 사용
+        left_valid = [val for val in self.left_history if 0 < val <= 0.30]
+        if left_valid:
+            valid_sensors.append(min(left_valid))  # 가장 가까운 값 사용
+        
+        # 전방 센서: 최근 10개 중 유효한 값이 있으면 사용
+        front_valid = [val for val in self.front_history if 0 < val <= 0.30]
+        if front_valid:
+            valid_sensors.append(min(front_valid))  # 가장 가까운 값 사용
+        
+        # 우측 센서: 최근 10개 중 유효한 값이 있으면 사용
+        right_valid = [val for val in self.right_history if 0 < val <= 0.30]
+        if right_valid:
+            valid_sensors.append(min(right_valid))  # 가장 가까운 값 사용
+        
+        # 유효한 센서가 없으면 안전하게 정지
+        if not valid_sensors:
+            self.safety_status = "SENSOR_ERROR"
+            stop_cmd = Twist()
+            self.safe_cmd_vel_pub.publish(stop_cmd)
+            return
+        
+        # 가장 가까운 거리 확인 (유효한 센서만 사용)
+        min_distance = min(valid_sensors)
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
@@ -88,11 +135,11 @@ class UltrasonicSafetyController(Node):
                 self.safety_status = "STOPPED"
                 self.get_logger().warn(f'Obstacle detected at {min_distance:.3f}m - STOPPING')
             
-            # 정지 시간이 지나면 다시 움직임 허용
-            elif current_time - self.stop_start_time >= self.stop_duration:
+            # 정지 시간이 지나면 다시 움직임 허용 (센서 값이 안전해져야 함)
+            elif current_time - self.stop_start_time >= self.stop_duration and min_distance > self.safety_distance:
                 self.is_stopped = False
                 self.safety_status = "RESUMING"
-                self.get_logger().info('Stop duration completed - RESUMING')
+                self.get_logger().info('Stop duration completed and path clear - RESUMING')
         
         # 감속 구간
         elif min_distance <= self.slow_distance:
