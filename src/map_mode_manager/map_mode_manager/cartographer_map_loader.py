@@ -163,16 +163,16 @@ class CartographerMapLoader(Node):
             occupancy_grid.info.origin.orientation.w = 1.0
             
             # 이미지 데이터를 점유도로 변환
-            # PGM: 0=검은색(장애물), 255=흰색(자유공간), 205=회색(알 수 없음)
+            # PGM: 0=검은색(장애물), 254=흰색(자유공간), 205=회색(알 수 없음)
             occupancy_data = []
             unique_pixels = set()
             for pixel in image_data:
                 unique_pixels.add(pixel)
                 if pixel == 0:  # 검은색 - 장애물
                     occupancy_data.append(100)
-                elif pixel == 255:  # 흰색 - 자유공간
+                elif pixel >= 250:  # 흰색 - 자유공간 (254, 255 등)
                     occupancy_data.append(0)
-                else:  # 회색 - 알 수 없음
+                else:  # 회색 - 알 수 없음 (205 등)
                     occupancy_data.append(-1)
             
             # 디버깅: 실제 픽셀 값들 출력
