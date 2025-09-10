@@ -71,11 +71,11 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 4. 위치 관리 노드 - ExecuteProcess로 실행
+        # 4. 위치 관리 노드 - Python 스크립트 직접 실행
         ExecuteProcess(
-            cmd=[os.path.join(
+            cmd=['python3', os.path.join(
                 get_package_share_directory('location_manager'),
-                '..', '..', 'bin', 'location_manager'
+                '..', '..', 'lib', 'python3.10', 'site-packages', 'location_manager', 'location_manager.py'
             )],
             output='screen',
             env={
