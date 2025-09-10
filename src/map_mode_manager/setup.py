@@ -30,6 +30,8 @@ setup(
             'map_similarity_checker = map_mode_manager.map_similarity_checker:main',
             'mode_switcher = map_mode_manager.mode_switcher:main',
             'initial_pose_setter = map_mode_manager.initial_pose_setter:main',
+            'navigation_map_updater = map_mode_manager.navigation_map_updater:main',
+            'map_updater = map_mode_manager.map_updater:main',
         ],
     },
 )
