@@ -103,29 +103,34 @@ class UltrasonicSafetyController(Node):
         """안전 제어 로직"""
         current_time = time.time()
         
-        # 각 센서의 최근 10개 데이터 중 유효한 값들 확인
+        # 각 센서의 최근 10개 데이터 중 최신 유효한 값 사용
         valid_sensors = []
         
-        # 좌측 센서: 최근 10개 중 유효한 값이 있으면 사용
+        # 좌측 센서: 최근 10개 중 최신 유효한 값 사용
         left_valid = [val for val in self.left_history if 0 < val <= 0.50]
         if left_valid:
-            valid_sensors.append(min(left_valid))  # 가장 가까운 값 사용
+            valid_sensors.append(left_valid[-1])  # 가장 최신 값 사용
         
-        # 전방 센서: 최근 10개 중 유효한 값이 있으면 사용
+        # 전방 센서: 최근 10개 중 최신 유효한 값 사용
         front_valid = [val for val in self.front_history if 0 < val <= 0.50]
         if front_valid:
-            valid_sensors.append(min(front_valid))  # 가장 가까운 값 사용
+            valid_sensors.append(front_valid[-1])  # 가장 최신 값 사용
         
-        # 우측 센서: 최근 10개 중 유효한 값이 있으면 사용
+        # 우측 센서: 최근 10개 중 최신 유효한 값 사용
         right_valid = [val for val in self.right_history if 0 < val <= 0.50]
         if right_valid:
-            valid_sensors.append(min(right_valid))  # 가장 가까운 값 사용
+            valid_sensors.append(right_valid[-1])  # 가장 최신 값 사용
         
-        # 유효한 센서가 없으면 안전하게 정지
+        # 유효한 센서가 없으면 이전 상태 유지 (센서 오류 시에도 안전 우선)
         if not valid_sensors:
             self.safety_status = "SENSOR_ERROR"
-            stop_cmd = Twist()
-            self.safe_cmd_vel_pub.publish(stop_cmd)
+            # 센서 오류 시에는 정지 상태 유지 (브레이크 해제 방지)
+            if self.is_stopped:
+                stop_cmd = Twist()
+                self.safe_cmd_vel_pub.publish(stop_cmd)
+            else:
+                # 정지 상태가 아니면 이전 명령 유지 (급작스러운 정지 방지)
+                self.safe_cmd_vel_pub.publish(self.last_cmd_vel)
             return
         
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
