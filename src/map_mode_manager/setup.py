@@ -15,7 +15,7 @@ setup(
         ('share/' + package_name + '/launch', glob.glob('launch/*.launch.py')),
         ('share/' + package_name + '/config', glob.glob('config/*.yaml')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'numpy', 'opencv-python', 'PyYAML'],
     zip_safe=True,
     maintainer='TurtleBot3 User',
     maintainer_email='user@example.com',

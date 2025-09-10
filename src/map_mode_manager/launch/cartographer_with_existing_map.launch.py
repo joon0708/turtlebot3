@@ -50,19 +50,24 @@ def generate_launch_description():
     cartographer_config = LaunchConfiguration('cartographer_config')
     load_existing_map = LaunchConfiguration('load_existing_map')
     
-    # Cartographer Map Loader (기존 맵 로더)
-    map_loader_cmd = Node(
-        package='map_mode_manager',
-        executable='cartographer_map_loader.py',
-        name='cartographer_map_loader',
+    # Cartographer Map Loader (기존 맵 로더) - ExecuteProcess로 실행
+    map_loader_cmd = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'lib', 'python3.10', 'site-packages', 'map_mode_manager', 'cartographer_map_loader.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'map_file_path': map_file,
-            'load_existing_map': load_existing_map,
-            'publish_loaded_map': True,
-            'update_interval': 1.0
-        }]
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        }
     )
     
     # Cartographer Node (로컬라이제이션 모드)
@@ -95,73 +100,84 @@ def generate_launch_description():
         arguments=['-resolution', '0.05', '-publish_period_sec', '1.0']
     )
     
-    # Map Comparator (맵 비교)
-    map_comparator_cmd = Node(
-        package='map_mode_manager',
-        executable='map_comparator.py',
-        name='map_comparator',
+    # Map Comparator (맵 비교) - ExecuteProcess로 실행
+    map_comparator_cmd = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'lib', 'python3.10', 'site-packages', 'map_mode_manager', 'map_comparator.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'scan_sampling_ratio': 0.1,
-            'map_resolution': 0.05,
-            'comparison_area_size': 5.0,
-            'min_scan_points': 10,
-            'max_scan_range': 3.5
-        }]
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        }
     )
     
-    # Map Fusion Node (맵 융합)
-    map_fusion_cmd = Node(
-        package='map_mode_manager',
-        executable='map_fusion_node.py',
-        name='map_fusion_node',
+    # Map Fusion Node (맵 융합) - ExecuteProcess로 실행
+    map_fusion_cmd = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'lib', 'python3.10', 'site-packages', 'map_mode_manager', 'map_fusion_node.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'change_threshold': 0.3,
-            'fusion_confidence': 0.8,
-            'update_interval': 2.0,
-            'min_change_area': 50,
-            'enable_incremental_update': True
-        }]
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        }
     )
     
-    # Incremental Map Updater (점진적 맵 업데이터)
-    incremental_map_updater_cmd = Node(
-        package='map_mode_manager',
-        executable='incremental_map_updater.py',
-        name='incremental_map_updater',
+    # Incremental Map Updater (점진적 맵 업데이터) - ExecuteProcess로 실행
+    incremental_map_updater_cmd = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'lib', 'python3.10', 'site-packages', 'map_mode_manager', 'incremental_map_updater.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'base_map_path': os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'),
-                'map'
-            ),
-            'backup_enabled': True,
-            'max_backups': 10,
-            'update_confidence_threshold': 0.8,
-            'min_update_interval': 30.0,
-            'auto_update_enabled': True
-        }]
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        }
     )
     
-    # Navigation Map Updater (네비게이션 맵 업데이터)
-    navigation_map_updater_cmd = Node(
-        package='map_mode_manager',
-        executable='navigation_map_updater.py',
-        name='navigation_map_updater',
+    # Navigation Map Updater (네비게이션 맵 업데이터) - ExecuteProcess로 실행
+    navigation_map_updater_cmd = ExecuteProcess(
+        cmd=['python3', os.path.join(
+            get_package_share_directory('map_mode_manager'),
+            '..', '..', 'lib', 'python3.10', 'site-packages', 'map_mode_manager', 'navigation_map_updater.py'
+        )],
         output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'update_interval': 5.0,
-            'min_movement_distance': 1.0,
-            'exploration_threshold': 0.3,
-            'auto_update_enabled': True,
-            'update_during_navigation': True,
-            'map_confidence_threshold': 0.7
-        }]
+        env={
+            'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+            'ROS_DOMAIN_ID': '10',
+            'ROS_VERSION': '2',
+            'ROS_DISTRO': 'humble',
+            'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+            'PATH': os.environ.get('PATH', ''),
+            'HOME': os.environ.get('HOME', '/root'),
+            'USER': os.environ.get('USER', 'root'),
+        }
     )
     
     # Create the launch description and populate
