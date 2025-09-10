@@ -43,6 +43,9 @@ class UltrasonicPublisher(Node):
         self.prev_front = 0.0
         self.prev_right = 0.0
         
+        # 성능 테스트를 위한 설정
+        self.enable_filtering = False  # 필터링 비활성화로 성능 테스트
+        
         # 초음파 센서 토픽 발행
         self.left_pub = self.create_publisher(Range, '/ultrasonic/left', 10)
         self.front_pub = self.create_publisher(Range, '/ultrasonic/front', 10)
@@ -52,7 +55,7 @@ class UltrasonicPublisher(Node):
         self.connect_opencr()
         
         # 타이머로 주기적으로 센서 데이터 읽기
-        self.timer = self.create_timer(0.1, self.read_and_publish_sensors)  # 10Hz
+        self.timer = self.create_timer(0.05, self.read_and_publish_sensors)  # 20Hz (더 빠른 반응)
         
         self.get_logger().info('Ultrasonic Publisher started with direct OpenCR connection')
     
@@ -90,40 +93,79 @@ class UltrasonicPublisher(Node):
             return
         
         try:
-            # 3개 초음파 센서 데이터 읽기
-            left_val = self.read_control_table(self.ADDR_ULTRASONIC_LEFT)
-            front_val = self.read_control_table(self.ADDR_ULTRASONIC_FRONT)
-            right_val = self.read_control_table(self.ADDR_ULTRASONIC_RIGHT)
+            # 3개 초음파 센서 데이터를 한 번에 읽기 (성능 최적화)
+            left_val = self.read_control_table_fast(self.ADDR_ULTRASONIC_LEFT)
+            front_val = self.read_control_table_fast(self.ADDR_ULTRASONIC_FRONT)
+            right_val = self.read_control_table_fast(self.ADDR_ULTRASONIC_RIGHT)
             
-            # nan 값 필터링
-            if left_val is None or left_val != left_val:  # nan 체크
-                left_val = self.prev_left
+            # 필터링 (성능 테스트를 위해 비활성화 가능)
+            if self.enable_filtering:
+                # 최소한의 필터링 (None만 체크)
+                if left_val is None:
+                    left_val = self.prev_left
+                else:
+                    self.prev_left = left_val
+                    
+                if front_val is None:
+                    front_val = self.prev_front
+                else:
+                    self.prev_front = front_val
+                    
+                if right_val is None:
+                    right_val = self.prev_right
+                else:
+                    self.prev_right = right_val
             else:
-                self.prev_left = left_val
-                
-            if front_val is None or front_val != front_val:
-                front_val = self.prev_front
-            else:
-                self.prev_front = front_val
-                
-            if right_val is None or right_val != right_val:
-                right_val = self.prev_right
-            else:
-                self.prev_right = right_val
+                # 필터링 없이 원시 데이터 사용 (성능 테스트)
+                self.prev_left = left_val if left_val is not None else self.prev_left
+                self.prev_front = front_val if front_val is not None else self.prev_front
+                self.prev_right = right_val if right_val is not None else self.prev_right
             
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
             self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
             self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
             
-            # 디버깅용 로그
-            self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
+            # 디버깅용 로그 (성능 향상을 위해 주석 처리)
+            # self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
                 
         except Exception as e:
             self.get_logger().error(f'Error reading sensors: {e}')
     
+    def read_control_table_fast(self, address):
+        """OpenCR 제어 테이블에서 데이터 빠르게 읽기 (에러 로그 최소화)"""
+        if self.port_handler is None or not DYNAMIXEL_AVAILABLE:
+            return None
+        
+        try:
+            # 단일 주소 읽기 - DYNAMIXEL SDK 반환값 처리
+            result = self.packet_handler.read4ByteTxRx(
+                self.port_handler, self.OPENCR_ID, address)
+            
+            # result가 튜플인지 확인하고 적절히 처리
+            if isinstance(result, tuple):
+                if len(result) >= 2:
+                    data, error = result[0], result[1]
+                else:
+                    return None
+            else:
+                # 단일 값인 경우 (성공)
+                data = result
+                error = 0
+            
+            if error != 0:
+                return None  # 에러 로그 제거로 성능 향상
+            
+            # 4바이트를 float로 변환
+            import struct
+            float_value = struct.unpack('f', struct.pack('I', data))[0]
+            return float_value
+            
+        except Exception as e:
+            return None  # 에러 로그 제거로 성능 향상
+    
     def read_control_table(self, address):
-        """OpenCR 제어 테이블에서 데이터 읽기"""
+        """OpenCR 제어 테이블에서 데이터 읽기 (디버깅용)"""
         if self.port_handler is None or not DYNAMIXEL_AVAILABLE:
             return None
         
