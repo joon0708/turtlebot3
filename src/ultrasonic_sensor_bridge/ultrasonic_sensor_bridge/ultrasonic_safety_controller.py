@@ -73,30 +73,42 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        # 유효한 값이면 히스토리에 추가
+        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.left_history[self.left_index] = msg.range
-            self.left_index = (self.left_index + 1) % 10
-            # 최근 유효한 값으로 업데이트
             self.left_range = msg.range
+        else:
+            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            pass
+        
+        # 인덱스는 항상 증가 (순차적 처리)
+        self.left_index = (self.left_index + 1) % 10
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
-        # 유효한 값이면 히스토리에 추가
+        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.front_history[self.front_index] = msg.range
-            self.front_index = (self.front_index + 1) % 10
-            # 최근 유효한 값으로 업데이트
             self.front_range = msg.range
+        else:
+            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            pass
+        
+        # 인덱스는 항상 증가 (순차적 처리)
+        self.front_index = (self.front_index + 1) % 10
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
-        # 유효한 값이면 히스토리에 추가
+        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.right_history[self.right_index] = msg.range
-            self.right_index = (self.right_index + 1) % 10
-            # 최근 유효한 값으로 업데이트
             self.right_range = msg.range
+        else:
+            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            pass
+        
+        # 인덱스는 항상 증가 (순차적 처리)
+        self.right_index = (self.right_index + 1) % 10
     
     def cmd_vel_callback(self, msg):
         """원본 cmd_vel 콜백"""
