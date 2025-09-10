@@ -207,7 +207,7 @@ class UltrasonicPublisher(Node):
         msg.radiation_type = 0  # ULTRASOUND
         msg.field_of_view = 0.1  # 10 degrees
         msg.min_range = 0.02  # 2cm
-        msg.max_range = 4.0   # 4m
+        msg.max_range = 0.50  # 50cm
         msg.range = range_value
         
         publisher.publish(msg)
