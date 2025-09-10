@@ -7,8 +7,8 @@ from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import IfCondition
 from launch_ros.actions import Node
+import launch
 
 def generate_launch_description():
     # 환경 변수 설정
@@ -18,8 +18,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     lidar_port = LaunchConfiguration('lidar_port', default='/dev/ttyUSB0')
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
-    external_map_path = LaunchConfiguration('external_map_path', default='')
-    use_external_map = LaunchConfiguration('use_external_map', default='false')
+    enable_rfid = LaunchConfiguration('enable_rfid', default='false')
     
     return LaunchDescription([
         # Launch 파라미터 선언
@@ -39,24 +38,9 @@ def generate_launch_description():
             description='Connected USB port with OpenCR'),
         
         DeclareLaunchArgument(
-            'external_map_path',
-            default_value=os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map'),
-            description='External map path (e.g., turtlebot3_navigation2/map)'),
-        
-        DeclareLaunchArgument(
-            'use_external_map',
-            default_value='true',
-            description='Use external map from another package'),
-        
-        DeclareLaunchArgument(
-            'use_location_manager',
-            default_value='true',
-            description='Launch location manager node'),
-        
-        DeclareLaunchArgument(
-            'use_cartographer',
+            'enable_rfid',
             default_value='false',
-            description='Launch Cartographer SLAM system'),
+            description='Enable RFID tag detection and navigation'),
         
         # 1. 하드웨어 브링업 (모터 + 센서 + TF) - 한 번만
         IncludeLaunchDescription(
@@ -69,46 +53,65 @@ def generate_launch_description():
             }.items(),
         ),
         
-        # 2. 적응형 Cartographer (SLAM/Localization) - map_mode_manager 사용 (선택적)
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('map_mode_manager'), 'launch', 'adaptive_cartographer.launch.py')]),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-                'map_directory': os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map'),
-                'enable_map_protection': 'true',
-                'auto_backup_maps': 'true',
-                'use_external_map': use_external_map,
-                'external_map_path': external_map_path,
-                'start_mode': 'slam'  # 실시간 맵 생성을 위해 SLAM 모드로 시작
-            }.items(),
-            condition=IfCondition(LaunchConfiguration('use_cartographer', default='false')),
-        ),
+        # 2. Cartographer (SLAM) - 하드웨어 제외 (일시적으로 비활성화)
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource([os.path.join(
+        #         get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer_only.launch.py')]),
+        #     launch_arguments={
+        #         'use_sim_time': use_sim_time
+        #     }.items(),
+        # ),
         
-        # 3. Navigation2 - 항상 실행 (AMCL 포함)
+        # 3. Navigation2 - 하드웨어 제외
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2_only.launch.py')]),
             launch_arguments={
-                'use_sim_time': use_sim_time,
-                'map': os.path.join(get_package_share_directory('turtlebot3_navigation2'), 'map', 'map.yaml'),
-                'amcl_tf_broadcast': 'false'  # AMCL TF 브로드캐스트 비활성화 (카토그래퍼와 충돌 방지)
+                'use_sim_time': use_sim_time
             }.items(),
         ),
         
-        # 4. 위치 관리 노드
-        Node(
-            package='location_manager',
-            executable='location_manager',
-            name='location_manager',
+        # 4. 위치 관리 노드 - ExecuteProcess로 실행
+        ExecuteProcess(
+            cmd=[os.path.join(
+                get_package_share_directory('location_manager'),
+                '..', '..', 'bin', 'location_manager'
+            )],
             output='screen',
             env={
                 'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+                'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+                'PATH': os.environ.get('PATH', ''),
                 'ROS_DOMAIN_ID': '10',
                 'ROS_VERSION': '2',
                 'ROS_DISTRO': 'humble',
                 'ROS_LOG_DIR': '/root/.ros/log'
-            },
-            condition=IfCondition(LaunchConfiguration('use_location_manager', default='true'))
+            }
         ),
+        
+        # 5. RFID 태그 퍼블리셔 (조건부)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('rfid_tag_publisher'), 'launch', 'rfid_tag_publisher.launch.py')]),
+            condition=launch.conditions.IfCondition(enable_rfid),
+        ),
+        
+        # 6. RFID 위치 매핑 노드 (조건부)
+        Node(
+            package='rfid_location_mapper',
+            executable='rfid_location_mapper',
+            name='rfid_location_mapper',
+            output='screen',
+            condition=launch.conditions.IfCondition(enable_rfid),
+        ),
+        
+        # 7. LCD 컨트롤러 (위치 정보 표시)
+        Node(
+            package='lcd_controller',
+            executable='lcd_controller',
+            name='lcd_controller',
+            output='screen',
+        ),
+        
     ])

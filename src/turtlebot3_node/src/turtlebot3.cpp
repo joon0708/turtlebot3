@@ -67,9 +67,9 @@ void TurtleBot3::init_dynamixel_sdk_wrapper(const std::string & usb_port)
   dxl_sdk_wrapper_ = std::make_shared<DynamixelSDKWrapper>(opencr);
 
   dxl_sdk_wrapper_->init_read_memory(
-    extern_control_table.millis.addr,
-    (extern_control_table.profile_acceleration_right.addr - extern_control_table.millis.addr) +
-    extern_control_table.profile_acceleration_right.length
+    extern_control_table.millis.addr,                    // 10
+    (extern_control_table.ultrasonic_right.addr - extern_control_table.millis.addr) +
+    extern_control_table.ultrasonic_right.length 
   );
 }
 
@@ -153,7 +153,10 @@ void TurtleBot3::add_sensors()
   this->declare_parameter<uint8_t>("sensors.bumper_2");
   this->declare_parameter<uint8_t>("sensors.illumination");
   this->declare_parameter<uint8_t>("sensors.ir");
-  // this->declare_parameter<uint8_t>("sensors.sonar");  // 소나 센서 사용하지 않음
+  this->declare_parameter<uint8_t>("sensors.sonar");  // 기존 초음파 센서 활성화
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_left");   // 왼쪽 초음파 센서
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_front");  // 앞쪽 초음파 센서
+  this->declare_parameter<uint8_t>("sensors.ultrasonic_right");  // 오른쪽 초음파 센서
 
   this->get_parameter_or<uint8_t>(
     "sensors.bumper_1",
@@ -174,6 +177,23 @@ void TurtleBot3::add_sensors()
   this->get_parameter_or<uint8_t>(
     "sensors.sonar",
     is_connected_sonar,
+    0);
+  
+  uint8_t is_connected_ultrasonic_left = 0;
+  uint8_t is_connected_ultrasonic_front = 0;
+  uint8_t is_connected_ultrasonic_right = 0;
+  
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_left",
+    is_connected_ultrasonic_left,
+    0);
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_front",
+    is_connected_ultrasonic_front,
+    0);
+  this->get_parameter_or<uint8_t>(
+    "sensors.ultrasonic_right",
+    is_connected_ultrasonic_right,
     0);
 
   sensors_.push_back(
@@ -196,7 +216,10 @@ void TurtleBot3::add_sensors()
       is_connected_bumper_2,
       is_connected_illumination,
       is_connected_ir,
-      is_connected_sonar));
+      is_connected_sonar,
+      is_connected_ultrasonic_left,
+      is_connected_ultrasonic_front,
+      is_connected_ultrasonic_right));
 
   dxl_sdk_wrapper_->read_data_set();
   sensors_.push_back(

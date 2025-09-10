@@ -4,6 +4,9 @@ from RPLCD.i2c import CharLCD
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Bool, UInt8
+from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import BatteryState
+import time
 
 class LCDController(Node):
     def __init__(self, lcd):
@@ -22,6 +25,24 @@ class LCDController(Node):
         self.write_sub = self.create_subscription(String, '/lcd/write', self.write_callback, 10)
         self.clear_line_sub = self.create_subscription(UInt8, '/lcd/clear_line', self.clear_line_callback, 10)
         self.cursor_mode_sub = self.create_subscription(String, '/lcd/cursor_mode', self.cursor_mode_callback, 10)
+        
+        # 위치 정보 토픽 구독
+        self.goal_pose_sub = self.create_subscription(PoseStamped, '/goal_pose', self.goal_pose_callback, 10)
+        self.goal_name_sub = self.create_subscription(String, '/goal_location_name', self.goal_name_callback, 10)
+        self.location_status_sub = self.create_subscription(String, '/location_status', self.location_status_callback, 10)
+        self.rfid_status_sub = self.create_subscription(String, '/rfid_status', self.rfid_status_callback, 10)
+        self.battery_sub = self.create_subscription(BatteryState, '/battery_state', self.battery_callback, 10)
+        
+        # 상태 변수
+        self.current_goal = None
+        self.current_goal_name = None
+        self.current_location_status = "대기 중..."
+        self.current_rfid_status = "대기 중..."
+        self.current_battery_percentage = 0.0
+        self.last_update_time = time.time()
+        
+        # 주기적 업데이트 타이머
+        self.update_timer = self.create_timer(1.0, self.update_display)  # 1초마다 업데이트
         
         self.get_logger().info('LCD Controller started')
         
@@ -97,6 +118,129 @@ class LCDController(Node):
                 self.get_logger().error("Invalid mode. Use 'hide', 'visible', or 'blink'")
         except Exception as e:
             self.get_logger().error(f"Cursor mode error: {e}")
+    
+    def goal_pose_callback(self, msg):
+        """네비게이션 목표 위치 콜백"""
+        self.current_goal = msg
+        self.last_update_time = time.time()
+        self.get_logger().info(f"New goal: ({msg.pose.position.x:.2f}, {msg.pose.position.y:.2f})")
+    
+    def goal_name_callback(self, msg):
+        """목표 위치 이름 콜백"""
+        self.current_goal_name = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().info(f"Goal location name: {msg.data}")
+    
+    def location_status_callback(self, msg):
+        """위치 관리 상태 콜백"""
+        self.current_location_status = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().debug(f"Location status: {msg.data}")
+    
+    def rfid_status_callback(self, msg):
+        """RFID 상태 콜백"""
+        self.current_rfid_status = msg.data
+        self.last_update_time = time.time()
+        self.get_logger().debug(f"RFID status: {msg.data}")
+    
+    def battery_callback(self, msg):
+        """배터리 상태 콜백"""
+        # 배터리 퍼센티지 계산 (0-100%)
+        if hasattr(msg, 'percentage') and msg.percentage >= 0:
+            # percentage가 이미 0-1 범위인지 0-100 범위인지 확인
+            if msg.percentage <= 1.0:
+                self.current_battery_percentage = msg.percentage * 100.0
+            else:
+                self.current_battery_percentage = msg.percentage
+        else:
+            # percentage가 없으면 voltage로 계산 (대략적)
+            voltage = msg.voltage
+            if voltage > 0:
+                # Li-Po 배터리 기준: 3.0V(0%) ~ 4.2V(100%)
+                self.current_battery_percentage = min(100.0, max(0.0, (voltage - 3.0) / 1.2 * 100.0))
+        
+        # 0-100% 범위로 제한
+        self.current_battery_percentage = min(100.0, max(0.0, self.current_battery_percentage))
+        
+        self.get_logger().debug(f"Battery: {self.current_battery_percentage:.1f}% (voltage: {msg.voltage:.2f}V)")
+    
+    def update_display(self):
+        """LCD 화면 주기적 업데이트"""
+        try:
+            # 현재 시간
+            current_time = time.time()
+            
+            # 5초 이상 업데이트가 없으면 기본 화면 표시
+            if current_time - self.last_update_time > 5.0:
+                self.show_default_display()
+                return
+            
+            # 목표 위치가 있으면 네비게이션 정보 표시
+            if self.current_goal:
+                self.show_navigation_display()
+            else:
+                # 상태 정보 표시
+                self.show_status_display()
+                
+        except Exception as e:
+            self.get_logger().error(f"Display update error: {e}")
+    
+    def show_default_display(self):
+        """기본 화면 표시 (배터리 정보 포함)"""
+        try:
+            self.lcd.clear()
+            self.lcd.cursor_pos = (0, 0)
+            self.lcd.write_string("TurtleBot3 Ready")
+            
+            # 배터리 퍼센티지 표시
+            battery_text = f"Battery: {self.current_battery_percentage:.0f}%"
+            self.lcd.cursor_pos = (1, 0)
+            self.lcd.write_string(battery_text)
+            
+        except Exception as e:
+            self.get_logger().error(f"Default display error: {e}")
+    
+    def show_navigation_display(self):
+        """네비게이션 정보 표시"""
+        try:
+            self.lcd.clear()
+            self.lcd.cursor_pos = (0, 0)
+            self.lcd.write_string("Navigating to:")
+            
+            # 목표 위치 이름 표시 (우선순위)
+            if self.current_goal_name:
+                # 위치 이름이 16자를 초과하면 줄임
+                location_name = self.current_goal_name[:16]
+                self.lcd.cursor_pos = (1, 0)
+                self.lcd.write_string(location_name)
+            elif self.current_goal:
+                # 좌표 표시 (백업)
+                x = self.current_goal.pose.position.x
+                y = self.current_goal.pose.position.y
+                coord_text = f"({x:.1f}, {y:.1f})"
+                self.lcd.cursor_pos = (1, 0)
+                self.lcd.write_string(coord_text)
+            
+        except Exception as e:
+            self.get_logger().error(f"Navigation display error: {e}")
+    
+    def show_status_display(self):
+        """상태 정보 표시"""
+        try:
+            self.lcd.clear()
+            
+            # 첫 번째 줄: 위치 관리 상태
+            self.lcd.cursor_pos = (0, 0)
+            status_line1 = self.current_location_status[:16]  # 16자 제한
+            self.lcd.write_string(status_line1)
+            
+            # 두 번째 줄: RFID 상태
+            self.lcd.cursor_pos = (1, 0)
+            status_line2 = self.current_rfid_status[:16]  # 16자 제한
+            self.lcd.write_string(status_line2)
+            
+        except Exception as e:
+            self.get_logger().error(f"Status display error: {e}")
     
     def destroy_node(self):
         """노드 종료 시 정리"""

@@ -26,6 +26,8 @@ class LocationManager(Node):
         # Publishers
         self.nav_goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self.status_pub = self.create_publisher(String, '/location_status', 10)
+        self.integrated_status_pub = self.create_publisher(String, '/integrated_status', 10)
+        self.goal_name_pub = self.create_publisher(String, '/goal_location_name', 10)
         
         # Subscribers
         self.location_cmd_sub = self.create_subscription(String, '/location_command', self.location_command_callback, 10)
@@ -222,6 +224,9 @@ class LocationManager(Node):
         self.nav_goal_pub.publish(pose)
         self.get_logger().info(f'Navigating to {location_id}: {location["name"]} at ({location["x"]:.2f}, {location["y"]:.2f})')
         self.publish_status_message(f"Going to {location_id}")
+        
+        # LCD에 목표 위치 이름 전달
+        self.publish_goal_name_to_lcd(location['name'])
     
     def delete_location(self, name):
         """위치 삭제"""
@@ -279,6 +284,22 @@ class LocationManager(Node):
         status_msg = String()
         status_msg.data = message
         self.status_pub.publish(status_msg)
+        
+        # 통합 상태도 함께 발행
+        self.publish_integrated_status(message)
+    
+    def publish_integrated_status(self, location_message):
+        """통합 상태 발행"""
+        integrated_msg = String()
+        integrated_msg.data = location_message
+        self.integrated_status_pub.publish(integrated_msg)
+    
+    def publish_goal_name_to_lcd(self, location_name):
+        """LCD에 목표 위치 이름 발행"""
+        goal_name_msg = String()
+        goal_name_msg.data = location_name
+        self.goal_name_pub.publish(goal_name_msg)
+        self.get_logger().info(f'Goal location name sent to LCD: {location_name}')
     
 
 

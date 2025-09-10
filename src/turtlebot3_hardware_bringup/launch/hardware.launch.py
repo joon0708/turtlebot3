@@ -3,7 +3,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
@@ -94,11 +94,11 @@ def generate_launch_description():
                 'ROS_DISTRO': 'humble'
             }),
         
-        # TurtleBot3 Node (Motor Control) - 직접 실행
+        # TurtleBot3 Node (Motor Control) - 활성화
         Node(
             package='turtlebot3_node',
             executable='turtlebot3_ros',
-            name='turtlebot3_ros',  # 기본 이름 사용
+            name='turtlebot3_ros',
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
@@ -144,9 +144,10 @@ def generate_launch_description():
                     'bumper_2': 0,
                     'illumination': 0,
                     'ir': 0,
-                    'ultrasonic_left': 0,
-                    'ultrasonic_front': 0,
-                    'ultrasonic_right': 0
+                    'sonar': 1,  # 기존 초음파 센서 활성화
+                    'ultrasonic_left': 1,   # 왼쪽 초음파 센서 활성화
+                    'ultrasonic_front': 1,  # 앞쪽 초음파 센서 활성화
+                    'ultrasonic_right': 1   # 오른쪽 초음파 센서 활성화
                 },
                 'odometry': {
                     'frame_id': 'odom',
@@ -168,4 +169,27 @@ def generate_launch_description():
                 'ROS_VERSION': '2',
                 'ROS_DISTRO': 'humble'
             }),
+        
+        # 초음파 센서 발행 (ROS 구독 방식)
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_publisher_ros',
+            name='ultrasonic_publisher_ros',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }],
+        ),
+        
+        # 초음파 센서 LaserScan 변환
+        Node(
+            package='ultrasonic_sensor_bridge',
+            executable='ultrasonic_to_laserscan',
+            name='ultrasonic_to_laserscan',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+            }],
+        ),
+        
     ])

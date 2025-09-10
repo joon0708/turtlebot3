@@ -14,7 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob.glob('launch/*.launch.py')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'PyQt5'],
     zip_safe=True,
     maintainer='User',
     maintainer_email='user@example.com',
@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'location_manager = location_manager.location_manager:main',
+            'touch_ui = location_manager.touch_ui:main',
         ],
     },
 )

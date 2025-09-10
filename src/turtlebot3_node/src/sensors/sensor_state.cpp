@@ -29,13 +29,27 @@ SensorState::SensorState(
   const uint8_t & bumper_backward,
   const uint8_t & illumination,
   const uint8_t & cliff,
-  const uint8_t & sonar)
+  const uint8_t & sonar,
+  const uint8_t & ultrasonic_left,
+  const uint8_t & ultrasonic_front,
+  const uint8_t & ultrasonic_right)
 : Sensors(nh),
   bumper_forward_(bumper_forward),
   bumper_backward_(bumper_backward),
   illumination_(illumination),
   cliff_(cliff),
-  sonar_(sonar)
+  sonar_(sonar),
+  ultrasonic_left_(ultrasonic_left),
+  ultrasonic_front_(ultrasonic_front),
+  ultrasonic_right_(ultrasonic_right),
+  left_buffer_(BUFFER_SIZE, 0.0f),
+  front_buffer_(BUFFER_SIZE, 0.0f),
+  right_buffer_(BUFFER_SIZE, 0.0f),
+  buffer_index_(0),
+  buffer_full_(false),
+  prev_ultrasonic_left_(0.0f),
+  prev_ultrasonic_front_(0.0f),
+  prev_ultrasonic_right_(0.0f)
 {
   pub_ = nh->create_publisher<custom_turtlebot3_msgs::msg::SensorState>(topic_name, this->qos_);
 
@@ -79,11 +93,12 @@ void SensorState::publish(
     msg->cliff = 0.0f;
   }
 
-  if (sonar_) {
+  // sonar_ 파라미터는 개별 초음파 센서가 비활성화된 경우에만 사용
+  if (sonar_ && !ultrasonic_front_) {
     msg->ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
       extern_control_table.sonar.addr,
       extern_control_table.sonar.length);
-  } else {
+  } else if (!ultrasonic_front_) {
     msg->ultrasonic_front = 0.0f;
   }
 
@@ -138,23 +153,98 @@ void SensorState::publish(
     extern_control_table.battery_voltage.addr,
     extern_control_table.battery_voltage.length);
 
-  // Read 3 ultrasonic sensors
-  float ultrasonic_left = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_left.addr,
-    extern_control_table.ultrasonic_left.length);
+  // Read 3 ultrasonic sensors (only if individual parameters are enabled)
+  if (ultrasonic_left_) {
+    // 직접 4바이트 읽기 후 float로 변환 (ultrasonic_publisher_direct.py와 동일한 방식)
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
+      extern_control_table.ultrasonic_left.addr,
+      extern_control_table.ultrasonic_left.length);
+    
+    // 4바이트를 float로 변환
+    float ultrasonic_left = *reinterpret_cast<float*>(&raw_data);
+    
+    // nan 값 체크 - 버퍼에 저장
+    if (ultrasonic_left != ultrasonic_left) {  // nan 체크
+      left_buffer_[buffer_index_] = prev_ultrasonic_left_;  // nan이면 이전 값 사용
+    } else {
+      left_buffer_[buffer_index_] = ultrasonic_left;
+      prev_ultrasonic_left_ = ultrasonic_left;
+    }
+    
+    // 버퍼 인덱스 증가
+    buffer_index_++;
+    if (buffer_index_ >= BUFFER_SIZE) {
+      buffer_index_ = 0;
+      buffer_full_ = true;
+    }
+    
+    // 버퍼가 가득 찼을 때만 평균값 계산해서 발행
+    if (buffer_full_) {
+      float left_avg = 0.0f;
+      float front_avg = 0.0f;
+      float right_avg = 0.0f;
+      
+      // 평균값 계산
+      for (size_t i = 0; i < BUFFER_SIZE; i++) {
+        left_avg += left_buffer_[i];
+        front_avg += front_buffer_[i];
+        right_avg += right_buffer_[i];
+      }
+      left_avg /= BUFFER_SIZE;
+      front_avg /= BUFFER_SIZE;
+      right_avg /= BUFFER_SIZE;
+      
+      
+      msg->ultrasonic_left = left_avg;
+      msg->ultrasonic_front = front_avg;
+      msg->ultrasonic_right = right_avg;
+    } else {
+      // 버퍼가 아직 가득 차지 않았으면 0.0으로 설정
+      msg->ultrasonic_left = 0.0f;
+      msg->ultrasonic_front = 0.0f;
+      msg->ultrasonic_right = 0.0f;
+    }
+  } else {
+    msg->ultrasonic_left = 0.0f;
+  }
 
-  float ultrasonic_front = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_front.addr,
-    extern_control_table.ultrasonic_front.length);
+  if (ultrasonic_front_) {
+    // 직접 4바이트 읽기 후 float로 변환
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
+      extern_control_table.ultrasonic_front.addr,
+      extern_control_table.ultrasonic_front.length);
+    
+    float ultrasonic_front = *reinterpret_cast<float*>(&raw_data);
+    
+    // nan 값 체크 - 버퍼에 저장
+    if (ultrasonic_front != ultrasonic_front) {  // nan 체크
+      front_buffer_[buffer_index_] = prev_ultrasonic_front_;  // nan이면 이전 값 사용
+    } else {
+      front_buffer_[buffer_index_] = ultrasonic_front;
+      prev_ultrasonic_front_ = ultrasonic_front;
+    }
+  } else {
+    msg->ultrasonic_front = 0.0f;
+  }
 
-  float ultrasonic_right = dxl_sdk_wrapper->get_data_from_device<float>(
-    extern_control_table.ultrasonic_right.addr,
-    extern_control_table.ultrasonic_right.length);
-
-  // Set ultrasonic sensor values
-  msg->ultrasonic_left = ultrasonic_left;
-  msg->ultrasonic_front = ultrasonic_front;
-  msg->ultrasonic_right = ultrasonic_right;
+  if (ultrasonic_right_) {
+    // 직접 4바이트 읽기 후 float로 변환
+    uint32_t raw_data = dxl_sdk_wrapper->get_data_from_device<uint32_t>(
+      extern_control_table.ultrasonic_right.addr,
+      extern_control_table.ultrasonic_right.length);
+    
+    float ultrasonic_right = *reinterpret_cast<float*>(&raw_data);
+    
+    // nan 값 체크 - 버퍼에 저장
+    if (ultrasonic_right != ultrasonic_right) {  // nan 체크
+      right_buffer_[buffer_index_] = prev_ultrasonic_right_;  // nan이면 이전 값 사용
+    } else {
+      right_buffer_[buffer_index_] = ultrasonic_right;
+      prev_ultrasonic_right_ = ultrasonic_right;
+    }
+  } else {
+    msg->ultrasonic_right = 0.0f;
+  }
 
   pub_->publish(std::move(msg));
 }

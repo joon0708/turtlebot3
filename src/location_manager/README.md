@@ -9,6 +9,9 @@ TurtleBot3를 위한 위치 관리 시스템입니다. 자주 사용하는 위�
 - **자동 네비게이션**: 저장된 위치로 자동 이동
 - **위치 관리**: 저장, 삭제, 목록 조회 등
 - **Navigation2 연동**: ROS2 Navigation2와 완벽 호환
+- **RFID 연동**: RFID 태그를 통한 자동 위치 이동 (선택적)
+- **통합 상태 모니터링**: 두 시스템의 상태를 하나의 토픽으로 확인
+- **LCD 디스플레이**: 현재 향하는 위치와 상태 정보를 LCD에 실시간 표시
 
 ## 📋 시스템 요구사항
 
@@ -16,6 +19,7 @@ TurtleBot3를 위한 위치 관리 시스템입니다. 자주 사용하는 위�
 - **TurtleBot3** (Waffle Pi, Burger 등)
 - **Navigation2** 패키지
 - **Cartographer** (SLAM)
+- **LCD 디스플레이** (선택적, I2C 연결)
 
 ## 🛠️ 설치 및 빌드
 
@@ -38,10 +42,19 @@ ros2 pkg list | grep nav2
 ## 🚀 사용 방법
 
 ### 1. 시스템 실행
+
+#### **기본 실행 (위치 관리만)**
 ```bash
 # 위치 관리 + 네비게이션 전체 실행
-ros2 launch location_manager location_navigation.launch.py
+ros2 launch location_manager location_manager_complete.launch.py
 ```
+
+#### **RFID 기능 포함 실행**
+```bash
+# RFID 기능과 함께 실행
+ros2 launch location_manager location_manager_complete.launch.py enable_rfid:=true
+```
+
 
 ### 2. 위치 저장 명령어
 
@@ -70,6 +83,49 @@ ros2 topic pub /location_command std_msgs/msg/String "data: 'go home'" --once
 ros2 topic pub /location_command std_msgs/msg/String "data: 'go 회의실'" --once
 ```
 
+#### **명령 응답 확인**
+```bash
+# 위치 관리 명령의 응답을 실시간으로 확인
+ros2 topic echo /location_status
+
+# RFID 관련 응답 확인 (RFID 활성화 시)
+ros2 topic echo /rfid_status
+
+# 통합 상태 확인 (두 시스템의 응답을 하나의 토픽으로)
+ros2 topic echo /integrated_status
+```
+
+### 4. RFID 태그 사용법 (선택적)
+
+#### **RFID 시스템 활성화**
+```bash
+# RFID 기능과 함께 실행
+ros2 launch location_manager location_manager_complete.launch.py enable_rfid:=true
+```
+
+#### **RFID 태그 ID 확인**
+```bash
+# RFID 태그를 찍으면 ID가 표시됩니다
+ros2 topic echo /rfid/tag
+```
+
+#### **RFID 태그와 위치 매핑**
+```bash
+# RFID 태그를 특정 위치에 매핑 (대소문자 구분 없음)
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'map D3:64:15:0E home'" --once
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'map d3:64:15:0e table1'" --once
+
+# RFID 매핑 목록 확인
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'list'" --once
+
+# RFID 매핑 제거
+ros2 topic pub /rfid_command std_msgs/msg/String "data: 'unmap D3:64:15:0E'" --once
+```
+
+#### **RFID 자동 복귀**
+- RFID 태그를 찍으면 자동으로 매핑된 위치로 이동합니다
+- 위치가 저장되어 있어야 RFID 매핑이 가능합니다
+
 #### **위치 목록 및 관리**
 ```bash
 # 저장된 위치 목록 보기
@@ -93,9 +149,19 @@ location_manager/
 │   ├── __init__.py
 │   └── location_manager.py     # 메인 노드
 ├── launch/
-│   └── location_navigation.launch.py  # 실행 파일
+│   └── location_manager_complete.launch.py  # 통합 실행 파일
 ├── config/                     # 설정 파일 (자동 생성)
 │   └── saved_locations.yaml   # 저장된 위치 정보
+├── package.xml
+├── setup.py
+└── README.md
+
+rfid_location_mapper/
+├── rfid_location_mapper/
+│   ├── __init__.py
+│   └── rfid_location_mapper.py # RFID 매핑 노드
+├── launch/
+│   └── rfid_location_mapper.launch.py
 ├── package.xml
 ├── setup.py
 └── README.md
@@ -115,10 +181,13 @@ export ROS_DOMAIN_ID=10
 ### **포트 설정**
 ```bash
 # LIDAR 포트 (기본값: /dev/ttyUSB0)
-ros2 launch location_manager location_navigation.launch.py lidar_port:=/dev/ttyUSB1
+ros2 launch location_manager location_manager_complete.launch.py lidar_port:=/dev/ttyUSB1
 
-# OpenCR 포트 (기본값: /dev/ttyACM1)
-ros2 launch location_manager location_navigation.launch.py usb_port:=/dev/ttyACM0
+# OpenCR 포트 (기본값: /dev/ttyACM0)
+ros2 launch location_manager location_manager_complete.launch.py usb_port:=/dev/ttyACM1
+
+# RFID 기능과 함께 포트 설정
+ros2 launch location_manager location_manager_complete.launch.py enable_rfid:=true lidar_port:=/dev/ttyUSB1
 ```
 
 ## 📊 저장된 위치 형식
@@ -145,33 +214,6 @@ locations:
     created: "2024-01-01T12:30:00"
 ```
 
-## 🔍 문제 해결
-
-### **TF 오류**
-```
-Failed to get current location: Make sure TF is available and robot is localized
-```
-- Navigation2가 실행 중인지 확인
-- 로봇이 로컬라이즈되어 있는지 확인
-- TF 트리 상태 확인: `ros2 run tf2_tools view_frames`
-
-### **위치 저장 실패**
-- 로봇이 맵에서 위치를 파악할 수 있는지 확인
-- LIDAR 센서가 정상 작동하는지 확인
-
-### **네비게이션 실패**
-- Navigation2 상태 확인
-- 맵이 제대로 로드되었는지 확인
-- 목표 위치가 맵 내에 있는지 확인
-
-## 📈 향후 개발 계획
-
-- [ ] **GUI 제어 프로그램** (별도 프로젝트)
-- [ ] **센서 기반 자동 저장** (버튼, RFID, 초음파 등)
-- [ ] **위치 그룹화 및 카테고리**
-- [ ] **위치 간 경로 최적화**
-- [ ] **모바일 앱 연동**
-
 ## 🤝 기여하기
 
 버그 리포트, 기능 제안, 코드 기여를 환영합니다!
@@ -185,4 +227,24 @@ Apache 2.0 License
 문제가 발생하거나 질문이 있으시면 이슈를 등록해 주세요.
 
 
-동작 되는것 확인
+## 🎯 주요 토픽
+
+### **명령 토픽**
+- `/location_command` - 위치 관리 명령
+- `/rfid_command` - RFID 매핑 명령
+
+### **상태 토픽**
+- `/location_status` - 위치 관리 상태
+- `/rfid_status` - RFID 시스템 상태
+- `/integrated_status` - 통합 상태 (두 시스템의 응답을 하나로)
+
+### **RFID 토픽**
+- `/rfid/tag` - RFID 태그 ID 발행
+
+### **네비게이션 토픽**
+- `/goal_pose` - 네비게이션 목표 위치
+
+### **LCD 토픽**
+- `/lcd/display` - LCD 전체 화면 텍스트 표시
+- `/lcd/clear` - LCD 화면 지우기
+- `/lcd/backlight` - LCD 백라이트 제어

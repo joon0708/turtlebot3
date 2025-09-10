@@ -15,11 +15,11 @@ def generate_launch_description():
             description='Use simulation (Gazebo) clock if true'
         ),
         
-        # Ultrasonic Publisher Node
+        # Ultrasonic Publisher Node (Direct OpenCR Connection)
         Node(
             package='ultrasonic_sensor_bridge',
-            executable='ultrasonic_publisher',
-            name='ultrasonic_publisher',
+            executable='ultrasonic_publisher_direct',
+            name='ultrasonic_publisher_direct',
             output='screen',
             parameters=[{
                 'use_sim_time': LaunchConfiguration('use_sim_time'),
