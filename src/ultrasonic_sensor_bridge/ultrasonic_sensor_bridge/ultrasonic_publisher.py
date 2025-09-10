@@ -117,17 +117,16 @@ class UltrasonicPublisher(Node):
                     self.prev_right = right_val
             else:
                 # 필터링 없이 원시 데이터 사용 (성능 테스트)
-                self.prev_left = left_val if left_val is not None else self.prev_left
-                self.prev_front = front_val if front_val is not None else self.prev_front
-                self.prev_right = right_val if right_val is not None else self.prev_right
+                # None 값도 그대로 사용하여 이전 값이 남지 않도록 함
+                pass
             
             # Range 메시지로 발행
             self.publish_range_msg(self.left_pub, left_val, 'ultrasonic_left')
             self.publish_range_msg(self.front_pub, front_val, 'ultrasonic_front')
             self.publish_range_msg(self.right_pub, right_val, 'ultrasonic_right')
             
-            # 디버깅용 로그 (성능 향상을 위해 주석 처리)
-            # self.get_logger().info(f'Ultrasonic: L={left_val:.3f}, F={front_val:.3f}, R={right_val:.3f}')
+            # 디버깅용 로그 (성능 테스트를 위해 활성화)
+            self.get_logger().info(f'Raw Ultrasonic: L={left_val}, F={front_val}, R={right_val}')
                 
         except Exception as e:
             self.get_logger().error(f'Error reading sensors: {e}')
