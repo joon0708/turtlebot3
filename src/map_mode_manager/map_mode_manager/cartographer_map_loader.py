@@ -65,33 +65,39 @@ class CartographerMapLoader(Node):
         if self.load_existing_map:
             self.load_map_from_file()
         
-        self.get_logger().info('CartographerMapLoader 초기화 완료')
-        self.publish_status("맵 로더 시작됨")
+        self.get_logger().info('CartographerMapLoader initialized')
+        self.publish_status("Map loader started")
     
     def load_map_from_file(self) -> bool:
         """파일에서 맵 로드"""
         try:
             if not os.path.exists(self.map_file_path):
-                self.get_logger().error(f'맵 파일을 찾을 수 없습니다: {self.map_file_path}')
-                self.publish_status("맵 파일 없음")
+                self.get_logger().error(f'Map file not found: {self.map_file_path}')
+                self.publish_status("Map file not found")
                 return False
             
             # YAML 파일 읽기
-            with open(self.map_file_path, 'r') as file:
+            with open(self.map_file_path, 'r', encoding='utf-8') as file:
                 map_data = yaml.safe_load(file)
             
             # 맵 정보 추출
             image_path = map_data['image']
-            resolution = map_data['resolution']
+            resolution = float(map_data['resolution'])
             origin = map_data['origin']
+            
+            # origin을 float 리스트로 변환
+            if isinstance(origin, list):
+                origin = [float(x) for x in origin]
+            else:
+                origin = [float(origin[0]), float(origin[1]), float(origin[2]) if len(origin) > 2 else 0.0]
             
             # 이미지 파일 경로 구성
             map_dir = os.path.dirname(self.map_file_path)
             image_full_path = os.path.join(map_dir, image_path)
             
             if not os.path.exists(image_full_path):
-                self.get_logger().error(f'맵 이미지 파일을 찾을 수 없습니다: {image_full_path}')
-                self.publish_status("맵 이미지 파일 없음")
+                self.get_logger().error(f'Map image file not found: {image_full_path}')
+                self.publish_status("Map image file not found")
                 return False
             
             # PGM 이미지 로드
@@ -100,19 +106,19 @@ class CartographerMapLoader(Node):
             if self.loaded_map is not None:
                 self.map_loaded = True
                 self.get_logger().info(
-                    f'맵 로드 완료: {self.loaded_map.info.width}x{self.loaded_map.info.height}, '
-                    f'해상도: {resolution}m'
+                    f'Map loaded successfully: {self.loaded_map.info.width}x{self.loaded_map.info.height}, '
+                    f'resolution: {resolution}m'
                 )
-                self.publish_status("맵 로드 완료")
+                self.publish_status("Map loaded successfully")
                 return True
             else:
-                self.get_logger().error('맵 로드 실패')
-                self.publish_status("맵 로드 실패")
+                self.get_logger().error('Map load failed')
+                self.publish_status("Map load failed")
                 return False
                 
         except Exception as e:
-            self.get_logger().error(f'맵 로드 중 오류: {e}')
-            self.publish_status(f"맵 로드 오류: {e}")
+            self.get_logger().error(f'Error loading map: {e}')
+            self.publish_status(f"Map load error: {e}")
             return False
     
     def load_pgm_image(self, image_path: str, resolution: float, origin: list) -> Optional[OccupancyGrid]:
@@ -123,7 +129,7 @@ class CartographerMapLoader(Node):
                 # PGM 헤더 파싱
                 line = f.readline().decode('utf-8').strip()
                 if line != 'P5':
-                    self.get_logger().error('PGM 파일 형식이 아닙니다')
+                    self.get_logger().error('Not a PGM file format')
                     return None
                 
                 # 주석 건너뛰기
@@ -172,7 +178,7 @@ class CartographerMapLoader(Node):
             return occupancy_grid
             
         except Exception as e:
-            self.get_logger().error(f'PGM 이미지 로드 중 오류: {e}')
+            self.get_logger().error(f'Error loading PGM image: {e}')
             return None
     
     def publish_loaded_map_periodic(self):
@@ -191,7 +197,7 @@ class CartographerMapLoader(Node):
         self.loaded_map_pub.publish(self.loaded_map)
         self.last_update_time = current_time
         
-        self.get_logger().debug('로드된 맵 발행')
+        self.get_logger().debug('Published loaded map')
     
     def publish_status(self, message: str):
         """상태 메시지 발행"""
@@ -218,22 +224,22 @@ def main(args=None):
         rclpy.spin(node)
     except KeyboardInterrupt:
         if node:
-            node.get_logger().info('키보드 인터럽트로 노드를 종료합니다.')
+            node.get_logger().info('Keyboard interrupt, shutting down node.')
     except Exception as e:
         if node:
-            node.get_logger().error(f'노드 실행 중 오류 발생: {e}')
+            node.get_logger().error(f'Error during node execution: {e}')
     finally:
         if node:
             try:
                 node.destroy_node()
             except Exception as e:
-                print(f'노드 파괴 중 오류: {e}')
+                print(f'Error destroying node: {e}')
         
         if rclpy.ok():
             try:
                 rclpy.shutdown()
             except Exception as e:
-                print(f'ROS2 종료 중 오류: {e}')
+                print(f'Error shutting down ROS2: {e}')
 
 
 if __name__ == '__main__':
