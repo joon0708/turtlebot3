@@ -30,14 +30,14 @@ class UltrasonicSafetyController(Node):
         self.status_pub = self.create_publisher(String, '/safety_status', 10)
         
         # 센서 값 저장
-        self.left_range = 0.30  # 기본값 (30cm)
-        self.front_range = 0.30
-        self.right_range = 0.30
+        self.left_range = 0.50  # 기본값 (50cm)
+        self.front_range = 0.50
+        self.right_range = 0.50
         
         # 센서 값 히스토리 (최근 10개 데이터)
-        self.left_history = [0.30] * 10  # 기본값으로 초기화
-        self.front_history = [0.30] * 10
-        self.right_history = [0.30] * 10
+        self.left_history = [0.50] * 10  # 기본값으로 초기화
+        self.front_history = [0.50] * 10
+        self.right_history = [0.50] * 10
         
         # 히스토리 인덱스
         self.left_index = 0
@@ -45,12 +45,15 @@ class UltrasonicSafetyController(Node):
         self.right_index = 0
         
         # 안전 설정 (파라미터에서 가져오기)
-        self.declare_parameter('safety_distance', 0.15)
+        self.declare_parameter('safety_distance', 0.25)  # 정지 거리 (25cm)
+        self.declare_parameter('slow_distance', 0.30)    # 감속 거리 (30cm)
+        self.declare_parameter('warning_distance', 0.35) # 경고 거리 (35cm)
         self.declare_parameter('stop_duration', 3.0)
         
         self.safety_distance = self.get_parameter('safety_distance').get_parameter_value().double_value
+        self.slow_distance = self.get_parameter('slow_distance').get_parameter_value().double_value
+        self.warning_distance = self.get_parameter('warning_distance').get_parameter_value().double_value
         self.stop_duration = self.get_parameter('stop_duration').get_parameter_value().double_value
-        self.slow_distance = 0.25    # 25cm 이하에서 감속
         
         # 상태 변수
         self.is_stopped = False
@@ -62,12 +65,13 @@ class UltrasonicSafetyController(Node):
         self.timer = self.create_timer(0.1, self.safety_control)  # 10Hz
         
         self.get_logger().info('Ultrasonic Safety Controller started')
-        self.get_logger().info(f'Safety distance: {self.safety_distance}m, Stop duration: {self.stop_duration}s')
+        self.get_logger().info(f'Safety zones: STOP={self.safety_distance}m, SLOW={self.slow_distance}m, WARNING={self.warning_distance}m')
+        self.get_logger().info(f'Stop duration: {self.stop_duration}s')
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
         # 유효한 값이면 히스토리에 추가
-        if msg.range > 0 and msg.range <= 0.30:
+        if msg.range > 0 and msg.range <= 0.50:
             self.left_history[self.left_index] = msg.range
             self.left_index = (self.left_index + 1) % 10
             # 최근 유효한 값으로 업데이트
@@ -76,7 +80,7 @@ class UltrasonicSafetyController(Node):
     def front_callback(self, msg):
         """전방 센서 콜백"""
         # 유효한 값이면 히스토리에 추가
-        if msg.range > 0 and msg.range <= 0.30:
+        if msg.range > 0 and msg.range <= 0.50:
             self.front_history[self.front_index] = msg.range
             self.front_index = (self.front_index + 1) % 10
             # 최근 유효한 값으로 업데이트
@@ -85,7 +89,7 @@ class UltrasonicSafetyController(Node):
     def right_callback(self, msg):
         """우측 센서 콜백"""
         # 유효한 값이면 히스토리에 추가
-        if msg.range > 0 and msg.range <= 0.30:
+        if msg.range > 0 and msg.range <= 0.50:
             self.right_history[self.right_index] = msg.range
             self.right_index = (self.right_index + 1) % 10
             # 최근 유효한 값으로 업데이트
@@ -103,17 +107,17 @@ class UltrasonicSafetyController(Node):
         valid_sensors = []
         
         # 좌측 센서: 최근 10개 중 유효한 값이 있으면 사용
-        left_valid = [val for val in self.left_history if 0 < val <= 0.30]
+        left_valid = [val for val in self.left_history if 0 < val <= 0.50]
         if left_valid:
             valid_sensors.append(min(left_valid))  # 가장 가까운 값 사용
         
         # 전방 센서: 최근 10개 중 유효한 값이 있으면 사용
-        front_valid = [val for val in self.front_history if 0 < val <= 0.30]
+        front_valid = [val for val in self.front_history if 0 < val <= 0.50]
         if front_valid:
             valid_sensors.append(min(front_valid))  # 가장 가까운 값 사용
         
         # 우측 센서: 최근 10개 중 유효한 값이 있으면 사용
-        right_valid = [val for val in self.right_history if 0 < val <= 0.30]
+        right_valid = [val for val in self.right_history if 0 < val <= 0.50]
         if right_valid:
             valid_sensors.append(min(right_valid))  # 가장 가까운 값 사용
         
@@ -141,7 +145,7 @@ class UltrasonicSafetyController(Node):
                 self.safety_status = "RESUMING"
                 self.get_logger().info('Stop duration completed and path clear - RESUMING')
         
-        # 감속 구간
+        # 2단계: 감속 구간 (25cm 이하)
         elif min_distance <= self.slow_distance:
             self.safety_status = "SLOWING"
             # 속도를 절반으로 감소
@@ -149,8 +153,19 @@ class UltrasonicSafetyController(Node):
             safe_cmd.linear.x = self.last_cmd_vel.linear.x * 0.5
             safe_cmd.angular.z = self.last_cmd_vel.angular.z * 0.5
             self.safe_cmd_vel_pub.publish(safe_cmd)
+            self.get_logger().info(f'Obstacle at {min_distance:.3f}m - SLOWING DOWN')
         
-        # 정상 구간
+        # 3단계: 경고 구간 (35cm 이하)
+        elif min_distance <= self.warning_distance:
+            self.safety_status = "WARNING"
+            # 속도를 75%로 감소
+            safe_cmd = Twist()
+            safe_cmd.linear.x = self.last_cmd_vel.linear.x * 0.75
+            safe_cmd.angular.z = self.last_cmd_vel.angular.z * 0.75
+            self.safe_cmd_vel_pub.publish(safe_cmd)
+            self.get_logger().info(f'Obstacle at {min_distance:.3f}m - WARNING (reduced speed)')
+        
+        # 4단계: 정상 구간 (35cm 초과)
         else:
             if self.is_stopped:
                 self.is_stopped = False
