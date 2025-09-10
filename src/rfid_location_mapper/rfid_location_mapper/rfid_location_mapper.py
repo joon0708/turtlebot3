@@ -192,13 +192,25 @@ class RFIDLocationMapper(Node):
     def list_rfid_mappings(self):
         """RFID 태그 매핑 목록 출력"""
         if not self.rfid_location_mapping:
-            self.get_logger().info('RFID 태그 매핑이 없습니다')
+            message = 'RFID 태그 매핑이 없습니다'
+            self.get_logger().info(message)
+            self.publish_status_message(message)
             return
         
+        # 간결한 메시지로 토픽 발행
+        message = f'RFID Mappings ({len(self.rfid_location_mapping)}): '
+        mapping_list = []
+        for tag_id, location_data in self.rfid_location_mapping.items():
+            mapping_list.append(f'{tag_id}->{location_data["name"]}')
+        message += ', '.join(mapping_list)
+        
+        # 상세 정보는 로그에만 출력
         self.get_logger().info('=== RFID 태그 매핑 목록 ===')
         for tag_id, location_data in self.rfid_location_mapping.items():
             self.get_logger().info(f'  {tag_id} -> {location_data["name"]} ({location_data["x"]:.2f}, {location_data["y"]:.2f})')
         self.get_logger().info('')
+        
+        self.publish_status_message(message)
     
     def publish_status_message(self, message):
         """상태 메시지 발행"""
