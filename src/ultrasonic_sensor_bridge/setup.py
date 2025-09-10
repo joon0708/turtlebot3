@@ -31,6 +31,7 @@ setup(
             'ultrasonic_lcd_display = ultrasonic_sensor_bridge.ultrasonic_lcd_display:main',
             'ultrasonic_to_laserscan = ultrasonic_sensor_bridge.ultrasonic_to_laserscan:main',
             'ultrasonic_safety_controller = ultrasonic_sensor_bridge.ultrasonic_safety_controller:main',
+            'cmd_vel_relay = ultrasonic_sensor_bridge.cmd_vel_relay:main',
         ],
     },
 )

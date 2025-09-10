@@ -23,7 +23,7 @@ class UltrasonicSafetyController(Node):
         self.cmd_vel_sub = self.create_subscription(
             Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         
-        # 안전한 cmd_vel 발행
+        # 안전한 cmd_vel 발행 (우선순위가 높은 토픽)
         self.safe_cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel_safe', 10)
         
         # 상태 발행

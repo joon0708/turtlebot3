@@ -140,12 +140,12 @@ def generate_launch_description():
         
         # 10. cmd_vel 토픽 리맵핑 (안전 제어 사용 시)
         Node(
-            package='topic_tools',
-            executable='relay',
+            package='ultrasonic_sensor_bridge',
+            executable='cmd_vel_relay',
             name='cmd_vel_relay',
-            arguments=['/cmd_vel_safe', '/cmd_vel'],
             output='screen',
             condition=launch.conditions.IfCondition(enable_ultrasonic_safety),
         ),
+        
         
     ])
