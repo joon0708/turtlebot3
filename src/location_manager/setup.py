@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             'location_manager = location_manager.location_manager:main',
             'touch_ui = location_manager.touch_ui:main',
+            'terminal_ui = location_manager.terminal_ui:main',
         ],
     },
 )
