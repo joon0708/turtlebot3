@@ -74,9 +74,6 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        # 디버그: 좌측 센서만 로그 추가
-        self.get_logger().info(f'L: {msg.range} → {self.left_range}')
-        
         # 간단한 방식: 유효한 값이면 바로 사용 (50cm까지)
         if msg.range > 0 and msg.range <= 0.50:
             self.left_range = msg.range
