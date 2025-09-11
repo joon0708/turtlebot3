@@ -216,15 +216,15 @@ class UltrasonicSafetyController(Node):
                 self.safety_status = "RESUMING"
                 self.get_logger().info('Stop duration completed and path clear - RESUMING')
         
-               # 2단계: 감속 구간 (히스테리시스 적용)
-               elif min_distance <= (self.slow_distance + self.hysteresis):
-                   self.safety_status = "SLOWING"
-                   # 속도를 절반으로 감소
-                   safe_cmd = Twist()
-                   safe_cmd.linear.x = self.last_cmd_vel.linear.x * 0.5
-                   safe_cmd.angular.z = self.last_cmd_vel.angular.z * 0.5
-                   self.safe_cmd_vel_pub.publish(safe_cmd)
-                   # self.get_logger().info(f'Obstacle at {min_distance:.3f}m - SLOWING DOWN')  # 로그 제거
+            # 2단계: 감속 구간 (히스테리시스 적용)
+            elif min_distance <= (self.slow_distance + self.hysteresis):
+                self.safety_status = "SLOWING"
+                # 속도를 절반으로 감소
+                safe_cmd = Twist()
+                safe_cmd.linear.x = self.last_cmd_vel.linear.x * 0.5
+                safe_cmd.angular.z = self.last_cmd_vel.angular.z * 0.5
+                self.safe_cmd_vel_pub.publish(safe_cmd)
+                # self.get_logger().info(f'Obstacle at {min_distance:.3f}m - SLOWING DOWN')  # 로그 제거
         
         # 3단계: 경고 구간 (히스테리시스 적용)
         elif min_distance <= (self.warning_distance + self.hysteresis):
