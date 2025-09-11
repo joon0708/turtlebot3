@@ -6,6 +6,7 @@ from sensor_msgs.msg import Range, LaserScan
 from std_msgs.msg import Header
 import math
 import numpy as np
+import time
 
 class UltrasonicToLaserScan(Node):
     def __init__(self):
@@ -26,6 +27,14 @@ class UltrasonicToLaserScan(Node):
         self.left_range = 0.50  # 기본값 (50cm)
         self.front_range = 0.50
         self.right_range = 0.50
+        
+        # 장애물 지속 시간 (초)
+        self.obstacle_persistence = 3.0  # 3초간 장애물 기억
+        
+        # 장애물 감지 시간 기록
+        self.left_obstacle_time = 0.0
+        self.front_obstacle_time = 0.0
+        self.right_obstacle_time = 0.0
         
         # LaserScan 파라미터 - 전면 집중 범위
         self.angle_min = -math.pi / 2.0  # -90도 (좌측)
@@ -51,7 +60,13 @@ class UltrasonicToLaserScan(Node):
         """좌측 센서 콜백"""
         old_range = self.left_range
         self.left_range = msg.range
-        if math.isnan(self.left_range) or self.left_range <= 0:
+        
+        current_time = time.time()
+        
+        # 장애물 감지 시 시간 기록
+        if not math.isnan(self.left_range) and self.left_range > 0 and self.left_range <= 0.50:
+            self.left_obstacle_time = current_time
+        elif math.isnan(self.left_range) or self.left_range <= 0:
             self.left_range = float('inf')  # 무효한 값으로 설정
         
         # 값이 바뀌면 즉시 LaserScan 발행
@@ -62,7 +77,13 @@ class UltrasonicToLaserScan(Node):
         """전방 센서 콜백"""
         old_range = self.front_range
         self.front_range = msg.range
-        if math.isnan(self.front_range) or self.front_range <= 0:
+        
+        current_time = time.time()
+        
+        # 장애물 감지 시 시간 기록
+        if not math.isnan(self.front_range) and self.front_range > 0 and self.front_range <= 0.50:
+            self.front_obstacle_time = current_time
+        elif math.isnan(self.front_range) or self.front_range <= 0:
             self.front_range = float('inf')  # 무효한 값으로 설정
         
         # 값이 바뀌면 즉시 LaserScan 발행
@@ -73,7 +94,13 @@ class UltrasonicToLaserScan(Node):
         """우측 센서 콜백"""
         old_range = self.right_range
         self.right_range = msg.range
-        if math.isnan(self.right_range) or self.right_range <= 0:
+        
+        current_time = time.time()
+        
+        # 장애물 감지 시 시간 기록
+        if not math.isnan(self.right_range) and self.right_range > 0 and self.right_range <= 0.50:
+            self.right_obstacle_time = current_time
+        elif math.isnan(self.right_range) or self.right_range <= 0:
             self.right_range = float('inf')  # 무효한 값으로 설정
         
         # 값이 바뀌면 즉시 LaserScan 발행
@@ -99,13 +126,36 @@ class UltrasonicToLaserScan(Node):
         num_angles = int((self.angle_max - self.angle_min) / self.angle_increment) + 1
         ranges = [self.range_max] * num_angles
         
-        # 각 센서의 영향 범위에 거리 값 설정
-        self.set_sensor_range(ranges, self.left_angle, self.left_range)
-        self.set_sensor_range(ranges, self.front_angle, self.front_range)
-        self.set_sensor_range(ranges, self.right_angle, self.right_range)
+        # 각 센서의 영향 범위에 거리 값 설정 (장애물 지속 시간 고려)
+        current_time = time.time()
+        
+        # 좌측 센서: 장애물 지속 시간 내이면 유지
+        left_range = self.get_persistent_range(self.left_range, self.left_obstacle_time, current_time)
+        self.set_sensor_range(ranges, self.left_angle, left_range)
+        
+        # 전방 센서: 장애물 지속 시간 내이면 유지
+        front_range = self.get_persistent_range(self.front_range, self.front_obstacle_time, current_time)
+        self.set_sensor_range(ranges, self.front_angle, front_range)
+        
+        # 우측 센서: 장애물 지속 시간 내이면 유지
+        right_range = self.get_persistent_range(self.right_range, self.right_obstacle_time, current_time)
+        self.set_sensor_range(ranges, self.right_angle, right_range)
         
         scan_msg.ranges = ranges
         self.laserscan_pub.publish(scan_msg)
+    
+    def get_persistent_range(self, current_range, obstacle_time, current_time):
+        """장애물 지속 시간을 고려한 거리 값 반환"""
+        # 현재 유효한 거리 값이면 그대로 반환
+        if not math.isnan(current_range) and current_range > 0 and current_range <= 0.50:
+            return current_range
+        
+        # 무효한 값이지만 장애물 지속 시간 내이면 마지막 유효한 값 유지
+        if obstacle_time > 0 and (current_time - obstacle_time) <= self.obstacle_persistence:
+            return 0.20  # 20cm로 설정 (안전한 거리)
+        
+        # 장애물 지속 시간 초과 또는 장애물 없음
+        return float('inf')
     
     def set_sensor_range(self, ranges, sensor_angle, sensor_range):
         """특정 각도 범위에 센서 거리 값 설정"""
