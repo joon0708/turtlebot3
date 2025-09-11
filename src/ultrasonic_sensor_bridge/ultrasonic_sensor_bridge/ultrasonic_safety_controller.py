@@ -73,51 +73,39 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        # 디버그: 받은 값 확인
-        self.get_logger().info(f'Left received: {msg.range}')
-        
         # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.left_history[self.left_index] = msg.range
             self.left_range = msg.range
-            self.get_logger().info(f'Left sensor: {msg.range:.3f}m - UPDATED')
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            self.get_logger().warn(f'Left sensor invalid: {msg.range} - KEEPING PREVIOUS: {self.left_range:.3f}m')
+            pass
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.left_index = (self.left_index + 1) % 10
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
-        # 디버그: 받은 값 확인
-        self.get_logger().info(f'Front received: {msg.range}')
-        
         # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.front_history[self.front_index] = msg.range
             self.front_range = msg.range
-            self.get_logger().info(f'Front sensor: {msg.range:.3f}m - UPDATED')
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            self.get_logger().warn(f'Front sensor invalid: {msg.range} - KEEPING PREVIOUS: {self.front_range:.3f}m')
+            pass
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.front_index = (self.front_index + 1) % 10
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
-        # 디버그: 받은 값 확인
-        self.get_logger().info(f'Right received: {msg.range}')
-        
         # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.right_history[self.right_index] = msg.range
             self.right_range = msg.range
-            self.get_logger().info(f'Right sensor: {msg.range:.3f}m - UPDATED')
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            self.get_logger().warn(f'Right sensor invalid: {msg.range} - KEEPING PREVIOUS: {self.right_range:.3f}m')
+            pass
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.right_index = (self.right_index + 1) % 10
@@ -163,8 +151,8 @@ class UltrasonicSafetyController(Node):
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
         min_distance = min(valid_sensors)
         
-        # 현재 센서 값과 상태 로그 출력
-        self.get_logger().info(f'Sensor values: L={self.left_range:.3f}m, F={self.front_range:.3f}m, R={self.right_range:.3f}m | Min: {min_distance:.3f}m | Status: {self.safety_status}')
+        # 상태가 변경될 때만 로그 출력 (로그 스팸 방지)
+        # self.get_logger().info(f'Sensor values: L={self.left_range:.3f}m, F={self.front_range:.3f}m, R={self.right_range:.3f}m | Min: {min_distance:.3f}m | Status: {self.safety_status}')
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
