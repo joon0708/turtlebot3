@@ -77,8 +77,10 @@ class UltrasonicSafetyController(Node):
         if msg.range > 0 and msg.range <= 0.50:
             self.left_history[self.left_index] = msg.range
             self.left_range = msg.range
+            # self.get_logger().info(f'Left sensor: {msg.range:.3f}m')  # 개별 로그는 주석 처리
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            # self.get_logger().warn(f'Left sensor invalid: {msg.range}')  # 개별 로그는 주석 처리
             pass
         
         # 인덱스는 항상 증가 (순차적 처리)
@@ -90,8 +92,10 @@ class UltrasonicSafetyController(Node):
         if msg.range > 0 and msg.range <= 0.50:
             self.front_history[self.front_index] = msg.range
             self.front_range = msg.range
+            # self.get_logger().info(f'Front sensor: {msg.range:.3f}m')  # 개별 로그는 주석 처리
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            # self.get_logger().warn(f'Front sensor invalid: {msg.range}')  # 개별 로그는 주석 처리
             pass
         
         # 인덱스는 항상 증가 (순차적 처리)
@@ -103,8 +107,10 @@ class UltrasonicSafetyController(Node):
         if msg.range > 0 and msg.range <= 0.50:
             self.right_history[self.right_index] = msg.range
             self.right_range = msg.range
+            # self.get_logger().info(f'Right sensor: {msg.range:.3f}m')  # 개별 로그는 주석 처리
         else:
             # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
+            # self.get_logger().warn(f'Right sensor invalid: {msg.range}')  # 개별 로그는 주석 처리
             pass
         
         # 인덱스는 항상 증가 (순차적 처리)
@@ -150,6 +156,9 @@ class UltrasonicSafetyController(Node):
         
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
         min_distance = min(valid_sensors)
+        
+        # 현재 센서 값과 상태 로그 출력
+        self.get_logger().info(f'Sensor values: L={self.left_range:.3f}m, F={self.front_range:.3f}m, R={self.right_range:.3f}m | Min: {min_distance:.3f}m | Status: {self.safety_status}')
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
