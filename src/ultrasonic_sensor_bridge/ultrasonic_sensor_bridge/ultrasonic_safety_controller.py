@@ -78,8 +78,7 @@ class UltrasonicSafetyController(Node):
             # 무효한 값이면 None으로 설정
             self.left_range = None
         
-        # 한 줄 디버그: 받은 값 → 현재 값
-        self.get_logger().info(f'L: {msg.range} → {self.left_range}')
+        # 개별 센서 로그는 제거 (너무 많음)
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # self.get_logger().info(f'Left callback: {msg.range}')
@@ -100,8 +99,7 @@ class UltrasonicSafetyController(Node):
             # 무효한 값이면 None으로 설정
             self.front_range = None
         
-        # 한 줄 디버그: 받은 값 → 현재 값
-        self.get_logger().info(f'F: {msg.range} → {self.front_range}')
+        # 개별 센서 로그는 제거 (너무 많음)
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # if msg.range > 0 and msg.range <= 0.50:
@@ -121,8 +119,7 @@ class UltrasonicSafetyController(Node):
             # 무효한 값이면 None으로 설정
             self.right_range = None
         
-        # 한 줄 디버그: 받은 값 → 현재 값
-        self.get_logger().info(f'R: {msg.range} → {self.right_range}')
+        # 개별 센서 로그는 제거 (너무 많음)
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # if msg.range > 0 and msg.range <= 0.50:
