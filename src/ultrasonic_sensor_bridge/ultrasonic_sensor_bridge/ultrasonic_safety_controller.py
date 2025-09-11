@@ -136,16 +136,23 @@ class UltrasonicSafetyController(Node):
         if right_valid:
             valid_sensors.append(right_valid[-1])  # 가장 최신 값 사용
         
-        # 유효한 센서가 없으면 이전 상태 유지 (센서 오류 시에도 안전 우선)
+        # 유효한 센서가 없으면 장애물 없는 것으로 인식 (멀리 있을 때)
         if not valid_sensors:
-            self.safety_status = "SENSOR_ERROR"
-            # 센서 오류 시에는 정지 상태 유지 (브레이크 해제 방지)
+            self.safety_status = "NORMAL"
+            
+            # 센서 감지 없음 상태 로그 출력
+            left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
+            front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
+            right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
+            self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:None | {self.safety_status}')
+            
+            # 정지 상태 해제하고 원본 명령 전달
             if self.is_stopped:
-                stop_cmd = Twist()
-                self.safe_cmd_vel_pub.publish(stop_cmd)
-            else:
-                # 정지 상태가 아니면 이전 명령 유지 (급작스러운 정지 방지)
-                self.safe_cmd_vel_pub.publish(self.last_cmd_vel)
+                self.is_stopped = False
+                self.get_logger().info('No sensors detected - resuming normal operation')
+            
+            # 원본 명령 그대로 전달 (장애물 없음)
+            self.safe_cmd_vel_pub.publish(self.last_cmd_vel)
             return
         
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
