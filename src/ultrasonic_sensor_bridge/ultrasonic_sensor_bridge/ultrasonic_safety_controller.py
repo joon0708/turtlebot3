@@ -68,9 +68,10 @@ class UltrasonicSafetyController(Node):
         # 타이머로 안전 제어 실행
         self.timer = self.create_timer(0.2, self.safety_control)  # 5Hz (더 안정적)
         
-        self.get_logger().info('Ultrasonic Safety Controller started')
-        self.get_logger().info(f'Safety zones: STOP={self.safety_distance}m, SLOW={self.slow_distance}m, WARNING={self.warning_distance}m')
-        self.get_logger().info(f'Stop duration: {self.stop_duration}s')
+        # 로그 제거 (너무 많음)
+        # self.get_logger().info('Ultrasonic Safety Controller started')
+        # self.get_logger().info(f'Safety zones: STOP={self.safety_distance}m, SLOW={self.slow_distance}m, WARNING={self.warning_distance}m')
+        # self.get_logger().info(f'Stop duration: {self.stop_duration}s')
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
@@ -145,7 +146,7 @@ class UltrasonicSafetyController(Node):
             self.front_range = None
             self.right_range = None
             self.last_reset_time = current_time
-            self.get_logger().info('Sensor values reset due to timeout')
+            # self.get_logger().info('Sensor values reset due to timeout')  # 로그 제거
         
         # 간단한 방식: 현재 센서 값 바로 사용
         valid_sensors = []
@@ -177,11 +178,11 @@ class UltrasonicSafetyController(Node):
         if not valid_sensors:
             self.safety_status = "NORMAL"
             
-            # 센서 감지 없음 상태 로그 출력
-            left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
-            front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
-            right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
-            self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:None | {self.safety_status}')
+            # 센서 감지 없음 상태 로그 출력 (제거)
+            # left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
+            # front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
+            # right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
+            # self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:None | {self.safety_status}')
             
             # 정지 상태 해제하고 원본 명령 전달
             if self.is_stopped:
@@ -195,11 +196,11 @@ class UltrasonicSafetyController(Node):
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
         min_distance = min(valid_sensors)
         
-        # 거리값과 상태를 한 줄로 표시 (None 값 처리)
-        left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
-        front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
-        right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
-        self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:{min_distance:.2f} | {self.safety_status}')
+        # 거리값과 상태를 한 줄로 표시 (제거)
+        # left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
+        # front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
+        # right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
+        # self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:{min_distance:.2f} | {self.safety_status}')
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
