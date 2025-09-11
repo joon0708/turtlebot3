@@ -42,28 +42,43 @@ class UltrasonicToLaserScan(Node):
         # 센서 각도 범위 (각 센서당 ±15도) - 더 좁은 범위
         self.sensor_angle_range = math.pi / 12.0  # 15도
         
-        # 타이머로 LaserScan 발행
-        self.timer = self.create_timer(0.05, self.publish_laserscan)  # 20Hz
+        # 타이머로 LaserScan 발행 (센서 주파수에 맞춤)
+        self.timer = self.create_timer(0.025, self.publish_laserscan)  # 40Hz (센서 주파수와 비슷)
         
 
         
     def left_callback(self, msg):
         """좌측 센서 콜백"""
+        old_range = self.left_range
         self.left_range = msg.range
         if math.isnan(self.left_range) or self.left_range <= 0:
             self.left_range = float('inf')  # 무효한 값으로 설정
+        
+        # 값이 바뀌면 즉시 LaserScan 발행
+        if old_range != self.left_range:
+            self.publish_laserscan()
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
+        old_range = self.front_range
         self.front_range = msg.range
         if math.isnan(self.front_range) or self.front_range <= 0:
             self.front_range = float('inf')  # 무효한 값으로 설정
+        
+        # 값이 바뀌면 즉시 LaserScan 발행
+        if old_range != self.front_range:
+            self.publish_laserscan()
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
+        old_range = self.right_range
         self.right_range = msg.range
         if math.isnan(self.right_range) or self.right_range <= 0:
             self.right_range = float('inf')  # 무효한 값으로 설정
+        
+        # 값이 바뀌면 즉시 LaserScan 발행
+        if old_range != self.right_range:
+            self.publish_laserscan()
     
     def publish_laserscan(self):
         """LaserScan 메시지 생성 및 발행"""
