@@ -81,8 +81,9 @@ class UltrasonicSafetyController(Node):
             self.left_history[self.left_index] = msg.range
             self.left_range = msg.range
         else:
-            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            pass
+            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
+            self.left_history[self.left_index] = None
+            # self.left_range는 이전 값 유지
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.left_index = (self.left_index + 1) % 10
@@ -94,8 +95,9 @@ class UltrasonicSafetyController(Node):
             self.front_history[self.front_index] = msg.range
             self.front_range = msg.range
         else:
-            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            pass
+            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
+            self.front_history[self.front_index] = None
+            # self.front_range는 이전 값 유지
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.front_index = (self.front_index + 1) % 10
@@ -107,8 +109,9 @@ class UltrasonicSafetyController(Node):
             self.right_history[self.right_index] = msg.range
             self.right_range = msg.range
         else:
-            # 무효한 값이면 이전 값 유지 (히스토리는 업데이트하지 않음)
-            pass
+            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
+            self.right_history[self.right_index] = None
+            # self.right_range는 이전 값 유지
         
         # 인덱스는 항상 증가 (순차적 처리)
         self.right_index = (self.right_index + 1) % 10
