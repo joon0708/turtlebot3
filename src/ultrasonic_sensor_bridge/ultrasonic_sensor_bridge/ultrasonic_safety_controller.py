@@ -34,15 +34,13 @@ class UltrasonicSafetyController(Node):
         self.front_range = None
         self.right_range = None
         
-        # 센서 값 히스토리 (최근 10개 데이터, 초기값은 None)
-        self.left_history = [None] * 10
-        self.front_history = [None] * 10
-        self.right_history = [None] * 10
-        
-        # 히스토리 인덱스
-        self.left_index = 0
-        self.front_index = 0
-        self.right_index = 0
+        # 히스토리 관련 코드 (나중에 사용할 수 있도록 주석 처리)
+        # self.left_history = [None] * 10
+        # self.front_history = [None] * 10
+        # self.right_history = [None] * 10
+        # self.left_index = 0
+        # self.front_index = 0
+        # self.right_index = 0
         
         # 안전 설정 (파라미터에서 가져오기)
         self.declare_parameter('safety_distance', 0.25)  # 정지 거리 (25cm)
@@ -73,48 +71,58 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        # 디버그: 콜백 호출 확인
-        self.get_logger().info(f'Left callback: {msg.range}')
-        
-        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
+        # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
-            self.left_history[self.left_index] = msg.range
             self.left_range = msg.range
         else:
-            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
-            self.left_history[self.left_index] = None
-            # self.left_range는 이전 값 유지
+            # 무효한 값이면 None으로 설정
+            self.left_range = None
         
-        # 인덱스는 항상 증가 (순차적 처리)
-        self.left_index = (self.left_index + 1) % 10
+        # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
+        # self.get_logger().info(f'Left callback: {msg.range}')
+        # if msg.range > 0 and msg.range <= 0.50:
+        #     self.left_history[self.left_index] = msg.range
+        #     self.left_range = msg.range
+        # else:
+        #     self.left_history[self.left_index] = None
+        #     # self.left_range는 이전 값 유지
+        # self.left_index = (self.left_index + 1) % 10
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
-        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
+        # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
-            self.front_history[self.front_index] = msg.range
             self.front_range = msg.range
         else:
-            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
-            self.front_history[self.front_index] = None
-            # self.front_range는 이전 값 유지
+            # 무효한 값이면 None으로 설정
+            self.front_range = None
         
-        # 인덱스는 항상 증가 (순차적 처리)
-        self.front_index = (self.front_index + 1) % 10
+        # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
+        # if msg.range > 0 and msg.range <= 0.50:
+        #     self.front_history[self.front_index] = msg.range
+        #     self.front_range = msg.range
+        # else:
+        #     self.front_history[self.front_index] = None
+        #     # self.front_range는 이전 값 유지
+        # self.front_index = (self.front_index + 1) % 10
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
-        # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
+        # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
-            self.right_history[self.right_index] = msg.range
             self.right_range = msg.range
         else:
-            # 무효한 값이면 히스토리에 None 저장 (순차적 처리)
-            self.right_history[self.right_index] = None
-            # self.right_range는 이전 값 유지
+            # 무효한 값이면 None으로 설정
+            self.right_range = None
         
-        # 인덱스는 항상 증가 (순차적 처리)
-        self.right_index = (self.right_index + 1) % 10
+        # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
+        # if msg.range > 0 and msg.range <= 0.50:
+        #     self.right_history[self.right_index] = msg.range
+        #     self.right_range = msg.range
+        # else:
+        #     self.right_history[self.right_index] = None
+        #     # self.right_range는 이전 값 유지
+        # self.right_index = (self.right_index + 1) % 10
     
     def cmd_vel_callback(self, msg):
         """원본 cmd_vel 콜백"""
@@ -124,23 +132,31 @@ class UltrasonicSafetyController(Node):
         """안전 제어 로직"""
         current_time = time.time()
         
-        # 각 센서의 최근 10개 데이터 중 최신 유효한 값 사용
+        # 간단한 방식: 현재 센서 값 바로 사용
         valid_sensors = []
         
-        # 좌측 센서: 최근 10개 중 최신 유효한 값 사용
-        left_valid = [val for val in self.left_history if val is not None and 0 < val <= 0.50]
-        if left_valid:
-            valid_sensors.append(left_valid[-1])  # 가장 최신 값 사용
+        # 좌측 센서: 현재 값이 유효하면 사용
+        if self.left_range is not None and 0 < self.left_range <= 0.50:
+            valid_sensors.append(self.left_range)
         
-        # 전방 센서: 최근 10개 중 최신 유효한 값 사용
-        front_valid = [val for val in self.front_history if val is not None and 0 < val <= 0.50]
-        if front_valid:
-            valid_sensors.append(front_valid[-1])  # 가장 최신 값 사용
+        # 전방 센서: 현재 값이 유효하면 사용
+        if self.front_range is not None and 0 < self.front_range <= 0.50:
+            valid_sensors.append(self.front_range)
         
-        # 우측 센서: 최근 10개 중 최신 유효한 값 사용
-        right_valid = [val for val in self.right_history if val is not None and 0 < val <= 0.50]
-        if right_valid:
-            valid_sensors.append(right_valid[-1])  # 가장 최신 값 사용
+        # 우측 센서: 현재 값이 유효하면 사용
+        if self.right_range is not None and 0 < self.right_range <= 0.50:
+            valid_sensors.append(self.right_range)
+        
+        # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
+        # left_valid = [val for val in self.left_history if val is not None and 0 < val <= 0.50]
+        # if left_valid:
+        #     valid_sensors.append(left_valid[-1])
+        # front_valid = [val for val in self.front_history if val is not None and 0 < val <= 0.50]
+        # if front_valid:
+        #     valid_sensors.append(front_valid[-1])
+        # right_valid = [val for val in self.right_history if val is not None and 0 < val <= 0.50]
+        # if right_valid:
+        #     valid_sensors.append(right_valid[-1])
         
         # 유효한 센서가 없으면 장애물 없는 것으로 인식 (멀리 있을 때)
         if not valid_sensors:
