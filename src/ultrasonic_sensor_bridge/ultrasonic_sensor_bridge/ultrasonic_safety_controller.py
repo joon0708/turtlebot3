@@ -71,7 +71,7 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
-        # 간단한 방식: 유효한 값이면 바로 사용
+        # 간단한 방식: 유효한 값이면 바로 사용 (50cm까지)
         if msg.range > 0 and msg.range <= 0.50:
             self.left_range = msg.range
         else:
@@ -92,7 +92,7 @@ class UltrasonicSafetyController(Node):
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
-        # 간단한 방식: 유효한 값이면 바로 사용
+        # 간단한 방식: 유효한 값이면 바로 사용 (50cm까지)
         if msg.range > 0 and msg.range <= 0.50:
             self.front_range = msg.range
         else:
@@ -112,7 +112,7 @@ class UltrasonicSafetyController(Node):
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
-        # 간단한 방식: 유효한 값이면 바로 사용
+        # 간단한 방식: 유효한 값이면 바로 사용 (50cm까지)
         if msg.range > 0 and msg.range <= 0.50:
             self.right_range = msg.range
         else:
@@ -141,15 +141,15 @@ class UltrasonicSafetyController(Node):
         # 간단한 방식: 현재 센서 값 바로 사용
         valid_sensors = []
         
-        # 좌측 센서: 현재 값이 유효하면 사용
+        # 좌측 센서: 현재 값이 유효하면 사용 (50cm까지)
         if self.left_range is not None and 0 < self.left_range <= 0.50:
             valid_sensors.append(self.left_range)
         
-        # 전방 센서: 현재 값이 유효하면 사용
+        # 전방 센서: 현재 값이 유효하면 사용 (50cm까지)
         if self.front_range is not None and 0 < self.front_range <= 0.50:
             valid_sensors.append(self.front_range)
         
-        # 우측 센서: 현재 값이 유효하면 사용
+        # 우측 센서: 현재 값이 유효하면 사용 (50cm까지)
         if self.right_range is not None and 0 < self.right_range <= 0.50:
             valid_sensors.append(self.right_range)
         

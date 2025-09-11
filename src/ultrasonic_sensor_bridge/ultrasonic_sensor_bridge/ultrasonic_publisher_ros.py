@@ -32,8 +32,8 @@ class UltrasonicPublisherROS(Node):
             front_val = msg.ultrasonic_front
             right_val = msg.ultrasonic_right
             
-            # 초음파 센서 범위 제한 (30cm 범위로 제한)
-            MAX_RANGE = 0.30  # 30cm 이상이면 무효
+            # 초음파 센서 범위 제한 (50cm 범위로 제한)
+            MAX_RANGE = 0.50  # 50cm 이상이면 무효
             MIN_RANGE = 0.02  # 2cm 미만이면 무효
             
             if left_val > MAX_RANGE or left_val < MIN_RANGE:
