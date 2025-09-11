@@ -29,15 +29,15 @@ class UltrasonicSafetyController(Node):
         # 상태 발행
         self.status_pub = self.create_publisher(String, '/safety_status', 10)
         
-        # 센서 값 저장
-        self.left_range = 0.50  # 기본값 (50cm)
-        self.front_range = 0.50
-        self.right_range = 0.50
+        # 센서 값 저장 (초기값은 None으로 설정)
+        self.left_range = None
+        self.front_range = None
+        self.right_range = None
         
-        # 센서 값 히스토리 (최근 10개 데이터)
-        self.left_history = [0.50] * 10  # 기본값으로 초기화
-        self.front_history = [0.50] * 10
-        self.right_history = [0.50] * 10
+        # 센서 값 히스토리 (최근 10개 데이터, 초기값은 None)
+        self.left_history = [None] * 10
+        self.front_history = [None] * 10
+        self.right_history = [None] * 10
         
         # 히스토리 인덱스
         self.left_index = 0
@@ -151,8 +151,11 @@ class UltrasonicSafetyController(Node):
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
         min_distance = min(valid_sensors)
         
-        # 거리값과 상태를 한 줄로 표시
-        self.get_logger().info(f'L:{self.left_range:.2f} F:{self.front_range:.2f} R:{self.right_range:.2f} | Min:{min_distance:.2f} | {self.safety_status}')
+        # 거리값과 상태를 한 줄로 표시 (None 값 처리)
+        left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
+        front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
+        right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
+        self.get_logger().info(f'L:{left_str} F:{front_str} R:{right_str} | Min:{min_distance:.2f} | {self.safety_status}')
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
@@ -203,9 +206,12 @@ class UltrasonicSafetyController(Node):
             stop_cmd = Twist()
             self.safe_cmd_vel_pub.publish(stop_cmd)
         
-        # 상태 발행
+        # 상태 발행 (None 값 처리)
+        left_str = f"{self.left_range:.2f}" if self.left_range is not None else "None"
+        front_str = f"{self.front_range:.2f}" if self.front_range is not None else "None"
+        right_str = f"{self.right_range:.2f}" if self.right_range is not None else "None"
         status_msg = String()
-        status_msg.data = f"{self.safety_status}: L={self.left_range:.2f}, F={self.front_range:.2f}, R={self.right_range:.2f}"
+        status_msg.data = f"{self.safety_status}: L={left_str}, F={front_str}, R={right_str}"
         self.status_pub.publish(status_msg)
 
 def main(args=None):
