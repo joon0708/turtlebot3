@@ -48,8 +48,8 @@ class UltrasonicToLaserScan(Node):
         self.front_angle = 0.0             # 0도 (정면)
         self.right_angle = -math.pi / 6.0  # -30도 (우측 전방)
         
-        # 센서 각도 범위 (각 센서당 ±15도) - 실제 센서 범위에 맞춤
-        self.sensor_angle_range = math.pi / 12.0  # 15도
+        # 센서 각도 범위 (각 센서당 ±5도) - 경로 계획 최적화를 위해 좁게 설정
+        self.sensor_angle_range = math.pi / 36.0  # 5도 (경로 계획에 최적화)
         
         # 타이머로 LaserScan 발행 (센서 주파수에 맞춤)
         self.timer = self.create_timer(0.025, self.publish_laserscan)  # 40Hz (센서 주파수와 비슷)
