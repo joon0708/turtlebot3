@@ -151,8 +151,8 @@ class UltrasonicSafetyController(Node):
         # 가장 가까운 거리 확인 (유효한 센서만 사용)
         min_distance = min(valid_sensors)
         
-        # 상태가 변경될 때만 로그 출력 (로그 스팸 방지)
-        # self.get_logger().info(f'Sensor values: L={self.left_range:.3f}m, F={self.front_range:.3f}m, R={self.right_range:.3f}m | Min: {min_distance:.3f}m | Status: {self.safety_status}')
+        # 거리값과 상태를 한 줄로 표시
+        self.get_logger().info(f'L:{self.left_range:.2f} F:{self.front_range:.2f} R:{self.right_range:.2f} | Min:{min_distance:.2f} | {self.safety_status}')
         
         # 안전 거리 이하 감지
         if min_distance <= self.safety_distance:
