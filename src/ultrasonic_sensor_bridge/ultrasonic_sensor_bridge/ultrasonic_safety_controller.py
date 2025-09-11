@@ -71,12 +71,17 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
+        # 디버그: 받은 값 확인
+        self.get_logger().info(f'Left received: {msg.range}')
+        
         # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
             self.left_range = msg.range
+            self.get_logger().info(f'Left updated: {self.left_range:.3f}m')
         else:
             # 무효한 값이면 None으로 설정
             self.left_range = None
+            self.get_logger().info(f'Left set to None (was: {msg.range})')
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # self.get_logger().info(f'Left callback: {msg.range}')
@@ -90,12 +95,17 @@ class UltrasonicSafetyController(Node):
     
     def front_callback(self, msg):
         """전방 센서 콜백"""
+        # 디버그: 받은 값 확인
+        self.get_logger().info(f'Front received: {msg.range}')
+        
         # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
             self.front_range = msg.range
+            self.get_logger().info(f'Front updated: {self.front_range:.3f}m')
         else:
             # 무효한 값이면 None으로 설정
             self.front_range = None
+            self.get_logger().info(f'Front set to None (was: {msg.range})')
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # if msg.range > 0 and msg.range <= 0.50:
@@ -108,12 +118,17 @@ class UltrasonicSafetyController(Node):
     
     def right_callback(self, msg):
         """우측 센서 콜백"""
+        # 디버그: 받은 값 확인
+        self.get_logger().info(f'Right received: {msg.range}')
+        
         # 간단한 방식: 유효한 값이면 바로 사용
         if msg.range > 0 and msg.range <= 0.50:
             self.right_range = msg.range
+            self.get_logger().info(f'Right updated: {self.right_range:.3f}m')
         else:
             # 무효한 값이면 None으로 설정
             self.right_range = None
+            self.get_logger().info(f'Right set to None (was: {msg.range})')
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # if msg.range > 0 and msg.range <= 0.50:
