@@ -20,9 +20,9 @@ def generate_launch_description():
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
     enable_rfid = LaunchConfiguration('enable_rfid', default='false')
     enable_ultrasonic_safety = LaunchConfiguration('enable_ultrasonic_safety', default='true')
-    safety_distance = LaunchConfiguration('safety_distance', default='0.25')
-    slow_distance = LaunchConfiguration('slow_distance', default='0.30')
-    warning_distance = LaunchConfiguration('warning_distance', default='0.35')
+    safety_distance = LaunchConfiguration('safety_distance', default='0.40')
+    slow_distance = LaunchConfiguration('slow_distance', default='0.45')
+    warning_distance = LaunchConfiguration('warning_distance', default='0.50')
     stop_duration = LaunchConfiguration('stop_duration', default='3.0')
     
     return LaunchDescription([
@@ -54,18 +54,18 @@ def generate_launch_description():
         
         DeclareLaunchArgument(
             'safety_distance',
-            default_value='0.25',
-            description='Stop distance in meters (default: 25cm)'),
+            default_value='0.40',
+            description='Stop distance in meters (default: 40cm)'),
         
         DeclareLaunchArgument(
             'slow_distance',
-            default_value='0.30',
-            description='Slow down distance in meters (default: 30cm)'),
+            default_value='0.45',
+            description='Slow down distance in meters (default: 45cm)'),
         
         DeclareLaunchArgument(
             'warning_distance',
-            default_value='0.35',
-            description='Warning distance in meters (default: 35cm)'),
+            default_value='0.50',
+            description='Warning distance in meters (default: 50cm)'),
         
         DeclareLaunchArgument(
             'stop_duration',

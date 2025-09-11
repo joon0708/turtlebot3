@@ -34,6 +34,9 @@ class UltrasonicSafetyController(Node):
         self.front_range = None
         self.right_range = None
         
+        # 센서 값 리셋을 위한 타이머 (10초마다)
+        self.last_reset_time = time.time()
+        
         # 히스토리 관련 코드 (나중에 사용할 수 있도록 주석 처리)
         # self.left_history = [None] * 10
         # self.front_history = [None] * 10
@@ -43,9 +46,9 @@ class UltrasonicSafetyController(Node):
         # self.right_index = 0
         
         # 안전 설정 (파라미터에서 가져오기)
-        self.declare_parameter('safety_distance', 0.25)  # 정지 거리 (25cm)
-        self.declare_parameter('slow_distance', 0.30)    # 감속 거리 (30cm)
-        self.declare_parameter('warning_distance', 0.35) # 경고 거리 (35cm)
+        self.declare_parameter('safety_distance', 0.40)  # 정지 거리 (40cm)
+        self.declare_parameter('slow_distance', 0.45)    # 감속 거리 (45cm)
+        self.declare_parameter('warning_distance', 0.50) # 경고 거리 (50cm)
         self.declare_parameter('stop_duration', 3.0)
         
         # 히스테리시스 설정 (경계에서 변동 방지)
@@ -71,14 +74,15 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
+        # 디버그: 좌측 센서만 로그 추가
+        self.get_logger().info(f'L: {msg.range} → {self.left_range}')
+        
         # 간단한 방식: 유효한 값이면 바로 사용 (50cm까지)
         if msg.range > 0 and msg.range <= 0.50:
             self.left_range = msg.range
         else:
             # 무효한 값이면 None으로 설정
             self.left_range = None
-        
-        # 개별 센서 로그는 제거 (너무 많음)
         
         # 히스토리 방식 (나중에 사용할 수 있도록 주석 처리)
         # self.get_logger().info(f'Left callback: {msg.range}')
@@ -137,6 +141,14 @@ class UltrasonicSafetyController(Node):
     def safety_control(self):
         """안전 제어 로직"""
         current_time = time.time()
+        
+        # 10초마다 센서 값 리셋 (이전 값 유지 문제 해결)
+        if current_time - self.last_reset_time > 10.0:
+            self.left_range = None
+            self.front_range = None
+            self.right_range = None
+            self.last_reset_time = current_time
+            self.get_logger().info('Sensor values reset due to timeout')
         
         # 간단한 방식: 현재 센서 값 바로 사용
         valid_sensors = []
