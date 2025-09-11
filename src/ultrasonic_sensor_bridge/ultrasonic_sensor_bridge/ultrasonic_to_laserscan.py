@@ -28,8 +28,8 @@ class UltrasonicToLaserScan(Node):
         self.front_range = 0.50
         self.right_range = 0.50
         
-        # 장애물 지속 시간 (초)
-        self.obstacle_persistence = 3.0  # 3초간 장애물 기억
+        # 장애물 지속 시간 (초) - 회전 중 장애물 놓치지 않도록 더 길게
+        self.obstacle_persistence = 6.0  # 6초간 장애물 기억
         
         # 장애물 감지 시간 기록
         self.left_obstacle_time = 0.0
@@ -43,12 +43,12 @@ class UltrasonicToLaserScan(Node):
         self.range_min = 0.02  # 2cm
         self.range_max = 0.50  # 50cm
         
-        # 센서 각도 (라디안) - 전면에 집중된 배치
-        self.left_angle = math.pi / 4.0    # 45도 (좌측 전방)
+        # 센서 각도 (라디안) - 실제 하드웨어에 맞춤
+        self.left_angle = math.pi / 6.0    # 30도 (좌측 전방)
         self.front_angle = 0.0             # 0도 (정면)
-        self.right_angle = -math.pi / 4.0  # -45도 (우측 전방)
+        self.right_angle = -math.pi / 6.0  # -30도 (우측 전방)
         
-        # 센서 각도 범위 (각 센서당 ±15도) - 더 좁은 범위
+        # 센서 각도 범위 (각 센서당 ±15도) - 실제 센서 범위에 맞춤
         self.sensor_angle_range = math.pi / 12.0  # 15도
         
         # 타이머로 LaserScan 발행 (센서 주파수에 맞춤)
@@ -152,7 +152,7 @@ class UltrasonicToLaserScan(Node):
         
         # 무효한 값이지만 장애물 지속 시간 내이면 마지막 유효한 값 유지
         if obstacle_time > 0 and (current_time - obstacle_time) <= self.obstacle_persistence:
-            return 0.20  # 20cm로 설정 (안전한 거리)
+            return 0.15  # 15cm로 설정 (더 안전한 거리)
         
         # 장애물 지속 시간 초과 또는 장애물 없음
         return float('inf')
