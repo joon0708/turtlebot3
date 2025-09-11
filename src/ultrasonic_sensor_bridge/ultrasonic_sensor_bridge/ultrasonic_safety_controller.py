@@ -73,6 +73,9 @@ class UltrasonicSafetyController(Node):
     
     def left_callback(self, msg):
         """좌측 센서 콜백"""
+        # 디버그: 콜백 호출 확인
+        self.get_logger().info(f'Left callback: {msg.range}')
+        
         # 유효한 값이면 히스토리에 추가하고 현재 값 업데이트
         if msg.range > 0 and msg.range <= 0.50:
             self.left_history[self.left_index] = msg.range
@@ -122,17 +125,17 @@ class UltrasonicSafetyController(Node):
         valid_sensors = []
         
         # 좌측 센서: 최근 10개 중 최신 유효한 값 사용
-        left_valid = [val for val in self.left_history if 0 < val <= 0.50]
+        left_valid = [val for val in self.left_history if val is not None and 0 < val <= 0.50]
         if left_valid:
             valid_sensors.append(left_valid[-1])  # 가장 최신 값 사용
         
         # 전방 센서: 최근 10개 중 최신 유효한 값 사용
-        front_valid = [val for val in self.front_history if 0 < val <= 0.50]
+        front_valid = [val for val in self.front_history if val is not None and 0 < val <= 0.50]
         if front_valid:
             valid_sensors.append(front_valid[-1])  # 가장 최신 값 사용
         
         # 우측 센서: 최근 10개 중 최신 유효한 값 사용
-        right_valid = [val for val in self.right_history if 0 < val <= 0.50]
+        right_valid = [val for val in self.right_history if val is not None and 0 < val <= 0.50]
         if right_valid:
             valid_sensors.append(right_valid[-1])  # 가장 최신 값 사용
         
