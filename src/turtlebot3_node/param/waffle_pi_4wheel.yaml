@@ -28,11 +28,11 @@ turtlebot3_node:
       ultrasonic_left: 1
       ultrasonic_right: 1
 
-    diff_drive_controller:
-      namespace: ""
-      
-      odometry:
-        publish_tf: true
-        use_imu: true
-        frame_id: "odom"
-        child_frame_id: "base_footprint"
+diff_drive_controller:
+  ros__parameters:
+
+    odometry:
+      publish_tf: true
+      use_imu: true
+      frame_id: "odom"
+      child_frame_id: "base_footprint"
