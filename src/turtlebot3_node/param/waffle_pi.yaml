@@ -1,5 +1,6 @@
 turtlebot3_node:
   ros__parameters:
+    namespace: ""
 
     opencr:
       id: 200
