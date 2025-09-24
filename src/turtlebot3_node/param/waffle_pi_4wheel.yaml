@@ -30,6 +30,7 @@ turtlebot3_node:
 
 diff_drive_controller:
   ros__parameters:
+    namespace: ""
 
     odometry:
       publish_tf: true
