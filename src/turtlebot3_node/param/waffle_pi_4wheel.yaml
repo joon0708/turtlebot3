@@ -24,6 +24,7 @@ turtlebot3_node:
       illumination: 0
       ir: 0
       sonar: 1  # 초음파 센서 활성화
+      ultrasonic_front: 1
       ultrasonic_left: 1
       ultrasonic_right: 1
 
