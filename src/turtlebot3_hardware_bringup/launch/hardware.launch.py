@@ -159,7 +159,16 @@ def generate_launch_description():
                     'rear_wheels_weight': 0.5
                 }
             }],
-            arguments=['-i', usb_port]),
+            arguments=['-i', usb_port],
+            env={
+                'TURTLEBOT3_MODEL': TURTLEBOT3_MODEL,
+                'AMENT_PREFIX_PATH': '/opt/ros/humble:/turtlebot3/install',
+                'LD_LIBRARY_PATH': '/opt/ros/humble/lib:/turtlebot3/install/lib:/turtlebot3/install/custom_turtlebot3_msgs/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib',
+                'ROS_LOG_DIR': '/root/.ros/log',
+                'ROS_DOMAIN_ID': '10',
+                'ROS_VERSION': '2',
+                'ROS_DISTRO': 'humble'
+            }),
         
         # 초음파 센서 발행 (ROS 구독 방식)
         Node(
